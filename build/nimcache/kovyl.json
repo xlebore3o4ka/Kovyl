@@ -1,0 +1,39 @@
+{
+  "cacheVersion": "D20240927T193831",
+  "outputFile": "/home/xlebore3o4ka/nimProjects/RawKovyl/build/kovyl",
+  "outputLastModificationTime": "",
+  "compile": [
+    [
+      "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@slexer.nim.c",
+      "gcc -c  -w -fmax-errors=3 -fno-strict-aliasing -pthread -g3 -Og -O3 -fno-ident -fno-math-errno   -I/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib -I/home/xlebore3o4ka/nimProjects/RawKovyl/src -o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@slexer.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@slexer.nim.c"
+    ]
+  ],
+  "link": [
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem@sexceptions.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sprivate@sdigitsutils.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sassertions.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sobjectdollar.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem@sdollars.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@punicode.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@ptables.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@stokens.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@slexer.nim.c.o",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mkovyl.nim.c.o"
+  ],
+  "linkcmd": "gcc   -o /home/xlebore3o4ka/nimProjects/RawKovyl/build/kovyl /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem@sexceptions.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sprivate@sdigitsutils.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sassertions.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@pstd@sobjectdollar.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem@sdollars.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@psystem.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@punicode.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@ptables.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@stokens.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mparser@slexer.nim.c.o /home/xlebore3o4ka/nimProjects/RawKovyl/build/nimcache/@mkovyl.nim.c.o  -pthread -pthread -lm -lm   -ldl",
+  "extraCmds": [],
+  "configFiles": [
+    "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/config/nim.cfg",
+    "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/config/config.nims",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/nim.cfg",
+    "/home/xlebore3o4ka/nimProjects/RawKovyl/config.nims"
+  ],
+  "stdinInput": false,
+  "projectIsCmd": false,
+  "cmdInput": "",
+  "currentDir": "/home/xlebore3o4ka/nimProjects/RawKovyl",
+  "cmdline": "",
+  "depfiles": [],
+  "nimexe": ""
+}
