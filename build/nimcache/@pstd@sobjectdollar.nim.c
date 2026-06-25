@@ -71,27 +71,65 @@
 #define FX_70 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/system/repr_v2.nim"
 #define FX_71 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/system/deepcopy.nim"
 #define FX_72 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/nimhcr.nim"
-#define FX_73 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/parser/lexer.nim"
-#define FX_74 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/unicode.nim"
-#define FX_75 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/strbasics.nim"
-#define FX_76 "strbasics.nim"
-#define FX_77 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/includes/unicode_ranges.nim"
-#define FX_78 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/tables.nim"
-#define FX_79 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/hashes.nim"
-#define FX_80 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/jsutils.nim"
-#define FX_81 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/endians.nim"
-#define FX_82 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/math.nim"
-#define FX_83 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/bitops.nim"
-#define FX_84 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/core/macros.nim"
-#define FX_85 "macros.nim"
-#define FX_86 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/fenv.nim"
-#define FX_87 "math.nim"
-#define FX_88 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/algorithm.nim"
-#define FX_89 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/tableimpl.nim"
-#define FX_90 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/hashcommon.nim"
-#define FX_91 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/outparams.nim"
-#define FX_92 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/parser/tokens.nim"
-#define FX_93 "hashcommon.nim"
+#define FX_73 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/parser.nim"
+#define FX_74 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/lexer.nim"
+#define FX_75 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/astnodes.nim"
+#define FX_76 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/tokens.nim"
+#define FX_77 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/errors.nim"
+#define FX_78 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/unicode.nim"
+#define FX_79 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/strbasics.nim"
+#define FX_80 "strbasics.nim"
+#define FX_81 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/includes/unicode_ranges.nim"
+#define FX_82 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/tables.nim"
+#define FX_83 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/hashes.nim"
+#define FX_84 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/jsutils.nim"
+#define FX_85 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/endians.nim"
+#define FX_86 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/math.nim"
+#define FX_87 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/bitops.nim"
+#define FX_88 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/core/macros.nim"
+#define FX_89 "macros.nim"
+#define FX_90 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/fenv.nim"
+#define FX_91 "math.nim"
+#define FX_92 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/algorithm.nim"
+#define FX_93 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/tableimpl.nim"
+#define FX_94 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/collections/hashcommon.nim"
+#define FX_95 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/outparams.nim"
+#define FX_96 "hashcommon.nim"
+#define FX_97 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/core/types.nim"
+#define FX_98 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/utils/strast.nim"
+#define FX_99 "/home/xlebore3o4ka/nimProjects/RawKovyl/src/utils/strerr.nim"
+#define FX_100 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/strutils.nim"
+#define FX_101 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/parseutils.nim"
+#define FX_102 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/enumutils.nim"
+#define FX_103 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/typetraits.nim"
+#define FX_104 "enumutils.nim"
+#define FX_105 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/strimpl.nim"
+#define FX_106 "strutils.nim"
+#define FX_107 "tables.nim"
+#define FX_108 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/os.nim"
+#define FX_109 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/ospaths2.nim"
+#define FX_110 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/pathnorm.nim"
+#define FX_111 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/osseps.nim"
+#define FX_112 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/oserrors.nim"
+#define FX_113 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/oscommon.nim"
+#define FX_114 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/staticos.nim"
+#define FX_115 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/posix/posix.nim"
+#define FX_116 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/posix/posix_linux_amd64.nim"
+#define FX_117 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/posix/posix_linux_amd64_consts.nim"
+#define FX_118 "oscommon.nim"
+#define FX_119 "ospaths2.nim"
+#define FX_120 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/osfiles.nim"
+#define FX_121 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/ossymlinks.nim"
+#define FX_122 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/times.nim"
+#define FX_123 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/pure/options.nim"
+#define FX_124 "times.nim"
+#define FX_125 "osfiles.nim"
+#define FX_126 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/osdirs.nim"
+#define FX_127 "osdirs.nim"
+#define FX_128 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/private/osappdirs.nim"
+#define FX_129 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/envvars.nim"
+#define FX_130 "/home/xlebore3o4ka/.nimble/pkgs2/nim-2.2.10-17ec440fdb89f8903db29a17898af590087d2b64/lib/std/cmdline.nim"
+#define FX_131 "os.nim"
 /* Generated by Nim Compiler v2.2.10 */
 /* Compiled for: Linux, amd64, gcc */
 /* Command for C compiler:
@@ -125,7 +163,7 @@
 
 typedef struct NimStrPayload NimStrPayload;
 typedef struct NimStringV2 NimStringV2;
-typedef struct tyObject_Token__AdZj86CO7Fenkiz033pO5A tyObject_Token__AdZj86CO7Fenkiz033pO5A;
+typedef struct tyObject_Token__aw1GIWPKgU4aGE0W4ZTlew tyObject_Token__aw1GIWPKgU4aGE0W4ZTlew;
 struct NimStrPayload {
 	NI cap;
 	NIM_CHAR data[SEQ_DECL_SIZE];
@@ -134,10 +172,11 @@ struct NimStringV2 {
 	NI len;
 	NimStrPayload* p;
 };
-typedef NU8 tyEnum_TokenType__gqEpygsdjqSBnlDljfOHWw;
-struct tyObject_Token__AdZj86CO7Fenkiz033pO5A {
-	tyEnum_TokenType__gqEpygsdjqSBnlDljfOHWw kind;
-	NimStringV2 value;
+typedef NU8 tyEnum_TokenType__OET2HDFciTds9aRInLAZK0A;
+struct tyObject_Token__aw1GIWPKgU4aGE0W4ZTlew {
+	tyEnum_TokenType__OET2HDFciTds9aRInLAZK0A kind;
+	NimStringV2 lexeme;
+	NimStringV2 file;
 	NI line;
 	NI column;
 	NI offset;
@@ -146,7 +185,7 @@ static N_INLINE(void, appendString)(NimStringV2* dest_p0, NimStringV2 src_p1);
 static N_INLINE(void, _ZN6system7copyMemE7pointer7pointer25range09223372036854775807)(void* dest_p0, void* source_p1, NI size_p2);
 static N_INLINE(void, nimCopyMem)(void* dest_p0, void* source_p1, NI size_p2);
 N_LIB_PRIVATE N_NIMCALL(void, prepareAdd)(NimStringV2* s_p0, NI addLen_p1);
-N_LIB_PRIVATE N_NIMCALL(void, _ZN6system9addQuotedE3varI6stringEN6tokens9TokenTypeE)(NimStringV2* s_p0, tyEnum_TokenType__gqEpygsdjqSBnlDljfOHWw x_p1);
+N_LIB_PRIVATE N_NIMCALL(void, _ZN6system9addQuotedE3varI6stringEN6tokens9TokenTypeE)(NimStringV2* s_p0, tyEnum_TokenType__OET2HDFciTds9aRInLAZK0A x_p1);
 N_LIB_PRIVATE N_NIMCALL(void, _ZN6system9addQuotedE3varI6stringE6string)(NimStringV2* s_p0, NimStringV2 x_p1);
 N_LIB_PRIVATE N_NIMCALL(void, _ZN6system9addQuotedE3varI6stringE25range19223372036854775807)(NimStringV2* s_p0, NI x_p1);
 N_LIB_PRIVATE N_NIMCALL(void, _ZN6system9addQuotedE3varI6stringE25range09223372036854775807)(NimStringV2* s_p0, NI x_p1);
@@ -171,32 +210,38 @@ static const struct {
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_9 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_10 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_4};
 static const struct {
-  NI cap; NIM_CHAR data[5+1];
-} TM__US7tUPSVHwyWbwv9cB5DrpQ_11 = { 5 | NIM_STRLIT_FLAG, "value" };
-static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_12 = {5, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_11};
+  NI cap; NIM_CHAR data[6+1];
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_11 = { 6 | NIM_STRLIT_FLAG, "lexeme" };
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_12 = {6, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_11};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_13 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_14 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_4};
 static const struct {
   NI cap; NIM_CHAR data[4+1];
-} TM__US7tUPSVHwyWbwv9cB5DrpQ_15 = { 4 | NIM_STRLIT_FLAG, "line" };
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_15 = { 4 | NIM_STRLIT_FLAG, "file" };
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_16 = {4, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_15};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_17 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_18 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_4};
 static const struct {
-  NI cap; NIM_CHAR data[6+1];
-} TM__US7tUPSVHwyWbwv9cB5DrpQ_19 = { 6 | NIM_STRLIT_FLAG, "column" };
-static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_20 = {6, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_19};
+  NI cap; NIM_CHAR data[4+1];
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_19 = { 4 | NIM_STRLIT_FLAG, "line" };
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_20 = {4, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_19};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_21 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_22 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_4};
 static const struct {
   NI cap; NIM_CHAR data[6+1];
-} TM__US7tUPSVHwyWbwv9cB5DrpQ_23 = { 6 | NIM_STRLIT_FLAG, "offset" };
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_23 = { 6 | NIM_STRLIT_FLAG, "column" };
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_24 = {6, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_23};
 static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_25 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_26 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_4};
+static const struct {
+  NI cap; NIM_CHAR data[6+1];
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_27 = { 6 | NIM_STRLIT_FLAG, "offset" };
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_28 = {6, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_27};
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_29 = {2, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_8};
 static const struct {
   NI cap; NIM_CHAR data[1+1];
-} TM__US7tUPSVHwyWbwv9cB5DrpQ_26 = { 1 | NIM_STRLIT_FLAG, ")" };
-static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_27 = {1, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_26};
+} TM__US7tUPSVHwyWbwv9cB5DrpQ_30 = { 1 | NIM_STRLIT_FLAG, ")" };
+static const NimStringV2 TM__US7tUPSVHwyWbwv9cB5DrpQ_31 = {1, (NimStrPayload*)&TM__US7tUPSVHwyWbwv9cB5DrpQ_30};
 extern NIM_THREADVAR TFrame* framePtr__system_u2809;
 
 #line 5 FX_41
@@ -256,16 +301,16 @@ static N_INLINE(void, popFrame)(void) {
 	framePtr__system_u2809 = (*framePtr__system_u2809).prev;}
 
 #line 5 FX_29
-N_LIB_PRIVATE N_NIMCALL(NimStringV2, _ZN12objectdollar7dollar_EN6tokens5TokenE)(tyObject_Token__AdZj86CO7Fenkiz033pO5A* x_p0) {	NimStringV2 result;	
+N_LIB_PRIVATE N_NIMCALL(NimStringV2, _ZN12objectdollar7dollar_EN6tokens5TokenE)(tyObject_Token__aw1GIWPKgU4aGE0W4ZTlew* x_p0) {	NimStringV2 result;	
 #line 27 FX_19
-NI countX60gensym16__1;	nimfr_("$", "objectdollar.nim");
+NI countX60gensym0__1;	nimfr_("$", "objectdollar.nim");
 #line 13 FX_29
 
 #line 25 FX_19
-	result = TM__US7tUPSVHwyWbwv9cB5DrpQ_3;	countX60gensym16__1 = ((NI)0);	{		if (!NIM_TRUE) goto LA3_;
+	result = TM__US7tUPSVHwyWbwv9cB5DrpQ_3;	countX60gensym0__1 = ((NI)0);	{		if (!NIM_TRUE) goto LA3_;
 
 #line 29 FX_19
-		{			if (!(((NI)0) < countX60gensym16__1)) goto LA7_;
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA7_;
 			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_5);		}
 LA7_: ;
 
@@ -274,7 +319,7 @@ LA7_: ;
 #line 32 FX_19
 		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_9);
 #line 33 FX_19
-		countX60gensym16__1 += ((NI)1);
+		countX60gensym0__1 += ((NI)1);
 #line 39 FX_19
 		_ZN6system9addQuotedE3varI6stringEN6tokens9TokenTypeE((&result), (*x_p0).kind);
 	}
@@ -282,24 +327,24 @@ LA3_: ;
 	{		if (!NIM_TRUE) goto LA11_;
 
 #line 29 FX_19
-		{			if (!(((NI)0) < countX60gensym16__1)) goto LA15_;
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA15_;
 			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_10);		}
 LA15_: ;
 
 #line 31 FX_19
-		prepareAdd((&result), 5);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_12);
+		prepareAdd((&result), 6);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_12);
 #line 32 FX_19
 		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_13);
 #line 33 FX_19
-		countX60gensym16__1 += ((NI)1);
+		countX60gensym0__1 += ((NI)1);
 #line 39 FX_19
-		_ZN6system9addQuotedE3varI6stringE6string((&result), (*x_p0).value);
+		_ZN6system9addQuotedE3varI6stringE6string((&result), (*x_p0).lexeme);
 	}
 LA11_: ;
 	{		if (!NIM_TRUE) goto LA19_;
 
 #line 29 FX_19
-		{			if (!(((NI)0) < countX60gensym16__1)) goto LA23_;
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA23_;
 			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_14);		}
 LA23_: ;
 
@@ -308,32 +353,32 @@ LA23_: ;
 #line 32 FX_19
 		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_17);
 #line 33 FX_19
-		countX60gensym16__1 += ((NI)1);
+		countX60gensym0__1 += ((NI)1);
 #line 39 FX_19
-		_ZN6system9addQuotedE3varI6stringE25range19223372036854775807((&result), (*x_p0).line);
+		_ZN6system9addQuotedE3varI6stringE6string((&result), (*x_p0).file);
 	}
 LA19_: ;
 	{		if (!NIM_TRUE) goto LA27_;
 
 #line 29 FX_19
-		{			if (!(((NI)0) < countX60gensym16__1)) goto LA31_;
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA31_;
 			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_18);		}
 LA31_: ;
 
 #line 31 FX_19
-		prepareAdd((&result), 6);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_20);
+		prepareAdd((&result), 4);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_20);
 #line 32 FX_19
 		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_21);
 #line 33 FX_19
-		countX60gensym16__1 += ((NI)1);
+		countX60gensym0__1 += ((NI)1);
 #line 39 FX_19
-		_ZN6system9addQuotedE3varI6stringE25range19223372036854775807((&result), (*x_p0).column);
+		_ZN6system9addQuotedE3varI6stringE25range19223372036854775807((&result), (*x_p0).line);
 	}
 LA27_: ;
 	{		if (!NIM_TRUE) goto LA35_;
 
 #line 29 FX_19
-		{			if (!(((NI)0) < countX60gensym16__1)) goto LA39_;
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA39_;
 			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_22);		}
 LA39_: ;
 
@@ -342,11 +387,28 @@ LA39_: ;
 #line 32 FX_19
 		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_25);
 #line 33 FX_19
-		countX60gensym16__1 += ((NI)1);
+		countX60gensym0__1 += ((NI)1);
+#line 39 FX_19
+		_ZN6system9addQuotedE3varI6stringE25range19223372036854775807((&result), (*x_p0).column);
+	}
+LA35_: ;
+	{		if (!NIM_TRUE) goto LA43_;
+
+#line 29 FX_19
+		{			if (!(((NI)0) < countX60gensym0__1)) goto LA47_;
+			prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_26);		}
+LA47_: ;
+
+#line 31 FX_19
+		prepareAdd((&result), 6);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_28);
+#line 32 FX_19
+		prepareAdd((&result), 2);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_29);
+#line 33 FX_19
+		countX60gensym0__1 += ((NI)1);
 #line 39 FX_19
 		_ZN6system9addQuotedE3varI6stringE25range09223372036854775807((&result), (*x_p0).offset);
 	}
-LA35_: ;
+LA43_: ;
 
 #line 45 FX_19
-	prepareAdd((&result), 1);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_27);	popFrame();	return result;}
+	prepareAdd((&result), 1);appendString((&result), TM__US7tUPSVHwyWbwv9cB5DrpQ_31);	popFrame();	return result;}
