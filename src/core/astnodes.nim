@@ -19,6 +19,40 @@ type
     operand*: Expression
     op*: Token
 
+  # STATEMENTS
+
+  Statement* = ref object of RootObj
+
+  VariableDeclarationStatement* = ref object of Statement
+    typeToken*: Token
+    varType*: ptr Type
+    name*: Token
+    value*: Expression
+
+  BlockStatement* = ref object of Statement
+    startToken*: Token
+    endToken*: Token
+    statements*: seq[Statement]
+
+  ErrorStatement* = ref object of Statement
+    token*: Token
+
+proc newErrorStatement*(token: Token): ErrorStatement {.inline.} =
+  ErrorStatement(token: token)
+
+proc newBlockStatement*(startToken: Token, endToken: Token): BlockStatement {.inline.} =
+  BlockStatement(startToken: startToken, endToken: endToken, statements: @[])
+
+proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
+  blockStmt.statements.add(stmt)
+
+proc newVariableDeclarationStatement*(
+    typeToken: Token, name: Token, value: Expression
+  ): VariableDeclarationStatement {.inline.} =
+  VariableDeclarationStatement(typeToken: typeToken, name: name, value: value, varType: getUndefinedType())
+
+# EXPRESSIONS
+
 proc newErrorExpression*(token: Token): ErrorExpression {.inline.} =
   ErrorExpression(token: token, returnType: getUndefinedType())
 

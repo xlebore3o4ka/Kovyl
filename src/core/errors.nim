@@ -2,7 +2,7 @@ import tokens, tables
 
 type
   ErrorKind* = enum
-    errSyntax, errExpression
+    errSyntax, errExpression, errStatement, errExpectedSyntax
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -20,6 +20,8 @@ proc message(kind: ErrorKind): string =
   case kind
     of errSyntax: "Invalid syntax"
     of errExpression: "Expected expression, got @0"
+    of errStatement: "Expected statement, got @0"
+    of errExpectedSyntax: "Expected @0, got @1"
 
 proc newError*(
               kind: ErrorKind, file: string, token: Token, 

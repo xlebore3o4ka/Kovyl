@@ -1,12 +1,19 @@
 type
-  TokenType* = enum
+  TokenKind* = enum
     tkIntLiteral,
+    tkIdentifier,
+
     tkPlus, tkMinus, tkStar, tkSlash,
+    tkEqual,
+
+    tkInt,
+
     tkEOS,
-    tkEOF
+    tkEOF,
+    tkInvalid
 
   Token* = object
-    kind*: TokenType
+    kind*: TokenKind
     lexeme*: string
     file*: string
     line*: Positive
@@ -14,6 +21,6 @@ type
     offset*: Natural
 
 func newToken*(
-              kind: TokenType, lexeme: string, file: string, 
+              kind: TokenKind, lexeme: string, file: string, 
               line: Positive, column: Positive, offset: Natural): Token =
   Token(kind: kind, lexeme: lexeme, file: file, line: line, column: column, offset: offset)

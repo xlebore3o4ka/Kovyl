@@ -1,5 +1,5 @@
-import core/[parser, astnodes, errors]
-import utils/[strast, strerr]
+import core/[parser, astnodes, errors, lexer, tokens]
+import utils/[strast, strerr, strtok]
 import os
 
 proc main() =
@@ -9,18 +9,48 @@ proc main() =
     stderr.writeLine("Usage: ", getAppFilename(), " <file>")
     quit(1)
   
-  let filePath = args[0]
+  var showTokens = false
+  var showRepr = false
+  var filePath = ""
+  
+  for arg in args:
+    if arg == "-t":
+      showTokens = true
+    elif arg == "-r":
+      showRepr = true
+    else:
+      filePath = arg
+  
+  if filePath.len == 0:
+    stderr.writeLine("Usage: ", getAppFilename(), " [-t] [-r] <file>")
+    quit(1)
   
   if not fileExists(filePath):
     stderr.writeLine("Error: File not found: ", filePath)
     quit(1)
   
   let text = readFile(filePath)
+  
+  if showTokens:
+    var lexer = newLexer(text, filePath)
+    while true:
+      let token = lexer.nextToken()
+      if token.kind == tkEOS:
+        stdout.writeLine("")
+      else:
+        stdout.write("(" & token.mean() & ")`" & token.lexeme & "` ")
+        if token.kind == tkEOF: break
+
+  stdout.writeLine("")
+
   var parser = newParser(text, filePath)
-  var expression: Expression = parser.parse()
+  var blockStatement: BlockStatement = parser.parse()
   
   if errors.errors.len == 0:
-    echo expression
+    if showRepr:
+      echo blockStatement.representation
+    else:
+      echo blockStatement
   else:
     for error in errors.errors:
       printError(error)
