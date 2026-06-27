@@ -1,5 +1,5 @@
 import ../core/errors
-import std/[tables, strutils]
+import std/[strutils, strformat, os]
 
 proc getSourceLine(file: string, line: Natural): string =
   try:
@@ -12,23 +12,14 @@ proc getSourceLine(file: string, line: Natural): string =
   except:
     return ""
 
-proc printError*(error: CompileError) =
-  var msg = error.message
-  for key, value in error.args:
-    msg = msg.replace(key, value)
-
-  stderr.writeLine("Error [", $error.kind, "]: ", msg)
-  stderr.writeLine("  --> ", error.file, ":", error.line, ":", error.col + 1)
-
-  stderr.writeLine("   |")
-  stderr.write(" ", error.line, " | ")
-
-  let sourceLine = getSourceLine(error.file, error.line)
-  stderr.writeLine(sourceLine)
-
-  stderr.write("   | ")
-  for i in 0 ..< error.col - 1:
-    stderr.write(" ")
-  for i in 0 ..< error.len:
-    stderr.write("^")
-  stderr.writeLine("")
+proc printError*(error: CompileError, short: bool = false) =
+  if not short:
+    stderr.write(absolutePath(error.file))
+  else:
+    stderr.write(error.file)
+  stderr.write(&"({error.line}:{error.col}) ")
+  stderr.writeLine($error.kind & ": " & error.message.multiReplace(error.args))
+  if not short:
+    stderr.write("  | " & repeat(" ", error.col))
+    stderr.writeLine(repeat("_", error.len))
+    stderr.writeLine("  ?  " & getSourceLine(error.file, error.line))

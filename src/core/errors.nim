@@ -1,4 +1,4 @@
-import tokens, tables
+import tokens
 
 type
   ErrorKind* = enum
@@ -11,7 +11,7 @@ type
     col*: Natural
     pos*: Positive
     len*: Natural
-    args*: Table[string, string]
+    args*: seq[(string, string)]
     message*: string
 
 var errors*: seq[CompileError] = @[]
@@ -25,7 +25,7 @@ proc message(kind: ErrorKind): string =
 
 proc newError*(
               kind: ErrorKind, file: string, token: Token, 
-              args: Table[string, string] = initTable[string, string]()) =
+              args: seq[(string, string)] = @[]) =
   let msg = kind.message()
   
   errors.add(CompileError(
@@ -36,7 +36,7 @@ proc newError*(
 proc newError*(
               kind: ErrorKind, file: string, line: Natural, col: Natural, 
               pos: Positive, len: Natural, 
-              args: Table[string, string] = initTable[string, string]()) =
+              args: seq[(string, string)] = @[]) =
   let msg = kind.message()
   
   errors.add(CompileError(

@@ -10,6 +10,8 @@ type Lexer* = object
   column: Positive = 1
   pos: Natural = 0
 
+  hasError*: bool = false
+
   peekedToken*: Token
   hasPeeked*: bool = false
 
@@ -68,7 +70,7 @@ proc nextToken*(self: var Lexer): Token =
   let c = self.peek
   if c == Rune(0): return tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
   elif c == '\n'.Rune: 
-    result = tkEOS.newToken("\\n", self.file, self.line, self.column, self.pos)
+    result = tkEOS.newToken("\n", self.file, self.line, self.column, self.pos)
     self.line.inc
     self.advance
     self.column = 1
@@ -98,18 +100,13 @@ proc nextToken*(self: var Lexer): Token =
       result = tkIdentifier.newToken(ident, self.file, self.line, column, start)
   else:
     newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
+    result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
     self.advance()
-    return self.nextToken()
+    self.hasError = true
 
 proc peekToken*(self: var Lexer): Token =
   if not self.hasPeeked:
     self.peekedToken = self.nextToken()
     self.hasPeeked = true
   return self.peekedToken
-
-proc expectToken*(self: var Lexer, expected: TokenKind): Token =
-  let token = self.nextToken()
-  if token.kind != expected:
-    newError(errExpectedSyntax, self.file, token, {"@0": expected.mean(), "@1": token.mean()}.toTable)
-    return tkInvalid.newToken(token.lexeme, self.file, token.line, token.column, token.offset)
-  return token
+  

@@ -2,3 +2,4 @@ main.py
 nimble.develop
 nimble.paths
 nimbledeps
+build/

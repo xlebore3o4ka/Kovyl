@@ -1,6 +1,7 @@
-import core/[parser, astnodes, errors, lexer, tokens]
-import utils/[strast, strerr, strtok]
+import core/[parser, astnodes, errors]
+import utils/[strerr]
 import os
+import core/visitors/ASTPrinterVisitor
 
 proc main() =
   let args = commandLineParams()
@@ -9,15 +10,12 @@ proc main() =
     stderr.writeLine("Usage: ", getAppFilename(), " <file>")
     quit(1)
   
-  var showTokens = false
-  var showRepr = false
+  var shortErrors = false
   var filePath = ""
   
   for arg in args:
-    if arg == "-t":
-      showTokens = true
-    elif arg == "-r":
-      showRepr = true
+    if arg == "-s":
+      shortErrors = true
     else:
       filePath = arg
   
@@ -30,16 +28,6 @@ proc main() =
     quit(1)
   
   let text = readFile(filePath)
-  
-  if showTokens:
-    var lexer = newLexer(text, filePath)
-    while true:
-      let token = lexer.nextToken()
-      if token.kind == tkEOS:
-        stdout.writeLine("")
-      else:
-        stdout.write("(" & token.mean() & ")`" & token.lexeme & "` ")
-        if token.kind == tkEOF: break
 
   stdout.writeLine("")
 
@@ -47,13 +35,10 @@ proc main() =
   var blockStatement: BlockStatement = parser.parse()
   
   if errors.errors.len == 0:
-    if showRepr:
-      echo blockStatement.representation
-    else:
-      echo blockStatement
+    echo newASTPrinterVisitor().printStatement(blockStatement)
   else:
     for error in errors.errors:
-      printError(error)
+      printError(error, shortErrors)
 
 when isMainModule:
   main()

@@ -1,6 +1,8 @@
 import types, tokens
 
 type
+  # EXPRESSIONS
+
   Expression* = ref object of RootObj
     returnType*: ptr Type
 
@@ -19,11 +21,14 @@ type
     operand*: Expression
     op*: Token
 
+  IdentifierExpression* = ref object of Expression
+    name*: Token
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
 
-  VariableDeclarationStatement* = ref object of Statement
+  DeclarationStatement* = ref object of Statement
     typeToken*: Token
     varType*: ptr Type
     name*: Token
@@ -34,8 +39,17 @@ type
     endToken*: Token
     statements*: seq[Statement]
 
+  AssignmentStatement* = ref object of Statement
+    name*: Token
+    value*: Expression
+
   ErrorStatement* = ref object of Statement
     token*: Token
+
+#STATEMENTS
+
+proc newAssignmentStatement*(name: Token, value: Expression): AssignmentStatement {.inline.} =
+  AssignmentStatement(name: name, value: value)
 
 proc newErrorStatement*(token: Token): ErrorStatement {.inline.} =
   ErrorStatement(token: token)
@@ -46,10 +60,10 @@ proc newBlockStatement*(startToken: Token, endToken: Token): BlockStatement {.in
 proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
   blockStmt.statements.add(stmt)
 
-proc newVariableDeclarationStatement*(
+proc newDeclarationStatement*(
     typeToken: Token, name: Token, value: Expression
-  ): VariableDeclarationStatement {.inline.} =
-  VariableDeclarationStatement(typeToken: typeToken, name: name, value: value, varType: getUndefinedType())
+  ): DeclarationStatement {.inline.} =
+  DeclarationStatement(typeToken: typeToken, name: name, value: value, varType: getUndefinedType())
 
 # EXPRESSIONS
 
@@ -64,3 +78,6 @@ proc newBinaryExpression*(left: Expression, op: Token, right: Expression): Binar
 
 proc newUnaryExpression*(operand: Expression, op: Token): UnaryExpression {.inline.} =
   UnaryExpression(operand: operand, op: op, returnType: getUndefinedType())
+
+proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
+  IdentifierExpression(name: name, returnType: getUndefinedType())

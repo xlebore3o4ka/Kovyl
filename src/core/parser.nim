@@ -1,6 +1,5 @@
 import lexer, astnodes, tokens, errors
 import ../utils/strtok
-import std/tables
 
 type Parser* = object
   file: string
@@ -9,13 +8,29 @@ type Parser* = object
 proc newParser*(text, file: string): Parser =
   Parser(file: file, lexer: newLexer(text, file))
 
+proc newError(self: Parser,
+  kind: ErrorKind, file: string, token: Token, 
+  args: seq[(string, string)] = @[]) =
+  if not self.lexer.hasError:
+    newError(kind, file, token, args)
+
+proc expectToken*(self: var Parser, expected: TokenKind): Token =
+  let token = self.lexer.nextToken()
+  if token.kind != expected:
+    self.newError(errExpectedSyntax, self.file, token, @{"@0": expected.mean(), "@1": token.mean()})
+    return tkInvalid.newToken(token.lexeme, self.file, token.line, token.column, token.offset)
+  return token
+
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
 
   if token.kind == tkIntLiteral:
     return newIntLitExpression(token)
 
-  newError(errExpression, self.file, token, {"@0": token.mean()}.toTable)
+  elif token.kind == tkIdentifier:
+    return newIdentifierExpression(token)
+
+  self.newError(errExpression, self.file, token, @{"@0": token.mean()})
   return newErrorExpression(token)
 
 proc parseUnary(self: var Parser): Expression =
@@ -53,18 +68,24 @@ proc parseAddSub(self: var Parser): Expression =
 proc parseExpr(self: var Parser): Expression =
   return self.parseAddSub()
 
-proc parseVariableDecl(self: var Parser, token: Token): VariableDeclarationStatement {.inline.} =
-  let name = self.lexer.expectToken(tkIdentifier)
-  discard self.lexer.expectToken(tkEqual)
-  return newVariableDeclarationStatement(token, name, self.parseExpr)
+proc parseVariableDecl(self: var Parser, token: Token): DeclarationStatement {.inline.} =
+  let name = self.expectToken(tkIdentifier)
+  discard self.expectToken(tkEqual)
+  return newDeclarationStatement(token, name, self.parseExpr)
+
+proc parseAssignment(self: var Parser, name: Token): AssignmentStatement {.inline.} =
+  discard self.expectToken(tkEqual)
+  return newAssignmentStatement(name, self.parseExpr)
 
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.nextToken()
 
   if token.kind in {tkInt}:
     return self.parseVariableDecl(token)
+  elif token.kind == tkIdentifier:
+    return self.parseAssignment(token)
   
-  newError(errStatement, self.file, token, {"@0": token.mean()}.toTable)
+  self.newError(errStatement, self.file, token, @{"@0": token.mean()})
   return newErrorStatement(token)
 
 proc parse*(self: var Parser): BlockStatement =
@@ -75,7 +96,10 @@ proc parse*(self: var Parser): BlockStatement =
 
   var blockStatement = newBlockStatement(startToken, self.lexer.getEOFToken())
 
-  while self.lexer.peekToken().kind != tkEOF:
+  while true:
     blockStatement.addStatement(self.parseStmt())
+    if self.lexer.peekToken().kind == tkEOF:
+      break
+    discard self.expectToken(tkEOS)
 
   return blockStatement
