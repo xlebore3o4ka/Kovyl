@@ -31,7 +31,10 @@ proc parsePrimary(self: var Parser): Expression =
     return result
 
   elif token.kind == tkIntLiteral:
-    return newIntLitExpression(token)
+    return newIntExpression(token)
+
+  elif token.kind in {tkTrue, tkFalse}:
+    return newBoolExpression(token)
 
   elif token.kind == tkIdentifier:
     return newIdentifierExpression(token)
@@ -40,7 +43,7 @@ proc parsePrimary(self: var Parser): Expression =
   return newErrorExpression(token)
 
 proc parseUnary(self: var Parser): Expression =
-  if self.lexer.peekToken().kind in {tkPlus, tkMinus}:
+  if self.lexer.peekToken().kind in {tkPlus, tkMinus, tkNot}:
     let token = self.lexer.nextToken()
     return newUnaryExpression(self.parseUnary(), token)
 
@@ -51,6 +54,7 @@ proc parseType(self: var Parser): ptr Type =
   case token.kind:
   of tkInt: return getIntType()
   of tkUint: return getUintType()
+  of tkBool: return getBoolType()
   else: 
     self.newError(errSyntax, token)
     return getUndefinedType()
@@ -85,8 +89,38 @@ proc parseAddSub(self: var Parser): Expression =
 
   return expression
 
+proc parseComparison(self: var Parser): Expression =
+  var expression = self.parseAddSub()
+
+  while self.lexer.peekToken().kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}:
+    let op = self.lexer.nextToken()
+    let right = self.parseAddSub()
+    expression = newBinaryExpression(expression, op, right)
+
+  return expression
+
+proc parseAnd(self: var Parser): Expression =
+  var expression = self.parseComparison()
+
+  while self.lexer.peekToken().kind == tkAnd:
+    let op = self.lexer.nextToken()
+    let right = self.parseComparison()
+    expression = newBinaryExpression(expression, op, right)
+
+  return expression
+
+proc parseOr(self: var Parser): Expression =
+  var expression = self.parseAnd()
+
+  while self.lexer.peekToken().kind == tkOr:
+    let op = self.lexer.nextToken()
+    let right = self.parseAnd()
+    expression = newBinaryExpression(expression, op, right)
+
+  return expression
+
 proc parseExpr(self: var Parser): Expression =
-  return self.parseAddSub()
+  return self.parseOr()
 
 proc parseVariableDecl(self: var Parser): DeclarationStatement {.inline.} =
   var varType = self.parseType()
@@ -102,7 +136,7 @@ proc parseAssignment(self: var Parser): AssignmentStatement {.inline.} =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint}:
+  if token.kind in {tkInt, tkUint, tkBool}:
     return self.parseVariableDecl()
   elif token.kind == tkIdentifier:
     return self.parseAssignment()

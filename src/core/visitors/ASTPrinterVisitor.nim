@@ -13,8 +13,11 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) {.base.}
 method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): auto =
   visitor.output.add("ErrorExpression(" & node.token.lexeme & ")")
 
-method visitIntLitExpression*(visitor: ASTPrinterVisitor, node: IntLitExpression): auto =
-  visitor.output.add("IntLitExpression(" & $node.value.lexeme & ")")
+method visitIntExpression*(visitor: ASTPrinterVisitor, node: IntExpression): auto =
+  visitor.output.add("IntExpression(" & $node.value.lexeme & ")")
+
+method visitBoolExpression*(visitor: ASTPrinterVisitor, node: BoolExpression): auto =
+  visitor.output.add("BoolExpression(" & $node.value.lexeme & ")")
 
 method visitBinaryExpression*(visitor: ASTPrinterVisitor, node: BinaryExpression): auto =
   visitor.output.add("BinaryExpression(")
@@ -64,8 +67,10 @@ method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): a
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
   if node of ErrorExpression:
     visitor.visitErrorExpression(ErrorExpression(node))
-  elif node of IntLitExpression:
-    visitor.visitIntLitExpression(IntLitExpression(node))
+  elif node of IntExpression:
+    visitor.visitIntExpression(IntExpression(node))
+  elif node of BoolExpression:
+    visitor.visitBoolExpression(BoolExpression(node))
   elif node of BinaryExpression:
     visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:

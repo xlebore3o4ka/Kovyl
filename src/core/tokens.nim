@@ -4,10 +4,14 @@ type
     tkIdentifier
 
     tkPlus, tkMinus, tkStar, tkSlash
-    tkEqual
+    tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
+    tkEqual, tkNot
     tkColon
 
     tkLParen, tkRParen
+
+    tkAnd
+    tkOr
 
     tkTrue
     tkFalse
@@ -41,10 +45,19 @@ proc mean*(kind: TokenKind): string =
   of tkMinus: return "minus operator '-'"
   of tkStar: return "star operator '*'"
   of tkSlash: return "slash operator '/'"
+  of tkEQ: return "equals operator '=='"
+  of tkNEQ: return "not equals operator '!='"
+  of tkGT: return "greater operator '>'"
+  of tkLT: return "less operator '<'"
+  of tkGTE: return "greater or equal operator '>='"
+  of tkLTE: return "less or equal operator '<='"
   of tkEqual: return "equal operator '='"
+  of tkNot: return "not operator '!'"
   of tkColon: return "colon operator ':'"
   of tkLParen: return "left parenthesis '('"
   of tkRParen: return "right parenthesis ')'"
+  of tkAnd: return "and operator 'and'"
+  of tkOr: return "or operator 'or'"
   of tkInt: return "int type"
   of tkUint: return "uint type"
   of tkBool: return "bool type"

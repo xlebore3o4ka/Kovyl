@@ -9,7 +9,10 @@ type
   ErrorExpression* = ref object of Expression
     token*: Token
 
-  IntLitExpression* = ref object of Expression
+  IntExpression* = ref object of Expression
+    value*: Token
+
+  BoolExpression* = ref object of Expression
     value*: Token
 
   BinaryExpression* = ref object of Expression
@@ -76,8 +79,11 @@ proc newCastExpression*(castToken: Token, castType: ptr Type, value: Expression)
 proc newErrorExpression*(token: Token): ErrorExpression {.inline.} =
   ErrorExpression(token: token, returnType: getUndefinedType())
 
-proc newIntLitExpression*(value: Token): IntLitExpression {.inline.} =
-  IntLitExpression(value: value, returnType: getIntType())
+proc newIntExpression*(value: Token): IntExpression {.inline.} =
+  IntExpression(value: value, returnType: getIntType())
+
+proc newBoolExpression*(value: Token): BoolExpression {.inline.} =
+  BoolExpression(value: value, returnType: getBoolType())
 
 proc newBinaryExpression*(left: Expression, op: Token, right: Expression): BinaryExpression {.inline.} =
   BinaryExpression(left: left, op: op, right: right, returnType: getUndefinedType())

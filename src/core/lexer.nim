@@ -53,12 +53,19 @@ func advance(self: var Lexer) {.inline.} =
 func isDigit(c: Rune): bool {.inline.} = int(c) in 48..57
 
 const operatorTokens = {
-  '+'.Rune: tkPlus,
-  '-'.Rune: tkMinus,
-  '*'.Rune: tkStar,
-  '/'.Rune: tkSlash,
-  '='.Rune: tkEqual,
-  ':'.Rune: tkColon
+  "+": tkPlus,
+  "-": tkMinus,
+  "*": tkStar,
+  "/": tkSlash,
+  "=": tkEqual,
+  ":": tkColon,
+  "!": tkNot,
+  ">": tkGT,
+  "<": tkLT,
+  "==": tkEQ,
+  "!=": tkNEQ,
+  ">=": tkGTE,
+  "<=": tkLTE,
 }.toTable
 
 const openBracketTokens = {
@@ -77,7 +84,11 @@ const pairBracketTokens = {
 const keywordsTokens = {
   "int": tkInt,
   "uint": tkUint,
-  "bool": tkBool
+  "bool": tkBool,
+  "true": tkTrue,
+  "false": tkFalse,
+  "and": tkAnd,
+  "or": tkOr
 }.toTable
 
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
@@ -110,9 +121,15 @@ proc nextToken*(self: var Lexer): Token =
       num &= $self.peek
       self.advance()
     result = tkIntLiteral.newToken(num, self.file, self.line, column, start)
-  elif c in operatorTokens:
-    result = operatorTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
+  elif $c in operatorTokens:
+    let column = self.column
+    let pos = self.pos
     self.advance()
+    var op = $c
+    if $c & $self.peek() in operatorTokens:
+      op &= self.peek()
+      self.advance()
+    result = operatorTokens[$op].newToken(op, self.file, self.line, column, pos)
   elif c in openBracketTokens:
     let token = openBracketTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
     self.bracketStack.add(token)

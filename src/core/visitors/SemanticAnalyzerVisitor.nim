@@ -34,11 +34,20 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
       node.returnType = getIntType()
     elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
       node.returnType = getUintType()
-    else:
-      newError(errBinaryTypeMismatch, node.op, @{
-        "@0": $node.op.lexeme, "@1": $node.left.returnType, "@2": $node.right.returnType})
+  of tkGT, tkLT, tkEQ, tkNEQ, tkGTE, tkLTE:
+    if node.left.returnType == getIntType() and node.right.returnType == getIntType():
+      node.returnType = getBoolType()
+    elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
+      node.returnType = getBoolType()
+  of tkAnd, tkOr:
+    if node.left.returnType == getBoolType() and node.right.returnType == getBoolType():
+      node.returnType = getBoolType()
   else:
-    newError(errSyntax, node.op)
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled binary operator " & node.op.mean()
+
+  if node.returnType == getUndefinedType():
+    newError(errBinaryTypeMismatch, node.op, @{
+        "@0": $node.op.lexeme, "@1": $node.left.returnType, "@2": $node.right.returnType})
 
 method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpression): auto =
   visitor.visitExpression(node.operand)
@@ -52,7 +61,11 @@ method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpres
       node.returnType = getUintType()
     elif node.operand.returnType == getIntType():
       node.returnType = getIntType()
-  else: discard
+  of tkNot:
+    if node.operand.returnType == getBoolType():
+      node.returnType = getBoolType()
+  else: 
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled unary operator " & node.op.mean()
 
   if node.returnType == getUndefinedType():
     newError(errUnaryTypeMismatch, node.op, @{
@@ -68,7 +81,7 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
   
-  # Cast always succeeds (for now, with int/uint types)
+  # Cast always succeeds (for now, with int/uint/bool types)
   # In a more complete implementation, you'd check if the cast is valid
 
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
@@ -109,7 +122,8 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
-  elif node of IntLitExpression: discard
+  elif node of IntExpression: discard
+  elif node of BoolExpression: discard
   elif node of BinaryExpression:
     visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:
