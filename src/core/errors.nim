@@ -2,15 +2,16 @@ import tokens
 
 type
   ErrorKind* = enum
-    errSyntax, errExpression, errStatement, errExpectedSyntax
+    errSyntax, errExpression, errStatement, errExpectedSyntax,
+    errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket
 
   CompileError* = ref object
     kind*: ErrorKind
     file*: string
-    line*: Natural
-    col*: Natural
-    pos*: Positive
-    len*: Natural
+    line*: Positive
+    col*: Positive
+    pos*: Natural
+    len*: Positive
     args*: seq[(string, string)]
     message*: string
 
@@ -22,6 +23,9 @@ proc message(kind: ErrorKind): string =
     of errExpression: "Expected expression, got @0"
     of errStatement: "Expected statement, got @0"
     of errExpectedSyntax: "Expected @0, got @1"
+    of errMismatchedBracket: "Mismatched bracket"
+    of errUnexpectedBracket: "Unexpected closing bracket"
+    of errUnclosedBracket: "Unclosed bracket"
 
 proc newError*(
               kind: ErrorKind, file: string, token: Token, 
@@ -34,8 +38,8 @@ proc newError*(
   ))
 
 proc newError*(
-              kind: ErrorKind, file: string, line: Natural, col: Natural, 
-              pos: Positive, len: Natural, 
+              kind: ErrorKind, file: string, line: Positive, col: Positive, 
+              pos: Natural, len: Positive, 
               args: seq[(string, string)] = @[]) =
   let msg = kind.message()
   

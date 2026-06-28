@@ -21,10 +21,17 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
     return tkInvalid.newToken(token.lexeme, self.file, token.line, token.column, token.offset)
   return token
 
+proc parseExpr(self: var Parser): Expression
+
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
 
-  if token.kind == tkIntLiteral:
+  if token.kind == tkLParen:
+    result = self.parseExpr()
+    discard self.expectToken(tkRParen)
+    return result
+
+  elif token.kind == tkIntLiteral:
     return newIntLitExpression(token)
 
   elif token.kind == tkIdentifier:

@@ -1,6 +1,5 @@
 import std/[unicode, tables]
 import tokens, errors
-import ../utils/strtok
 
 type Lexer* = object
   text: string
@@ -14,6 +13,8 @@ type Lexer* = object
 
   peekedToken*: Token
   hasPeeked*: bool = false
+
+  bracketStack: seq[Token]
 
 proc getEOFToken*(self: Lexer): Token =
   let lastPos = if self.len > 0: self.len - 1 else: 0
@@ -37,8 +38,9 @@ proc getEOFToken*(self: Lexer): Token =
   else:
     return tkEOF.newToken("\0", self.file, line, column + 1, self.len)
 
-func newLexer*(text: string, file: string): Lexer =
-  Lexer(text: text, file: file, len: text.len.Natural, peekedToken: tkEOF.newToken("\0", file, 1, 1, 0))
+proc newLexer*(text: string, file: string): Lexer =
+  Lexer(text: text, file: file, len: text.len.Natural, peekedToken: tkEOF.newToken("\0", file, 1, 1, 0),
+    bracketStack: newSeq[Token]())
 
 func peek(self: Lexer): Rune {.inline.} =
   if self.pos >= self.len: return Rune(0)
@@ -58,9 +60,27 @@ const operatorTokens = {
   '='.Rune: tkEqual
 }.toTable
 
+const openBracketTokens = {
+  '('.Rune: tkLParen
+}.toTable
+
+const closeBracketTokens = {
+  ')'.Rune: tkRParen
+}.toTable
+
+const pairBracketTokens = {
+  tkLParen: ')'.Rune,
+  tkRParen: '('.Rune
+}.toTable
+
 const keywordsTokens = {
   "int": tkInt
 }.toTable
+
+proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
+              args: seq[(string, string)] = @[]) =
+  self.hasError = true
+  newError(kind, file, line, column, pos, len, args)
 
 proc nextToken*(self: var Lexer): Token =
   if self.hasPeeked:
@@ -68,7 +88,11 @@ proc nextToken*(self: var Lexer): Token =
     return self.peekedToken
   while self.peek in ['\t'.Rune, ' '.Rune, '\r'.Rune]: self.advance
   let c = self.peek
-  if c == Rune(0): return tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
+  if c == Rune(0): 
+    if self.bracketStack.len > 0:
+      let last = self.bracketStack.pop()
+      self.newError(errUnclosedBracket, last.file, last.line, last.column, last.offset, 1)
+    result = tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
   elif c == '\n'.Rune: 
     result = tkEOS.newToken("\n", self.file, self.line, self.column, self.pos)
     self.line.inc
@@ -85,6 +109,24 @@ proc nextToken*(self: var Lexer): Token =
   elif c in operatorTokens:
     result = operatorTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
     self.advance()
+  elif c in openBracketTokens:
+    let token = openBracketTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
+    self.bracketStack.add(token)
+    result = token
+    self.advance()
+  elif c in closeBracketTokens:
+    result = closeBracketTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
+    if self.bracketStack.len > 0:
+      let last = self.bracketStack[^1]
+      if pairBracketTokens[last.kind] == c:
+        discard self.bracketStack.pop()
+      else:
+        self.newError(errMismatchedBracket, self.file, self.line, self.column, self.pos, 1)
+        result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
+    else:
+      self.newError(errUnexpectedBracket, self.file, self.line, self.column, self.pos, 1)
+      result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
+    self.advance()
   elif c.isAlpha or c == '_'.Rune:
     let column = self.column
     var start = self.pos
@@ -99,14 +141,12 @@ proc nextToken*(self: var Lexer): Token =
     else:
       result = tkIdentifier.newToken(ident, self.file, self.line, column, start)
   else:
-    newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
+    self.newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
     result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
     self.advance()
-    self.hasError = true
 
 proc peekToken*(self: var Lexer): Token =
   if not self.hasPeeked:
     self.peekedToken = self.nextToken()
     self.hasPeeked = true
   return self.peekedToken
-  

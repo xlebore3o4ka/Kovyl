@@ -6,6 +6,8 @@ type
     tkPlus, tkMinus, tkStar, tkSlash,
     tkEqual,
 
+    tkLParen, tkRParen,
+
     tkInt,
 
     tkEOS,
@@ -16,8 +18,8 @@ type
     kind*: TokenKind
     lexeme*: string
     file*: string
-    line*: Positive
-    column*: Positive
+    line*: Positive = 1
+    column*: Positive = 1
     offset*: Natural
 
 func newToken*(
