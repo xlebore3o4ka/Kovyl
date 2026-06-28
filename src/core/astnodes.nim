@@ -24,12 +24,15 @@ type
   IdentifierExpression* = ref object of Expression
     name*: Token
 
+  CastExpression* = ref object of Expression
+    castToken*: Token
+    value*: Expression
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
 
   DeclarationStatement* = ref object of Statement
-    typeToken*: Token
     varType*: ptr Type
     name*: Token
     value*: Expression
@@ -61,11 +64,14 @@ proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
   blockStmt.statements.add(stmt)
 
 proc newDeclarationStatement*(
-    typeToken: Token, name: Token, value: Expression
+    varType: ptr Type, name: Token, value: Expression
   ): DeclarationStatement {.inline.} =
-  DeclarationStatement(typeToken: typeToken, name: name, value: value, varType: getUndefinedType())
+  DeclarationStatement(name: name, value: value, varType: varType)
 
 # EXPRESSIONS
+
+proc newCastExpression*(castToken: Token, castType: ptr Type, value: Expression): CastExpression {.inline.} =
+  CastExpression(castToken: castToken, returnType: castType, value: value)
 
 proc newErrorExpression*(token: Token): ErrorExpression {.inline.} =
   ErrorExpression(token: token, returnType: getUndefinedType())

@@ -18,6 +18,9 @@ method visitUnaryExpression*(visitor: Visitor, node: UnaryExpression): auto {.ba
 method visitIdentifierExpression*(visitor: Visitor, node: IdentifierExpression): auto {.base.} =
   discard
 
+method visitCastExpression*(visitor: Visitor, node: CastExpression): auto {.base.} =
+  discard
+
 method visitDeclarationStatement*(visitor: Visitor, node: DeclarationStatement): auto {.base.} =
   discard
 

@@ -1,4 +1,4 @@
-import ../astnodes
+import ../[astnodes, types]
 import visitor
 
 type
@@ -8,13 +8,13 @@ type
 proc newASTPrinterVisitor*(): ASTPrinterVisitor =
   ASTPrinterVisitor(output: "")
 
+method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) {.base.}
+
 method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): auto =
   visitor.output.add("ErrorExpression(" & node.token.lexeme & ")")
 
 method visitIntLitExpression*(visitor: ASTPrinterVisitor, node: IntLitExpression): auto =
   visitor.output.add("IntLitExpression(" & $node.value.lexeme & ")")
-
-method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) {.base.}
 
 method visitBinaryExpression*(visitor: ASTPrinterVisitor, node: BinaryExpression): auto =
   visitor.output.add("BinaryExpression(")
@@ -31,8 +31,14 @@ method visitUnaryExpression*(visitor: ASTPrinterVisitor, node: UnaryExpression):
 method visitIdentifierExpression*(visitor: ASTPrinterVisitor, node: IdentifierExpression): auto =
   visitor.output.add("IdentifierExpression(" & node.name.lexeme & ")")
 
+method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): auto =
+  visitor.output.add("CastExpression(")
+  visitor.visitExpression(node.value)
+  visitor.output.add(", ")
+  visitor.output.add($node.returnType & ")")
+
 method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
-  visitor.output.add("DeclarationStatement(" & node.typeToken.lexeme & ", ")
+  visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
   visitor.output.add(node.name.lexeme & ", ")
   visitor.visitExpression(node.value)
   visitor.output.add(")")
@@ -66,6 +72,11 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitUnaryExpression(UnaryExpression(node))
   elif node of IdentifierExpression:
     visitor.visitIdentifierExpression(IdentifierExpression(node))
+  elif node of CastExpression:
+    visitor.visitCastExpression(CastExpression(node))
+  else:
+    echo "[ASTPrinterVisitor] WARNING: unhandled expression"
+    visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")
 
 method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
   if node of DeclarationStatement:
@@ -76,6 +87,9 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
     visitor.visitErrorStatement(ErrorStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
+  else:
+    echo "[ASTPrinterVisitor] WARNING: unhandled statement"
+    visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")
 
 proc printStatement*(visitor: ASTPrinterVisitor, node: Statement): string =
   visitor.output = ""

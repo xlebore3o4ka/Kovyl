@@ -57,7 +57,8 @@ const operatorTokens = {
   '-'.Rune: tkMinus,
   '*'.Rune: tkStar,
   '/'.Rune: tkSlash,
-  '='.Rune: tkEqual
+  '='.Rune: tkEqual,
+  ':'.Rune: tkColon
 }.toTable
 
 const openBracketTokens = {
@@ -74,7 +75,9 @@ const pairBracketTokens = {
 }.toTable
 
 const keywordsTokens = {
-  "int": tkInt
+  "int": tkInt,
+  "uint": tkUint,
+  "bool": tkBool
 }.toTable
 
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
@@ -86,7 +89,7 @@ proc nextToken*(self: var Lexer): Token =
   if self.hasPeeked:
     self.hasPeeked = false
     return self.peekedToken
-  while self.peek in ['\t'.Rune, ' '.Rune, '\r'.Rune]: self.advance
+  while self.peek in ['\t'.Rune, ' '.Rune]: self.advance
   let c = self.peek
   if c == Rune(0): 
     if self.bracketStack.len > 0:
@@ -95,8 +98,9 @@ proc nextToken*(self: var Lexer): Token =
     result = tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
   elif c == '\n'.Rune: 
     result = tkEOS.newToken("\n", self.file, self.line, self.column, self.pos)
-    self.line.inc
-    self.advance
+    while self.peek == '\n'.Rune:
+      self.advance
+      self.line.inc
     self.column = 1
   elif c.isDigit:
     let column = self.column
