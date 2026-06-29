@@ -6,7 +6,8 @@ type
     tkPlus, tkMinus, tkStar, tkSlash
     tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
     tkEqual, tkNot
-    tkColon
+    tkColon,
+    tkHash, tkPragma
 
     tkLParen, tkRParen
 
@@ -54,6 +55,8 @@ proc mean*(kind: TokenKind): string =
   of tkEqual: return "equal operator '='"
   of tkNot: return "not operator '!'"
   of tkColon: return "colon operator ':'"
+  of tkHash: return "hash operator '#'"
+  of tkPragma: return "pragma operator '#!'"
   of tkLParen: return "left parenthesis '('"
   of tkRParen: return "right parenthesis ')'"
   of tkAnd: return "and operator 'and'"

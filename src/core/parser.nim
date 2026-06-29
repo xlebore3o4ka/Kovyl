@@ -7,11 +7,13 @@ type Parser* = object
 proc newParser*(text, file: string): Parser =
   Parser(file: file, lexer: newLexer(text, file))
 
-proc newError(self: Parser,
+proc newError(self: var Parser,
   kind: ErrorKind, token: Token, 
   args: seq[(string, string)] = @[]) =
   if not self.lexer.hasError:
     newError(kind, token, args)
+    while self.lexer.peekToken().kind notin {tkEOS, tkEOF}:
+      discard self.lexer.nextToken()
 
 proc expectToken*(self: var Parser, expected: TokenKind): Token =
   let token = self.lexer.nextToken()
@@ -122,14 +124,17 @@ proc parseOr(self: var Parser): Expression =
 proc parseExpr(self: var Parser): Expression =
   return self.parseOr()
 
-proc parseVariableDecl(self: var Parser): DeclarationStatement {.inline.} =
+proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
   var varType = self.parseType()
   let name = self.expectToken(tkIdentifier)
   discard self.expectToken(tkEqual)
   return newDeclarationStatement(varType, name, self.parseExpr)
 
-proc parseAssignment(self: var Parser): AssignmentStatement {.inline.} =
+proc parseAssignment(self: var Parser): Statement {.inline.} =
   let name = self.lexer.nextToken()
+  if self.lexer.peekToken().kind == tkIdentifier:
+    self.newError(errUnknownType, name)
+    return newErrorStatement(self.lexer.nextToken())
   discard self.expectToken(tkEqual)
   return newAssignmentStatement(name, self.parseExpr)
 
@@ -137,7 +142,7 @@ proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
   if token.kind in {tkInt, tkUint, tkBool}:
-    return self.parseVariableDecl()
+    return self.parseSymbolDecl()
   elif token.kind == tkIdentifier:
     return self.parseAssignment()
   

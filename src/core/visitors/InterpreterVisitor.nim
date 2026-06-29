@@ -158,12 +158,6 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
-  let output = visitor.literalTable[node.name.lexeme]
-  case output.valueTypeKind:
-  of typeInt: echo node.name.lexeme & ": " & $output.intValue
-  of typeUint: echo node.name.lexeme & ": " & $output.uintValue
-  of typeBool: echo node.name.lexeme & ": " & $output.boolValue
-  else: echo node.name.lexeme & ": ???"
 
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard

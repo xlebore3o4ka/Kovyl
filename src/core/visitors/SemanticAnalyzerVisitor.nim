@@ -9,7 +9,10 @@ type
     index: Natural
 
   SemanticAnalyzerVisitor* = ref object of Visitor
-    symbolTable: OrderedTable[string, Symbol]
+    symbolTable: Table[string, Natural]
+    scopedSymbolPool: seq[Symbol]
+    symbolIndex: Natural = 0
+    scopeStack: seq[Natural]
 
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: ptr Type) =
   let symbol = Symbol(
@@ -17,7 +20,22 @@ proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: ptr T
     symbolType: symbolType,
     index: visitor.symbolTable.len
   )
-  visitor.symbolTable[token.lexeme] = symbol
+  let index = visitor.symbolIndex
+  visitor.symbolTable[token.lexeme] = index
+  visitor.symbolIndex.inc
+  visitor.scopedSymbolPool.setLen(visitor.symbolIndex)
+  visitor.scopedSymbolPool[index] = symbol
+
+proc getSymbol(visitor: SemanticAnalyzerVisitor, name: string): Symbol {.inline.} =
+  return visitor.scopedSymbolPool[visitor.symbolTable[name]]
+
+proc pushScope(visitor: SemanticAnalyzerVisitor) {.inline.} =
+  visitor.scopeStack.add(visitor.symbolIndex)
+
+proc popScope(visitor: SemanticAnalyzerVisitor) {.inline.} =
+  visitor.symbolIndex = visitor.scopeStack.pop()
+  for symbol in visitor.scopedSymbolPool[visitor.symbolIndex..^1]:
+    visitor.symbolTable.del(symbol.token.lexeme)
 
 proc newSemanticAnalyzerVisitor*(): SemanticAnalyzerVisitor =
   SemanticAnalyzerVisitor()
@@ -76,7 +94,7 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
     newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
     return
 
-  node.returnType = visitor.symbolTable[node.name.lexeme].symbolType
+  node.returnType = visitor.getSymbol(node.name.lexeme).symbolType
 
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
@@ -90,7 +108,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
   visitor.visitExpression(node.value)
 
   if node.name.lexeme in visitor.symbolTable:
-    let name = visitor.symbolTable[node.name.lexeme].token
+    let name = visitor.getSymbol(node.name.lexeme).token
     newError(errRedeclaration, node.name, 
       @{"@0": node.name.lexeme, "@1": name.file, "@2": $name.line, "@3": $name.column}
     )
@@ -103,10 +121,8 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
   visitor.newSymbol(node.name, node.varType)
 
 method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStatement): auto =
-  # TODO: push scope
   for stmt in node.statements:
     visitor.visitStatement(stmt)
-  # TODO: pop scope
 
 method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: AssignmentStatement): auto =
   visitor.visitExpression(node.value)
@@ -115,7 +131,7 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
     return
 
-  let varType = visitor.symbolTable[node.name.lexeme].symbolType
+  let varType = visitor.getSymbol(node.name.lexeme).symbolType
   if varType != node.value.returnType:
     newError(errTypeMismatch, node.name, @{"@0": $varType, "@1": $node.value.returnType})
     return

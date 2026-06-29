@@ -4,7 +4,7 @@ type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax
     errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket
-    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch
+    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType
     errRedeclaration, errUndeclaredSymbol
 
   CompileError* = ref object
@@ -31,6 +31,7 @@ proc message(kind: ErrorKind): string =
     of errBinaryTypeMismatch: "Type mismatch for binary operator @0 (@1 @0 @2)"
     of errUnaryTypeMismatch: "Type mismatch for unary operator @0 (@1)"
     of errTypeMismatch: "Type mismatch for @0 (expected @0, got @1)"
+    of errUnknownType: "Unknown type"
     of errRedeclaration: "Redeclaration of symbol '@0', originally declared at @1(@2:@3)"
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
 

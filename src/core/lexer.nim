@@ -15,6 +15,7 @@ type Lexer* = object
   hasPeeked*: bool = false
 
   bracketStack: seq[Token]
+  lastIsEOS: bool = false
 
 proc getEOFToken*(self: Lexer): Token =
   let lastPos = if self.len > 0: self.len - 1 else: 0
@@ -66,6 +67,8 @@ const operatorTokens = {
   "!=": tkNEQ,
   ">=": tkGTE,
   "<=": tkLTE,
+  "#": tkHash,
+  "#!": tkPragma
 }.toTable
 
 const openBracketTokens = {
@@ -113,6 +116,8 @@ proc nextToken*(self: var Lexer): Token =
       self.advance
       self.line.inc
     self.column = 1
+    if self.lastIsEOS:
+      result = self.nextToken()
   elif c.isDigit:
     let column = self.column
     var start = self.pos
@@ -126,10 +131,19 @@ proc nextToken*(self: var Lexer): Token =
     let pos = self.pos
     self.advance()
     var op = $c
+
     if $c & $self.peek() in operatorTokens:
       op &= self.peek()
       self.advance()
-    result = operatorTokens[$op].newToken(op, self.file, self.line, column, pos)
+
+    let kind = operatorTokens[$op]
+
+    if kind == tkHash:
+      while self.peek() != '\n'.Rune and self.peek() != '\0'.Rune: 
+        self.advance()
+      result = self.nextToken()
+    else:
+      result = kind.newToken(op, self.file, self.line, column, pos)
   elif c in openBracketTokens:
     let token = openBracketTokens[c].newToken($c, self.file, self.line, self.column, self.pos)
     self.bracketStack.add(token)
@@ -165,6 +179,8 @@ proc nextToken*(self: var Lexer): Token =
     self.newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
     result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
     self.advance()
+
+  self.lastIsEOS = result.kind == tkEOS
 
 proc peekToken*(self: var Lexer): Token =
   if not self.hasPeeked:
