@@ -1,7 +1,7 @@
 import core/[parser, astnodes, errors]
 import utils/[strerr]
-import os
-import core/visitors/[ASTPrinterVisitor, SemanticAnalyzerVisitor]
+import std/[os]
+import core/visitors/[InterpreterVisitor, SemanticAnalyzerVisitor]
 
 proc main() =
   let args = commandLineParams()
@@ -35,9 +35,11 @@ proc main() =
   var blockStatement: BlockStatement = parser.parse()
   newSemanticAnalyzerVisitor().visitStatement(blockStatement)
   
-  echo newASTPrinterVisitor().printStatement(blockStatement)
+  # echo newASTPrinterVisitor().printStatement(blockStatement)
   if errors.errors.len == 0:
     echo "[KOVYL] INFO: Compilation successful!"
+    let interpreter = newInterpreterVisitor()
+    interpreter.visitStatement(blockStatement)
 
   for error in errors.errors:
     printError(error, shortErrors)

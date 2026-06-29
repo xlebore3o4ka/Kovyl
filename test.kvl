@@ -1,1 +1,2 @@
-bool x = !(10 == 5) and 4 > 3 or !(3 != 4 and 6 <= 4)
+uint x = 10:uint - 20:uint
+x = x

@@ -1,5 +1,5 @@
 type
-  TypeKind = enum
+  TypeKind* = enum
     typeUndefined
     typeInt
     typeUint
