@@ -159,6 +159,14 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
 
+method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto =
+  let value = visitor.visitExpression(node.value)
+  case value.valueTypeKind:
+  of typeInt: echo value.intValue
+  of typeUint: echo value.uintValue
+  of typeBool: echo value.boolValue
+  else: echo ""
+
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard
   elif node of IntExpression:
@@ -184,5 +192,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitBlockStatement(BlockStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
+  elif node of OutStatement:
+    visitor.visitOutStatement(OutStatement(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled statement"

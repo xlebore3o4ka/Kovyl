@@ -6,6 +6,7 @@ type
     errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket
     errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType
     errRedeclaration, errUndeclaredSymbol
+    errUnknownPragma
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -34,6 +35,7 @@ proc message(kind: ErrorKind): string =
     of errUnknownType: "Unknown type"
     of errRedeclaration: "Redeclaration of symbol '@0', originally declared at @1(@2:@3)"
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
+    of errUnknownPragma: "Unknown pragma"
 
 proc newError*(
               kind: ErrorKind, token: Token, 

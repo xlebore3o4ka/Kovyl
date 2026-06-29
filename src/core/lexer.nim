@@ -138,7 +138,7 @@ proc nextToken*(self: var Lexer): Token =
 
     let kind = operatorTokens[$op]
 
-    if kind == tkHash:
+    if kind == tkHash or kind == tkPragma and pos == 0:
       while self.peek() != '\n'.Rune and self.peek() != '\0'.Rune: 
         self.advance()
       result = self.nextToken()

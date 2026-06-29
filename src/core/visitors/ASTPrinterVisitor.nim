@@ -64,6 +64,11 @@ method visitBlockStatement*(visitor: ASTPrinterVisitor, node: BlockStatement): a
 method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): auto =
   visitor.output.add("ErrorStatement(" & node.token.lexeme & ")")
 
+method visitOutStatement*(visitor: ASTPrinterVisitor, node: OutStatement): auto =
+  visitor.output.add("OutStatement(")
+  visitor.visitExpression(node.value)
+  visitor.output.add(")")
+
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
   if node of ErrorExpression:
     visitor.visitErrorExpression(ErrorExpression(node))
@@ -92,6 +97,8 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
     visitor.visitErrorStatement(ErrorStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
+  elif node of OutStatement:
+    visitor.visitOutStatement(OutStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")

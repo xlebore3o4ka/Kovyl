@@ -52,7 +52,13 @@ type
   ErrorStatement* = ref object of Statement
     token*: Token
 
+  OutStatement* = ref object of Statement
+    value*: Expression
+
 #STATEMENTS
+
+proc newOutStatement*(value: Expression): OutStatement {.inline.} =
+  OutStatement(value: value)
 
 proc newAssignmentStatement*(name: Token, value: Expression): AssignmentStatement {.inline.} =
   AssignmentStatement(name: name, value: value)

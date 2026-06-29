@@ -35,3 +35,6 @@ method visitErrorStatement*(visitor: Visitor, node: ErrorStatement): auto {.base
 
 method visitAssignmentStatement*(visitor: Visitor, node: AssignmentStatement): auto {.base.} =
   discard
+
+method visitOutStatement*(visitor: Visitor, node: OutStatement): auto {.base.} =
+  discard

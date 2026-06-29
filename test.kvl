@@ -1,5 +1,10 @@
-int x = 10 + 2
+# Test
+int x = 10  # Test 2
 
-# Hi spdnoasdnfmpsd asfd 23 412 4
+# Test 3
+bool y = x == 5  # Test 4
 
-int y = 10 + 2
+#!out(x)
+#!out(y)
+
+# Test 5

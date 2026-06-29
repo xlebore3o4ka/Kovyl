@@ -1,4 +1,5 @@
 import lexer, astnodes, tokens, errors, types
+import std/tables
 
 type Parser* = object
   file: string
@@ -138,6 +139,29 @@ proc parseAssignment(self: var Parser): Statement {.inline.} =
   discard self.expectToken(tkEqual)
   return newAssignmentStatement(name, self.parseExpr)
 
+type
+  pragmaProc = (proc (self: var Parser): Statement)
+
+proc pragmaOut(self: var Parser): Statement =
+  return newOutStatement(self.parseExpr())
+
+const pragmaMap: Table[string, pragmaProc] = {
+  "out": pragmaProc(pragmaOut)
+}.toTable
+
+proc parsePragma(self: var Parser): Statement =
+  let token = self.lexer.nextToken()
+  let name = self.expectToken(tkIdentifier)
+  discard self.expectToken(tkLParen)
+
+  if name.lexeme notin pragmaMap:
+    self.newError(errUnknownPragma, name)
+    return newErrorStatement(token)
+
+  result = pragmaMap[name.lexeme](self)
+
+  discard self.expectToken(tkRParen)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -145,6 +169,8 @@ proc parseStmt(self: var Parser): Statement =
     return self.parseSymbolDecl()
   elif token.kind == tkIdentifier:
     return self.parseAssignment()
+  elif token.kind == tkPragma:
+    return self.parsePragma()
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)
@@ -157,10 +183,15 @@ proc parse*(self: var Parser): BlockStatement =
 
   var blockStatement = newBlockStatement(startToken, self.lexer.getEOFToken())
 
+  if self.lexer.peekToken().kind == tkEOS:
+    discard self.lexer.nextToken()
+
   while true:
     blockStatement.addStatement(self.parseStmt())
     if self.lexer.peekToken().kind == tkEOF:
       break
     discard self.expectToken(tkEOS)
+    if self.lexer.peekToken().kind == tkEOF:
+      break
 
   return blockStatement

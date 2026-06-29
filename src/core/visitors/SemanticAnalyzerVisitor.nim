@@ -136,6 +136,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     newError(errTypeMismatch, node.name, @{"@0": $varType, "@1": $node.value.returnType})
     return
 
+method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
+  visitor.visitExpression(node.value)
+
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
   elif node of IntExpression: discard
@@ -159,5 +162,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitBlockStatement(BlockStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
+  elif node of OutStatement:
+    visitor.visitOutStatement(OutStatement(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled statement"
