@@ -1,10 +1,25 @@
-# Test
-int x = 10  # Test 2
+int a = 10
+int b = 4
+uint op = 0:uint  # 0:+ 1:- 2:* 3:/
 
-# Test 3
-bool y = x == 5  # Test 4
+bool zeroDiv = false
+bool unknownOp = false
 
-#!out(x)
-#!out(y)
+if op == 0:uint do
+  #!out(a + b)
+elif op == 1:uint do
+  #!out(a - b)
+elif op == 2:uint do
+  #!out(a * b)
+elif op == 3:uint do
+  if b == 0 do
+    zeroDiv = true
+  else
+    #!out(a / b)
+  end
+else
+  unknownOp = true
+end
 
-# Test 5
+#!out(zeroDiv)
+#!out(unknownOp)

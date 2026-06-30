@@ -91,9 +91,13 @@ const keywordsTokens = {
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
-  "or": tkOr
+  "or": tkOr,
+  "do": tkDo,
+  "end": tkEnd,
+  "if": tkIf,
+  "elif": tkElif,
+  "else": tkElse
 }.toTable
-
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
               args: seq[(string, string)] = @[]) =
   self.hasError = true
@@ -103,16 +107,16 @@ proc nextToken*(self: var Lexer): Token =
   if self.hasPeeked:
     self.hasPeeked = false
     return self.peekedToken
-  while self.peek in ['\t'.Rune, ' '.Rune]: self.advance
+  while self.peek == ' '.Rune or self.peek == '\t'.Rune: self.advance
   let c = self.peek
   if c == Rune(0): 
     if self.bracketStack.len > 0:
       let last = self.bracketStack.pop()
       self.newError(errUnclosedBracket, last.file, last.line, last.column, last.offset, 1)
     result = tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
-  elif c == '\n'.Rune: 
-    result = tkEOS.newToken("\n", self.file, self.line, self.column, self.pos)
-    while self.peek == '\n'.Rune:
+  elif c == '\n'.Rune or c == ';'.Rune: 
+    result = tkEOS.newToken($c, self.file, self.line, self.column, self.pos)
+    while self.peek == '\n'.Rune or self.peek == ';'.Rune:
       self.advance
       self.line.inc
     self.column = 1

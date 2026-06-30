@@ -162,6 +162,60 @@ proc parsePragma(self: var Parser): Statement =
 
   discard self.expectToken(tkRParen)
 
+proc parseStmt(self: var Parser): Statement
+
+proc parseBranching(self: var Parser): Statement =
+  discard self.lexer.nextToken()
+  let condition = self.parseExpr()
+
+  let ifBlock = newBlockStatement(self.expectToken(tkDo))
+  discard self.expectToken(tkEOS)
+
+  while self.lexer.peekToken().kind notin {tkElif, tkElse, tkEnd}:
+    ifBlock.addStatement(self.parseStmt())
+    discard self.expectToken(tkEOS)
+
+  ifBlock.endToken = self.lexer.peekToken()
+
+  var branchingStatement = newBranchingStatement(condition, ifBlock)
+
+  while true:
+    let tok = self.lexer.peekToken()
+    if tok.kind == tkEnd: break
+    elif tok.kind == tkElse:
+      discard self.lexer.nextToken()
+      let elseBlock = newBlockStatement(tok)
+      discard self.expectToken(tkEOS)
+
+      while self.lexer.peekToken().kind != tkEnd:
+        elseBlock.addStatement(self.parseStmt())
+        discard self.expectToken(tkEOS)
+
+      elseBlock.endToken = self.lexer.peekToken()
+
+      branchingStatement.setElse(elseBlock)
+      break
+    elif tok.kind == tkElif:
+      discard self.lexer.nextToken()
+      let condition = self.parseExpr()
+
+      let elifBlock = newBlockStatement(self.expectToken(tkDo))
+      discard self.expectToken(tkEOS)
+
+      while self.lexer.peekToken().kind notin {tkElif, tkElse, tkEnd}:
+        elifBlock.addStatement(self.parseStmt())
+        discard self.expectToken(tkEOS)
+
+      elifBlock.endToken = self.lexer.peekToken()
+
+      branchingStatement.addElif(condition, elifBlock)
+      continue
+    break
+
+  discard self.expectToken(tkEnd)
+
+  return branchingStatement
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -171,6 +225,8 @@ proc parseStmt(self: var Parser): Statement =
     return self.parseAssignment()
   elif token.kind == tkPragma:
     return self.parsePragma()
+  elif token.kind == tkIf:
+    return self.parseBranching()
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)

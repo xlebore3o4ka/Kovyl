@@ -32,82 +32,82 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
 method visitStatement*(visitor: InterpreterVisitor, node: Statement) {.base.}
 
 method visitIntExpression*(visitor: InterpreterVisitor, node: IntExpression): Value {.base.} =
-  return newIntValue(parseInt(node.value.lexeme))
+  return newIntValue(parseInt(node.token.lexeme))
 
 method visitBoolExpression*(visitor: InterpreterVisitor, node: BoolExpression): Value {.base.} =
-  return newBoolValue(node.value.kind == tkTrue)
+  return newBoolValue(node.token.kind == tkTrue)
 
 method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpression): Value {.base.} =
   let leftVal = visitor.visitExpression(node.left)
   let rightVal = visitor.visitExpression(node.right)
 
-  case node.op.kind:
+  case node.token.kind:
   of tkPlus:
     case node.returnType.kind:
     of typeInt: return newIntValue(leftVal.intValue + rightVal.intValue)
     of typeUint: return newUintValue(leftVal.uintValue + rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkMinus:
     case node.returnType.kind:
     of typeInt: return newIntValue(leftVal.intValue - rightVal.intValue)
     of typeUint: return newUintValue(leftVal.uintValue - rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkStar:
     case node.returnType.kind:
     of typeInt: return newIntValue(leftVal.intValue * rightVal.intValue)
     of typeUint: return newUintValue(leftVal.uintValue * rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkSlash:
     case node.returnType.kind:
     of typeInt: return newIntValue(leftVal.intValue div rightVal.intValue)
     of typeUint: return newUintValue(leftVal.uintValue div rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkEQ:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue == rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue == rightVal.uintValue)
     of typeBool: return newBoolValue(leftVal.boolValue == rightVal.boolValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkNEQ:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue != rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue != rightVal.uintValue)
     of typeBool: return newBoolValue(leftVal.boolValue != rightVal.boolValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkGT:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue > rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue > rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkLT:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue < rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue < rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkGTE:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue >= rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue >= rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkLTE:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue <= rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue <= rightVal.uintValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkAnd:
     case node.returnType.kind:
     of typeBool: return newBoolValue(leftVal.boolValue and rightVal.boolValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkOr:
     case node.returnType.kind:
     of typeBool: return newBoolValue(leftVal.boolValue or rightVal.boolValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.op.mean())
+    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   else: raise newException(RuntimeError, "Unknown binary operator")
 
 method visitUnaryExpression*(visitor: InterpreterVisitor, node: UnaryExpression): Value {.base.} =
   let value = visitor.visitExpression(node.operand)
 
-  case node.op.kind:
+  case node.token.kind:
   of tkPlus: 
     case node.returnType.kind:
     of typeInt, typeUint: return value
@@ -123,7 +123,7 @@ method visitUnaryExpression*(visitor: InterpreterVisitor, node: UnaryExpression)
   else: raise newException(RuntimeError, "Unknown binary operator")
 
 method visitIdentifierExpression*(visitor: InterpreterVisitor, node: IdentifierExpression): Value {.base.} =
-  return visitor.literalTable[node.name.lexeme]
+  return visitor.literalTable[node.token.lexeme]
 
 method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): Value {.base.} =
   let value = visitor.visitExpression(node.value)
@@ -167,6 +167,22 @@ method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto
   of typeBool: echo value.boolValue
   else: echo ""
 
+method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
+  let conditionValue = visitor.visitExpression(node.condition)
+  
+  if conditionValue.boolValue:
+    visitor.visitStatement(node.ifBlock)
+    return
+  
+  for el in node.elifBlocks:
+    let elifCondition = visitor.visitExpression(el.cond)
+    if elifCondition.boolValue:
+      visitor.visitStatement(el.elifBlock)
+      return
+  
+  if node.elseBlock != nil:
+    visitor.visitStatement(node.elseBlock)
+
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard
   elif node of IntExpression:
@@ -194,5 +210,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitAssignmentStatement(AssignmentStatement(node))
   elif node of OutStatement:
     visitor.visitOutStatement(OutStatement(node))
+  elif node of BranchingStatement:
+    visitor.visitBranchingStatement(BranchingStatement(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled statement"

@@ -1,4 +1,4 @@
-import ../[astnodes, types]
+import ../[astnodes, types, tokens]
 import visitor
 
 type
@@ -11,28 +11,28 @@ proc newASTPrinterVisitor*(): ASTPrinterVisitor =
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) {.base.}
 
 method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): auto =
-  visitor.output.add("ErrorExpression(" & node.token.lexeme & ")")
+  visitor.output.add("ErrorExpression(" & node.token.mean & ")")
 
 method visitIntExpression*(visitor: ASTPrinterVisitor, node: IntExpression): auto =
-  visitor.output.add("IntExpression(" & $node.value.lexeme & ")")
+  visitor.output.add("IntExpression(" & $node.token.lexeme & ")")
 
 method visitBoolExpression*(visitor: ASTPrinterVisitor, node: BoolExpression): auto =
-  visitor.output.add("BoolExpression(" & $node.value.lexeme & ")")
+  visitor.output.add("BoolExpression(" & $node.token.lexeme & ")")
 
 method visitBinaryExpression*(visitor: ASTPrinterVisitor, node: BinaryExpression): auto =
   visitor.output.add("BinaryExpression(")
   visitor.visitExpression(node.left)
-  visitor.output.add(", " & node.op.lexeme & ", ")
+  visitor.output.add(", " & node.token.lexeme & ", ")
   visitor.visitExpression(node.right)
   visitor.output.add(")")
 
 method visitUnaryExpression*(visitor: ASTPrinterVisitor, node: UnaryExpression): auto =
-  visitor.output.add("UnaryExpression(" & node.op.lexeme & ", ")
+  visitor.output.add("UnaryExpression(" & node.token.lexeme & ", ")
   visitor.visitExpression(node.operand)
   visitor.output.add(")")
 
 method visitIdentifierExpression*(visitor: ASTPrinterVisitor, node: IdentifierExpression): auto =
-  visitor.output.add("IdentifierExpression(" & node.name.lexeme & ")")
+  visitor.output.add("IdentifierExpression(" & node.token.lexeme & ")")
 
 method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): auto =
   visitor.output.add("CastExpression(")
@@ -62,11 +62,31 @@ method visitBlockStatement*(visitor: ASTPrinterVisitor, node: BlockStatement): a
   visitor.output.add("])")
 
 method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): auto =
-  visitor.output.add("ErrorStatement(" & node.token.lexeme & ")")
+  visitor.output.add("ErrorStatement(" & node.token.mean & ")")
 
 method visitOutStatement*(visitor: ASTPrinterVisitor, node: OutStatement): auto =
   visitor.output.add("OutStatement(")
   visitor.visitExpression(node.value)
+  visitor.output.add(")")
+
+method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingStatement): auto =
+  visitor.output.add("BranchingStatement(")
+  visitor.visitExpression(node.condition)
+  visitor.output.add(", ")
+  visitor.visitStatement(node.ifBlock)
+  
+  for el in node.elifBlocks:
+    visitor.output.add(", elif(")
+    visitor.visitExpression(el.cond)
+    visitor.output.add(", ")
+    visitor.visitStatement(el.elifBlock)
+    visitor.output.add(")")
+  
+  if node.elseBlock != nil:
+    visitor.output.add(", else(")
+    visitor.visitStatement(node.elseBlock)
+    visitor.output.add(")")
+  
   visitor.output.add(")")
 
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
@@ -99,6 +119,8 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
     visitor.visitAssignmentStatement(AssignmentStatement(node))
   elif node of OutStatement:
     visitor.visitOutStatement(OutStatement(node))
+  elif node of BranchingStatement:
+    visitor.visitBranchingStatement(BranchingStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")

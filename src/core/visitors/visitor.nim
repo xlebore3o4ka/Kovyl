@@ -38,3 +38,6 @@ method visitAssignmentStatement*(visitor: Visitor, node: AssignmentStatement): a
 
 method visitOutStatement*(visitor: Visitor, node: OutStatement): auto {.base.} =
   discard
+
+method visitBranchingStatement*(visitor: Visitor, node: BranchingStatement): auto {.base.} =
+  discard

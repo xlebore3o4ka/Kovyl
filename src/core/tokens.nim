@@ -21,6 +21,9 @@ type
     tkUint
     tkBool
 
+    tkDo, tkEnd
+    tkIf, tkElif, tkElse
+
     tkEOS
     tkEOF
     tkInvalid
@@ -69,6 +72,11 @@ proc mean*(kind: TokenKind): string =
   of tkEOS: return "end of statement"
   of tkEOF: return "end of file"
   of tkInvalid: return "invalid token"
+  of tkDo: return "keyword do"
+  of tkEnd: return "keyword end"
+  of tkIf: return "keyword if"
+  of tkElif: return "keyword elif"
+  of tkElse: return "keyword else"
 
 proc mean*(token: Token): string =
   mean(token.kind)

@@ -46,7 +46,7 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
   visitor.visitExpression(node.left)
   visitor.visitExpression(node.right)
 
-  case node.op.kind:
+  case node.token.kind:
   of tkPlus, tkMinus, tkStar, tkSlash:
     if node.left.returnType == getIntType() and node.right.returnType == getIntType():
       node.returnType = getIntType()
@@ -61,16 +61,16 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
     if node.left.returnType == getBoolType() and node.right.returnType == getBoolType():
       node.returnType = getBoolType()
   else:
-    echo "[SemanticAnalyzerVisitor] WARNING: unhandled binary operator " & node.op.mean()
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled binary operator " & node.token.mean()
 
   if node.returnType == getUndefinedType():
-    newError(errBinaryTypeMismatch, node.op, @{
-        "@0": $node.op.lexeme, "@1": $node.left.returnType, "@2": $node.right.returnType})
+    newError(errBinaryTypeMismatch, node.token, @{
+        "@0": $node.token.lexeme, "@1": $node.left.returnType, "@2": $node.right.returnType})
 
 method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpression): auto =
   visitor.visitExpression(node.operand)
 
-  case node.op.kind:
+  case node.token.kind:
   of tkMinus:
     if node.operand.returnType == getIntType():
       node.returnType = getIntType()
@@ -83,18 +83,18 @@ method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpres
     if node.operand.returnType == getBoolType():
       node.returnType = getBoolType()
   else: 
-    echo "[SemanticAnalyzerVisitor] WARNING: unhandled unary operator " & node.op.mean()
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled unary operator " & node.token.mean()
 
   if node.returnType == getUndefinedType():
-    newError(errUnaryTypeMismatch, node.op, @{
-      "@0": $node.op.lexeme, "@1": $node.operand.returnType})
+    newError(errUnaryTypeMismatch, node.token, @{
+      "@0": $node.token.lexeme, "@1": $node.operand.returnType})
 
 method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: IdentifierExpression): auto =
-  if node.name.lexeme notin visitor.symbolTable:
-    newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
+  if node.token.lexeme notin visitor.symbolTable:
+    newError(errUndeclaredSymbol, node.token, @{"@0": node.token.lexeme})
     return
 
-  node.returnType = visitor.getSymbol(node.name.lexeme).symbolType
+  node.returnType = visitor.getSymbol(node.token.lexeme).symbolType
 
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
@@ -139,6 +139,31 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
 method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
   visitor.visitExpression(node.value)
 
+method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: BranchingStatement): auto =
+  visitor.pushScope()
+  visitor.visitExpression(node.condition)
+  
+  if node.condition.returnType != getBoolType():
+    newError(errTypeMismatch, node.condition.token, @{"@0": "bool", "@1": $node.condition.returnType})
+  
+  visitor.visitStatement(node.ifBlock)
+  visitor.popScope()
+  
+  for el in node.elifBlocks:
+    visitor.pushScope()
+    visitor.visitExpression(el.cond)
+    
+    if el.cond.returnType != getBoolType():
+      newError(errTypeMismatch, el.cond.token, @{"@0": "bool", "@1": $el.cond.returnType})
+    
+    visitor.visitStatement(el.elifBlock)
+    visitor.popScope()
+  
+  if node.elseBlock != nil:
+    visitor.pushScope()
+    visitor.visitStatement(node.elseBlock)
+    visitor.popScope()
+
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
   elif node of IntExpression: discard
@@ -164,5 +189,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitAssignmentStatement(AssignmentStatement(node))
   elif node of OutStatement:
     visitor.visitOutStatement(OutStatement(node))
+  elif node of BranchingStatement:
+    visitor.visitBranchingStatement(BranchingStatement(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled statement"
