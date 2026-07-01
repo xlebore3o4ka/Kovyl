@@ -12,6 +12,7 @@ type
     of typeInt: intValue*: int
     of typeUint: uintValue*: uint
     of typeBool: boolValue*: bool
+    of typeString: stringValue*: string
 
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()

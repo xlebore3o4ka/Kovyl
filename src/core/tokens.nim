@@ -1,6 +1,7 @@
 type
   TokenKind* = enum
     tkIntLiteral
+    tkStringLiteral
     tkIdentifier
 
     tkPlus, tkMinus, tkStar, tkSlash
@@ -20,6 +21,7 @@ type
     tkInt
     tkUint
     tkBool
+    tkString
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
@@ -44,6 +46,7 @@ func newToken*(
 proc mean*(kind: TokenKind): string =
   case kind:
   of tkIntLiteral: return "number literal"
+  of tkStringLiteral: return "string literal"
   of tkIdentifier: return "identifier"
   of tkPlus: return "plus operator '+'"
   of tkMinus: return "minus operator '-'"
@@ -67,6 +70,7 @@ proc mean*(kind: TokenKind): string =
   of tkInt: return "int type"
   of tkUint: return "uint type"
   of tkBool: return "bool type"
+  of tkString: return "string type"
   of tkTrue: return "true literal"
   of tkFalse: return "false literal"
   of tkEOS: return "end of statement"

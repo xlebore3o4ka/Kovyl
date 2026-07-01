@@ -88,6 +88,7 @@ const keywordsTokens = {
   "int": tkInt,
   "uint": tkUint,
   "bool": tkBool,
+  "string": tkString,
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
@@ -179,6 +180,19 @@ proc nextToken*(self: var Lexer): Token =
       result = keywordsTokens[ident].newToken(ident, self.file, self.line, column, start)
     else:
       result = tkIdentifier.newToken(ident, self.file, self.line, column, start)
+  elif c == '"'.Rune:
+    self.advance()
+    
+    let column = self.column
+    var start = self.pos
+    var strbuffer = ""
+
+    while self.peek != '"'.Rune:
+      strbuffer &= $self.peek
+      self.advance()
+    self.advance()
+
+    result = tkStringLiteral.newToken(strbuffer, self.file, self.line, column, start)
   else:
     self.newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
     result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)

@@ -58,6 +58,7 @@ proc parseType(self: var Parser): ptr Type =
   of tkInt: return getIntType()
   of tkUint: return getUintType()
   of tkBool: return getBoolType()
+  of tkString: return getStringType()
   else: 
     self.newError(errSyntax, token)
     return getUndefinedType()
@@ -219,7 +220,7 @@ proc parseBranching(self: var Parser): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint, tkBool}:
+  if token.kind in {tkInt, tkUint, tkBool, tkString}:
     return self.parseSymbolDecl()
   elif token.kind == tkIdentifier:
     return self.parseAssignment()

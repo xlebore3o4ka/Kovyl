@@ -1,25 +1,3 @@
-int a = 10
-int b = 4
-uint op = 0:uint  # 0:+ 1:- 2:* 3:/
-
-bool zeroDiv = false
-bool unknownOp = false
-
-if op == 0:uint do
-  #!out(a + b)
-elif op == 1:uint do
-  #!out(a - b)
-elif op == 2:uint do
-  #!out(a * b)
-elif op == 3:uint do
-  if b == 0 do
-    zeroDiv = true
-  else
-    #!out(a / b)
-  end
-else
-  unknownOp = true
+if 10 + 4 do
+  #!out(1)
 end
-
-#!out(zeroDiv)
-#!out(unknownOp)
