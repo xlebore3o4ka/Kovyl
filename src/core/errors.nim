@@ -3,10 +3,11 @@ import tokens
 type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax
-    errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket
-    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType
-    errRedeclaration, errUndeclaredSymbol
+    errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, errUnclosedString
+    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType, errCannotCast
+    errRedeclaration, errUndeclaredSymbol, errSpecial
     errUnknownPragma
+    errSpecialArgumentsNumber
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -29,13 +30,17 @@ proc message(kind: ErrorKind): string =
     of errMismatchedBracket: "Mismatched bracket"
     of errUnexpectedBracket: "Unexpected closing bracket"
     of errUnclosedBracket: "Unclosed bracket"
-    of errBinaryTypeMismatch: "Type mismatch for binary operator @0 (@1 @0 @2)"
-    of errUnaryTypeMismatch: "Type mismatch for unary operator @0 (@1)"
+    of errUnclosedString: "Unclosed string literal"
+    of errBinaryTypeMismatch: "Type mismatch for binary operator '@0' (@1 @0 @2)"
+    of errUnaryTypeMismatch: "Type mismatch for unary operator '@0' (@1)"
     of errTypeMismatch: "Type mismatch for @0 (expected @0, got @1)"
     of errUnknownType: "Unknown type"
+    of errCannotCast: "Cannot cast from @0 to @1"
     of errRedeclaration: "Redeclaration of symbol '@0', originally declared at @1(@2:@3)"
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
+    of errSpecial: "Unknown special"
     of errUnknownPragma: "Unknown pragma"
+    of errSpecialArgumentsNumber: "Invalid number of arguments for the '@0' special (expected @1)"
 
 proc newError*(
               kind: ErrorKind, token: Token, 

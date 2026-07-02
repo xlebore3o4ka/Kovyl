@@ -25,6 +25,8 @@ type
   CastExpression* = ref object of Expression
     value*: Expression
 
+  StringExpression* = ref object of Expression
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
@@ -47,7 +49,7 @@ type
     token*: Token
 
   OutStatement* = ref object of Statement
-    value*: Expression
+    values*: seq[Expression] = @[]
 
   BranchingStatement* = ref object of Statement
     condition*: Expression
@@ -66,8 +68,11 @@ proc addElif*(self: var BranchingStatement, condition: Expression, elifBlock: Bl
 proc setElse*(self: var BranchingStatement, elseBlock: BlockStatement) {.inline.} =
   self.elseBlock = elseBlock
 
-proc newOutStatement*(value: Expression): OutStatement {.inline.} =
-  OutStatement(value: value)
+proc newOutStatement*(): OutStatement {.inline.} =
+  OutStatement()
+
+proc addExpr*(self: var OutStatement, expr: Expression) {.inline.} =
+  self.values.add(expr)
 
 proc newAssignmentStatement*(name: Token, value: Expression): AssignmentStatement {.inline.} =
   AssignmentStatement(name: name, value: value)
@@ -90,6 +95,9 @@ proc newDeclarationStatement*(
   DeclarationStatement(name: name, value: value, varType: varType)
 
 # EXPRESSIONS
+
+proc newStringExpression*(value: Token): StringExpression {.inline.} =
+  StringExpression(token: value, returnType: getStringType())
 
 proc newCastExpression*(castToken: Token, castType: ptr Type, value: Expression): CastExpression {.inline.} =
   CastExpression(token: castToken, returnType: castType, value: value)

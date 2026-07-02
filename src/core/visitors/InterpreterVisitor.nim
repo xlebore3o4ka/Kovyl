@@ -26,6 +26,9 @@ proc newUintValue*(uintValue: uint): Value {.inline.} =
 proc newBoolValue*(boolValue: bool): Value {.inline.} =
   Value(valueTypeKind: typeBool, valueType: getBoolType(), boolValue: boolValue)
 
+proc newStringValue*(stringValue: string): Value {.inline.} =
+  Value(valueTypeKind: typeString, valueType: getStringType(), stringValue: stringValue)
+
 proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
   InterpreterVisitor()
 
@@ -150,6 +153,9 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
     else: raise newException(RuntimeError, "Unknown type to convert")
   else: raise newException(RuntimeError, "Unknown type to convert")
 
+method visitStringExpression*(visitor: InterpreterVisitor, node: StringExpression): Value {.base.} =
+  return newStringValue(node.token.lexeme)
+
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
 
@@ -159,14 +165,17 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
-
+  
 method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto =
-  let value = visitor.visitExpression(node.value)
-  case value.valueTypeKind:
-  of typeInt: echo value.intValue
-  of typeUint: echo value.uintValue
-  of typeBool: echo value.boolValue
-  else: echo ""
+  for value in node.values:
+    let val = visitor.visitExpression(value)
+    case val.valueTypeKind:
+    of typeInt: stdout.write($val.intValue)
+    of typeUint: stdout.write($val.uintValue)
+    of typeBool: stdout.write($val.boolValue)
+    of typeString: stdout.write(val.stringValue)
+    else: raise newException(RuntimeError, "Unknown type to out")
+  stdout.write('\n')
 
 method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
   let conditionValue = visitor.visitExpression(node.condition)
@@ -198,6 +207,8 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     return visitor.visitCastExpression(CastExpression(node))
+  elif node of StringExpression:
+    return visitor.visitStringExpression(StringExpression(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled expression"
 

@@ -60,6 +60,7 @@ const operatorTokens = {
   "/": tkSlash,
   "=": tkEqual,
   ":": tkColon,
+  ",": tkComma,
   "!": tkNot,
   ">": tkGT,
   "<": tkLT,
@@ -187,12 +188,16 @@ proc nextToken*(self: var Lexer): Token =
     var start = self.pos
     var strbuffer = ""
 
-    while self.peek != '"'.Rune:
+    while self.peek != '"'.Rune and self.peek != '\0'.Rune and self.peek != '\n'.Rune:
       strbuffer &= $self.peek
       self.advance()
-    self.advance()
 
-    result = tkStringLiteral.newToken(strbuffer, self.file, self.line, column, start)
+    if self.peek == '\0'.Rune or self.peek == '\n'.Rune:
+      result = tkInvalid.newToken(strbuffer, self.file, self.line, column, start)
+      self.newError(errUnclosedString, self.file, self.line, column - 1, start - 1, strbuffer.len + 1)
+    else:
+      self.advance()
+      result = tkStringLiteral.newToken(strbuffer, self.file, self.line, column, start)
   else:
     self.newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
     result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)

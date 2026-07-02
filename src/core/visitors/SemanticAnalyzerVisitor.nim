@@ -99,8 +99,9 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
   
-  # Cast always succeeds (for now, with int/uint/bool types)
-  # In a more complete implementation, you'd check if the cast is valid
+  if node.value.returnType == getStringType():
+    newError(errCannotCast, node.token, @{"@0": $node.returnType, "@1": $node.value.returnType})
+    return
 
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 
@@ -137,7 +138,8 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     return
 
 method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
-  visitor.visitExpression(node.value)
+  for value in node.values:
+    visitor.visitExpression(value)
 
 method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: BranchingStatement): auto =
   visitor.pushScope()
@@ -168,6 +170,7 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
   elif node of IntExpression: discard
   elif node of BoolExpression: discard
+  elif node of StringExpression: discard
   elif node of BinaryExpression:
     visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:

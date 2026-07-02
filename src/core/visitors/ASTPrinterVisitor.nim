@@ -40,6 +40,9 @@ method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): a
   visitor.output.add(", ")
   visitor.output.add($node.returnType & ")")
 
+method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): auto =
+  visitor.output.add("StringExpression(\"" & node.token.lexeme & "\")")
+
 method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
   visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
   visitor.output.add(node.name.lexeme & ", ")
@@ -66,7 +69,10 @@ method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): a
 
 method visitOutStatement*(visitor: ASTPrinterVisitor, node: OutStatement): auto =
   visitor.output.add("OutStatement(")
-  visitor.visitExpression(node.value)
+  for i, expr in node.values:
+    if i > 0:
+      visitor.output.add(", ")
+    visitor.visitExpression(expr)
   visitor.output.add(")")
 
 method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingStatement): auto =
@@ -104,6 +110,8 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     visitor.visitCastExpression(CastExpression(node))
+  elif node of StringExpression:
+    visitor.visitStringExpression(StringExpression(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled expression"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")

@@ -24,6 +24,9 @@ method visitIdentifierExpression*(visitor: Visitor, node: IdentifierExpression):
 method visitCastExpression*(visitor: Visitor, node: CastExpression): auto {.base.} =
   discard
 
+method visitStringExpression*(visitor: Visitor, node: StringExpression): auto {.base.} =
+  discard
+
 method visitDeclarationStatement*(visitor: Visitor, node: DeclarationStatement): auto {.base.} =
   discard
 

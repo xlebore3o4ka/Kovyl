@@ -25,6 +25,27 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
 
 proc parseExpr(self: var Parser): Expression
 
+proc parseType(self: var Parser): ptr Type =
+  let token = self.lexer.nextToken()
+  case token.kind:
+  of tkInt: return getIntType()
+  of tkUint: return getUintType()
+  of tkBool: return getBoolType()
+  of tkString: return getStringType()
+  else: 
+    self.newError(errSyntax, token)
+    return getUndefinedType()
+
+proc parseType(self: var Parser, token: Token): ptr Type =
+  case token.kind:
+  of tkInt: return getIntType()
+  of tkUint: return getUintType()
+  of tkBool: return getBoolType()
+  of tkString: return getStringType()
+  else: 
+    self.newError(errSyntax, token)
+    return getUndefinedType()
+
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
 
@@ -42,6 +63,30 @@ proc parsePrimary(self: var Parser): Expression =
   elif token.kind == tkIdentifier:
     return newIdentifierExpression(token)
 
+  elif token.kind == tkStringLiteral:
+    return newStringExpression(token)
+
+  elif token.kind in {tkInt, tkUint, tkBool, tkString}:
+    let castType = self.parseType(token)
+
+    discard self.expectToken(tkColon)
+    var expectRParen = false
+
+    if self.lexer.peekToken().kind == tkLParen:
+      expectRParen = true
+      discard self.lexer.nextToken()
+
+    result = newCastExpression(token, castType, self.parseExpr())
+
+    if self.lexer.peekToken().kind == tkComma:
+      self.newError(errSpecialArgumentsNumber, self.lexer.nextToken(), @{"@0": token.lexeme, "@1": "1"})
+      return newErrorExpression(token)
+
+    if expectRParen:
+      discard self.expectToken(tkRParen)
+
+    return result
+
   self.newError(errExpression, token, @{"@0": token.mean()})
   return newErrorExpression(token)
 
@@ -52,33 +97,12 @@ proc parseUnary(self: var Parser): Expression =
 
   return self.parsePrimary()
 
-proc parseType(self: var Parser): ptr Type =
-  let token = self.lexer.nextToken()
-  case token.kind:
-  of tkInt: return getIntType()
-  of tkUint: return getUintType()
-  of tkBool: return getBoolType()
-  of tkString: return getStringType()
-  else: 
-    self.newError(errSyntax, token)
-    return getUndefinedType()
-
-proc parseCast(self: var Parser): Expression =
-  var expression = self.parseUnary()
-  
-  if self.lexer.peekToken().kind == tkColon:
-    let colonToken = self.lexer.nextToken()
-    let castType = self.parseType()
-    return newCastExpression(colonToken, castType, expression)
-  
-  return expression
-
 proc parseMulDiv(self: var Parser): Expression =
-  var expression = self.parseCast()
+  var expression = self.parseUnary()
 
   while self.lexer.peekToken().kind in {tkStar, tkSlash}:
     let op = self.lexer.nextToken()
-    let right = self.parseCast()
+    let right = self.parseUnary()
     expression = newBinaryExpression(expression, op, right)
 
   return expression
@@ -132,8 +156,7 @@ proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
   discard self.expectToken(tkEqual)
   return newDeclarationStatement(varType, name, self.parseExpr)
 
-proc parseAssignment(self: var Parser): Statement {.inline.} =
-  let name = self.lexer.nextToken()
+proc parseAssignment(self: var Parser, name: Token): Statement {.inline.} =
   if self.lexer.peekToken().kind == tkIdentifier:
     self.newError(errUnknownType, name)
     return newErrorStatement(self.lexer.nextToken())
@@ -143,12 +166,7 @@ proc parseAssignment(self: var Parser): Statement {.inline.} =
 type
   pragmaProc = (proc (self: var Parser): Statement)
 
-proc pragmaOut(self: var Parser): Statement =
-  return newOutStatement(self.parseExpr())
-
-const pragmaMap: Table[string, pragmaProc] = {
-  "out": pragmaProc(pragmaOut)
-}.toTable
+const pragmaMap: Table[string, pragmaProc] = initTable[string, pragmaProc]()
 
 proc parsePragma(self: var Parser): Statement =
   let token = self.lexer.nextToken()
@@ -217,13 +235,44 @@ proc parseBranching(self: var Parser): Statement =
 
   return branchingStatement
 
+proc parseSpecialStmt(self: var Parser, name: Token): Statement =
+  let token = self.lexer.nextToken()
+  if name.lexeme == "out":
+    var res: OutStatement = newOutStatement()
+
+    if self.lexer.peekToken().kind == tkLParen:
+      discard self.lexer.nextToken()
+
+      while true:
+        res.addExpr(self.parseExpr())
+
+        if self.lexer.peekToken().kind == tkRParen:
+          break
+
+        discard self.expectToken(tkComma)
+
+        if self.lexer.peekToken().kind == tkEOS:
+          discard self.lexer.nextToken()
+
+      discard self.lexer.nextToken()
+    else:
+      res.addExpr(self.parseExpr())
+
+    return res
+  else:
+    self.newError(errSpecial, token)
+    return newErrorStatement(token)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
   if token.kind in {tkInt, tkUint, tkBool, tkString}:
     return self.parseSymbolDecl()
   elif token.kind == tkIdentifier:
-    return self.parseAssignment()
+    discard self.lexer.nextToken()
+    if self.lexer.peekToken().kind == tkColon:
+      return self.parseSpecialStmt(token)
+    return self.parseAssignment(token)
   elif token.kind == tkPragma:
     return self.parsePragma()
   elif token.kind == tkIf:
