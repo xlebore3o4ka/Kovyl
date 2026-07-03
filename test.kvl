@@ -1,2 +1,1 @@
-uint a = uint: 10
-out: a
+out: 5 # test

@@ -21,7 +21,6 @@ type
     tkInt
     tkUint
     tkBool
-    tkString
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
@@ -71,7 +70,6 @@ proc mean*(kind: TokenKind): string =
   of tkInt: return "int type"
   of tkUint: return "uint type"
   of tkBool: return "bool type"
-  of tkString: return "string type"
   of tkTrue: return "true literal"
   of tkFalse: return "false literal"
   of tkEOS: return "end of statement"

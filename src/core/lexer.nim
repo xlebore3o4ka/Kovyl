@@ -89,7 +89,6 @@ const keywordsTokens = {
   "int": tkInt,
   "uint": tkUint,
   "bool": tkBool,
-  "string": tkString,
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,

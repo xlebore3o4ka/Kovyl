@@ -25,26 +25,18 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
 
 proc parseExpr(self: var Parser): Expression
 
-proc parseType(self: var Parser): ptr Type =
-  let token = self.lexer.nextToken()
-  case token.kind:
-  of tkInt: return getIntType()
-  of tkUint: return getUintType()
-  of tkBool: return getBoolType()
-  of tkString: return getStringType()
-  else: 
-    self.newError(errSyntax, token)
-    return getUndefinedType()
-
 proc parseType(self: var Parser, token: Token): ptr Type =
   case token.kind:
   of tkInt: return getIntType()
   of tkUint: return getUintType()
   of tkBool: return getBoolType()
-  of tkString: return getStringType()
   else: 
     self.newError(errSyntax, token)
     return getUndefinedType()
+
+proc parseType(self: var Parser): ptr Type {.inline.} =
+  let token = self.lexer.nextToken()
+  self.parseType(token)
 
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
@@ -63,10 +55,7 @@ proc parsePrimary(self: var Parser): Expression =
   elif token.kind == tkIdentifier:
     return newIdentifierExpression(token)
 
-  elif token.kind == tkStringLiteral:
-    return newStringExpression(token)
-
-  elif token.kind in {tkInt, tkUint, tkBool, tkString}:
+  elif token.kind in {tkInt, tkUint, tkBool}:
     let castType = self.parseType(token)
 
     discard self.expectToken(tkColon)
@@ -266,7 +255,7 @@ proc parseSpecialStmt(self: var Parser, name: Token): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint, tkBool, tkString}:
+  if token.kind in {tkInt, tkUint, tkBool}:
     return self.parseSymbolDecl()
   elif token.kind == tkIdentifier:
     discard self.lexer.nextToken()

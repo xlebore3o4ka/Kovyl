@@ -12,7 +12,6 @@ type
     of typeInt: intValue*: int
     of typeUint: uintValue*: uint
     of typeBool: boolValue*: bool
-    of typeString: stringValue*: string
 
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()
@@ -25,9 +24,6 @@ proc newUintValue*(uintValue: uint): Value {.inline.} =
 
 proc newBoolValue*(boolValue: bool): Value {.inline.} =
   Value(valueTypeKind: typeBool, valueType: getBoolType(), boolValue: boolValue)
-
-proc newStringValue*(stringValue: string): Value {.inline.} =
-  Value(valueTypeKind: typeString, valueType: getStringType(), stringValue: stringValue)
 
 proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
   InterpreterVisitor()
@@ -153,9 +149,6 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
     else: raise newException(RuntimeError, "Unknown type to convert")
   else: raise newException(RuntimeError, "Unknown type to convert")
 
-method visitStringExpression*(visitor: InterpreterVisitor, node: StringExpression): Value {.base.} =
-  return newStringValue(node.token.lexeme)
-
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
 
@@ -173,7 +166,6 @@ method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto
     of typeInt: stdout.write($val.intValue)
     of typeUint: stdout.write($val.uintValue)
     of typeBool: stdout.write($val.boolValue)
-    of typeString: stdout.write(val.stringValue)
     else: raise newException(RuntimeError, "Unknown type to out")
   stdout.write('\n')
 
@@ -207,8 +199,6 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     return visitor.visitCastExpression(CastExpression(node))
-  elif node of StringExpression:
-    return visitor.visitStringExpression(StringExpression(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled expression"
 

@@ -98,10 +98,6 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
 
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
-  
-  if node.value.returnType == getStringType():
-    newError(errCannotCast, node.token, @{"@0": $node.returnType, "@1": $node.value.returnType})
-    return
 
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 

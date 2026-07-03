@@ -96,9 +96,6 @@ proc newDeclarationStatement*(
 
 # EXPRESSIONS
 
-proc newStringExpression*(value: Token): StringExpression {.inline.} =
-  StringExpression(token: value, returnType: getStringType())
-
 proc newCastExpression*(castToken: Token, castType: ptr Type, value: Expression): CastExpression {.inline.} =
   CastExpression(token: castToken, returnType: castType, value: value)
 
