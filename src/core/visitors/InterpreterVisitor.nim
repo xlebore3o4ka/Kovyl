@@ -1,6 +1,6 @@
 import visitor
 import ../[astnodes, types, tokens]
-import std/[strutils, tables]
+import std/[strutils, tables, math]
 
 type
   RuntimeError* = object of CatchableError
@@ -220,10 +220,12 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   let idx = visitor.visitExpression(node.index)
   if idx.valueTypeKind != typeInt:
     raise newException(RuntimeError, "Index must be int")
-  
-  let index = idx.intValue
-  if index < 0 or index >= int(arr.arrayValue.length.uintValue):
+
+  if abs(idx.intValue) >= int(arr.arrayValue.length.uintValue):
     raise newException(RuntimeError, "Index out of bounds")
+  
+  let len = int(arr.arrayValue.length.uintValue)
+  let index = ((idx.intValue mod len) + len) mod len
   
   return arr.arrayValue.elements[index]
 
