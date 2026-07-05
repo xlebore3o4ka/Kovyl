@@ -1,7 +1,0 @@
-[int] x = {10, 20, 30}
-int i = 0
-out: x[i] ; i = i + 1
-out: x[i] ; i = i + 1
-out: x[i] ; i = i + 1
-x[0] = 40
-out: x[0]

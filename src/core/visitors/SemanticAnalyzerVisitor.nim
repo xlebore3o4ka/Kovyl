@@ -141,9 +141,11 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
     node.returnType = getArrayType(getUndefinedType())
     return
   
-  let firstType = node.values[0].returnType
   for val in node.values:
     visitor.visitExpression(val)
+  
+  let firstType = node.values[0].returnType
+  for val in node.values:
     if val.returnType != firstType:
       newError(errTypeMismatch, val.token, @{"@0": $firstType, "@1": $val.returnType})
   

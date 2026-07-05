@@ -221,10 +221,11 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   if idx.valueTypeKind != typeInt:
     raise newException(RuntimeError, "Index must be int")
 
-  if abs(idx.intValue) >= int(arr.arrayValue.length.uintValue):
+  let len = int(arr.arrayValue.length.uintValue)
+
+  if idx.intValue >= len or (idx.intValue) < -len:
     raise newException(RuntimeError, "Index out of bounds")
   
-  let len = int(arr.arrayValue.length.uintValue)
   let index = ((idx.intValue mod len) + len) mod len
   
   return arr.arrayValue.elements[index]
@@ -256,9 +257,13 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
     let idx = visitor.visitExpression(indexExpr.index)
     if idx.valueTypeKind != typeInt:
       raise newException(RuntimeError, "Index must be int")
+
+    let len = int(arr.arrayValue.length.uintValue)
+    
+    if idx.intValue >= len or (idx.intValue) < -len:
+      raise newException(RuntimeError, "Index out of bounds")
     
     let index = idx.intValue
-    let len = int(arr.arrayValue.length.uintValue)
     let actualIdx = ((index mod len) + len) mod len
     
     arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
