@@ -246,6 +246,22 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
     if ptrValue.valueTypeKind != typePtr:
       raise newException(RuntimeError, "Cannot dereference non-pointer")
     ptrValue.ptrValue[] = visitor.visitExpression(node.value)
+
+  elif node.left of IndexExpression:
+    let indexExpr = IndexExpression(node.left)
+    let arr = visitor.visitExpression(indexExpr.operand)
+    if arr.valueTypeKind != typeArray:
+      raise newException(RuntimeError, "Cannot index non-array")
+    
+    let idx = visitor.visitExpression(indexExpr.index)
+    if idx.valueTypeKind != typeInt:
+      raise newException(RuntimeError, "Index must be int")
+    
+    let index = idx.intValue
+    let len = int(arr.arrayValue.length.uintValue)
+    let actualIdx = ((index mod len) + len) mod len
+    
+    arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
   
 method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto =
   for value in node.values:

@@ -211,6 +211,24 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errTypeMismatch, node.left.token, @{"@0": $ptrType.ptrBaseType, "@1": $node.value.returnType})
       return
 
+  elif node.left of IndexExpression:
+    let indexExpr = IndexExpression(node.left)
+    visitor.visitExpression(indexExpr.operand)
+    visitor.visitExpression(indexExpr.index)
+    
+    if indexExpr.operand.returnType.kind != typeArray:
+      newError(errTypeMismatch, node.left.token, @{"@0": "array", "@1": $indexExpr.operand.returnType})
+      return
+    
+    if indexExpr.index.returnType != getIntType():
+      newError(errTypeMismatch, indexExpr.index.token, @{"@0": "int", "@1": $indexExpr.index.returnType})
+      return
+    
+    let elemType = indexExpr.operand.returnType.arrayBaseType
+    if elemType != node.value.returnType:
+      newError(errTypeMismatch, node.left.token, @{"@0": $elemType, "@1": $node.value.returnType})
+      return
+
 method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
   for value in node.values:
     visitor.visitExpression(value)

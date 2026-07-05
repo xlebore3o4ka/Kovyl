@@ -61,4 +61,4 @@ proc `$`*(t: Type): string =
   of typeBool: "bool"
   of typePtr: $t.ptrBaseType & "*"
   of typeChar: "char"
-  of typeArray: $t.arrayBaseType & "[]"
+  of typeArray: "[" & $t.arrayBaseType & "]"

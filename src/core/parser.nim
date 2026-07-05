@@ -31,6 +31,10 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkUint: result = getUintType()
   of tkBool: result = getBoolType()
   of tkChar: result = getCharType()
+  of tkLBracket:
+    let baseType = self.parseType(self.lexer.nextToken())
+    discard self.expectToken(tkRBracket)
+    result = getArrayType(baseType)
   else: 
     self.newError(errSyntax, token)
     return getUndefinedType()
@@ -187,8 +191,10 @@ proc parseAssignment(self: var Parser, left: Expression): Statement {.inline.} =
     return newAssignmentStatement(DerefExpression(left), self.parseExpr())
   elif left of IdentifierExpression:
     return newAssignmentStatement(IdentifierExpression(left), self.parseExpr())
+  elif left of IndexExpression:
+    return newAssignmentStatement(IndexExpression(left), self.parseExpr())
   else:
-    self.newError(errSyntax, left.token)
+    self.newError(errCannotAssign, left.token)
     return newErrorStatement(left.token)
 
 type
@@ -309,7 +315,7 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint, tkBool, tkChar}:
+  if token.kind in {tkInt, tkUint, tkBool, tkChar, tkLBracket}:
     return self.parseSymbolDecl()
 
   elif token.kind == tkIdentifier:
