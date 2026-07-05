@@ -36,6 +36,12 @@ method visitDerefExpression*(visitor: Visitor, node: DerefExpression): auto {.ba
 method visitCharExpression*(visitor: Visitor, node: CharExpression): auto {.base.} =
   discard
 
+method visitArrayExpression*(visitor: Visitor, node: ArrayExpression): auto {.base.} =
+  discard
+
+method visitIndexExpression*(visitor: Visitor, node: IndexExpression): auto {.base.} =
+  discard
+
 method visitDeclarationStatement*(visitor: Visitor, node: DeclarationStatement): auto {.base.} =
   discard
 

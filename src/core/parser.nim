@@ -83,6 +83,24 @@ proc parsePrimary(self: var Parser): Expression =
     
     return result
 
+  elif token.kind == tkLBrace:
+    var arrayExpr = newArrayExpression(token)
+
+    while self.lexer.peekToken().kind != tkRBrace:
+      arrayExpr.addExpr(self.parseExpr())
+
+      if self.lexer.peekToken().kind == tkRBrace: 
+        break
+
+      discard self.expectToken(tkComma)
+
+      if self.lexer.peekToken().kind == tkEOS:
+        discard self.lexer.nextToken()
+
+    discard self.expectToken(tkRBrace)
+    
+    return arrayExpr
+
   self.newError(errExpression, token, @{"@0": token.mean()})
   return newErrorExpression(token)
 
@@ -104,8 +122,14 @@ proc parsePostfix(self: var Parser): Expression =
       result = newCastExpression(token, castType, result)
 
     elif token.kind == tkLBracket:
-      discard self.expectToken(tkRBracket)
-      result = newDerefExpression(token, result)
+      if self.lexer.peekToken().kind == tkRBracket:
+        discard self.lexer.nextToken()
+        result = newDerefExpression(token, result)
+
+      else:
+        let index = self.parseExpr()
+        discard self.expectToken(tkRBracket)
+        result = newIndexExpression(token, result, index)
 
 proc parseMulDiv(self: var Parser): Expression =
   result = self.parsePostfix()

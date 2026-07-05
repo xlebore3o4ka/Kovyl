@@ -5,6 +5,10 @@ import std/[strutils, tables]
 type
   RuntimeError* = object of CatchableError
 
+  ArrayValue* = ref object
+    elements*: seq[Value]
+    length*: Value
+
   Value* = object
     valueType*: Type
     case valueTypeKind*: TypeKind
@@ -14,6 +18,7 @@ type
     of typeBool: boolValue*: bool
     of typePtr: ptrValue*: ref Value
     of typeChar: charValue*: char
+    of typeArray: arrayValue*: ArrayValue
 
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()
@@ -32,6 +37,10 @@ proc newPtrValue*(ptrVal: ref Value, baseType: Type): Value =
 
 proc newCharValue*(ch: char): Value {.inline.} =
   Value(valueTypeKind: typeChar, valueType: getCharType(), charValue: ch)
+
+proc newArrayValue*(elements: seq[Value], baseType: Type): Value =
+  Value(valueTypeKind: typeArray, valueType: getArrayType(baseType), arrayValue: 
+    ArrayValue(elements: elements, length: newUintValue(uint(elements.len))))
 
 proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
   InterpreterVisitor()
@@ -195,6 +204,29 @@ method visitCharExpression*(visitor: InterpreterVisitor, node: CharExpression): 
   else:
     raise newException(RuntimeError, "Invalid character literal")
 
+method visitArrayExpression*(visitor: InterpreterVisitor, node: ArrayExpression): Value {.base.} =
+  var elements: seq[Value]
+  for val in node.values:
+    elements.add(visitor.visitExpression(val))
+  
+  let baseType = if elements.len > 0: elements[0].valueType else: getUndefinedType()
+  return newArrayValue(elements, baseType)
+
+method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression): Value {.base.} =
+  let arr = visitor.visitExpression(node.operand)
+  if arr.valueTypeKind != typeArray:
+    raise newException(RuntimeError, "Cannot index non-array")
+  
+  let idx = visitor.visitExpression(node.index)
+  if idx.valueTypeKind != typeInt:
+    raise newException(RuntimeError, "Index must be int")
+  
+  let index = idx.intValue
+  if index < 0 or index >= int(arr.arrayValue.length.uintValue):
+    raise newException(RuntimeError, "Index out of bounds")
+  
+  return arr.arrayValue.elements[index]
+
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
 
@@ -267,6 +299,10 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
     return visitor.visitCharExpression(CharExpression(node))
+  elif node of ArrayExpression:
+    return visitor.visitArrayExpression(ArrayExpression(node))
+  elif node of IndexExpression:
+    return visitor.visitIndexExpression(IndexExpression(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled expression"
 

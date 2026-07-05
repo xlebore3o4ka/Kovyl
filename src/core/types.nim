@@ -6,10 +6,12 @@ type
     typeBool
     typePtr
     typeChar
+    typeArray
 
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBaseType*: Type
+    of typeArray: arrayBaseType*: Type
     else: discard
 
 let
@@ -20,6 +22,7 @@ let
   charType* = Type(kind: typeChar)
 
 var ptrTypes*: seq[Type] = @[]
+var arrayTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getIntType*(): Type {.inline.} = intType
@@ -38,6 +41,17 @@ proc getPtrType*(baseType: Type): Type =
   result = Type(kind: typePtr, ptrBaseType: baseType)
   ptrTypes.add(result)
 
+proc getArrayType*(baseType: Type): Type =
+  if baseType.kind == typeUndefined:
+    return baseType
+
+  for t in arrayTypes:
+    if t.kind == typeArray and t.arrayBaseType == baseType:
+      return t
+  
+  result = Type(kind: typeArray, arrayBaseType: baseType)
+  arrayTypes.add(result)
+
 proc `$`*(t: Type): string =
   if t == nil: return "nil"
   case t.kind
@@ -47,3 +61,4 @@ proc `$`*(t: Type): string =
   of typeBool: "bool"
   of typePtr: $t.ptrBaseType & "*"
   of typeChar: "char"
+  of typeArray: $t.arrayBaseType & "[]"

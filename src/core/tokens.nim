@@ -13,6 +13,7 @@ type
 
     tkLParen, tkRParen
     tkLBracket, tkRBracket
+    tkLBrace, tkRBrace
 
     tkAnd
     tkOr
@@ -72,6 +73,8 @@ proc mean*(kind: TokenKind): string =
   of tkRParen: return "right parenthesis ')'"
   of tkLBracket: return "left bracket '['"
   of tkRBracket: return "right bracket ']'"
+  of tkLBrace: return "left brace '{'"
+  of tkRBrace: return "right brace '}'"
   of tkAnd: return "and operator 'and'"
   of tkOr: return "or operator 'or'"
   of tkInt: return "int type"

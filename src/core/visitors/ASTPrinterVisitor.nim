@@ -56,6 +56,20 @@ method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression):
 method visitCharExpression*(visitor: ASTPrinterVisitor, node: CharExpression): auto =
   visitor.output.add("CharExpression('" & node.token.lexeme & "')")
 
+method visitArrayExpression*(visitor: ASTPrinterVisitor, node: ArrayExpression): auto =
+  visitor.output.add("ArrayExpression([")
+  for i, val in node.values:
+    if i > 0: visitor.output.add(", ")
+    visitor.visitExpression(val)
+  visitor.output.add("])")
+
+method visitIndexExpression*(visitor: ASTPrinterVisitor, node: IndexExpression): auto =
+  visitor.output.add("IndexExpression(")
+  visitor.visitExpression(node.operand)
+  visitor.output.add(", ")
+  visitor.visitExpression(node.index)
+  visitor.output.add(")")
+
 method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
   visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
   visitor.output.add(node.name.lexeme & ", ")
@@ -138,6 +152,10 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
     visitor.visitCharExpression(CharExpression(node))
+  elif node of ArrayExpression:
+    visitor.visitArrayExpression(ArrayExpression(node))
+  elif node of IndexExpression:
+    visitor.visitIndexExpression(IndexExpression(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled expression"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")

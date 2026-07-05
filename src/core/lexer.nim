@@ -105,19 +105,23 @@ const operatorTokens = {
 
 const openBracketTokens = {
   '('.Rune: tkLParen,
-  '['.Rune: tkLBracket
+  '['.Rune: tkLBracket,
+  '{'.Rune: tkLBrace
 }.toTable
 
 const closeBracketTokens = {
   ')'.Rune: tkRParen,
-  ']'.Rune: tkRBracket
+  ']'.Rune: tkRBracket,
+  '}'.Rune: tkRBrace
 }.toTable
 
 const pairBracketTokens = {
   tkLParen: ')'.Rune,
   tkRParen: '('.Rune,
   tkLBracket: ']'.Rune,
-  tkRBracket: '['.Rune
+  tkRBracket: '['.Rune,
+  tkLBrace: '}'.Rune,
+  tkRBrace: '{'.Rune
 }.toTable
 
 const keywordsTokens = {

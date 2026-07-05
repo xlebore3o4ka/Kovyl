@@ -35,6 +35,13 @@ type
 
   CharExpression* = ref object of Expression
 
+  ArrayExpression* = ref object of Expression
+    values*: seq[Expression]
+
+  IndexExpression* = ref object of Expression
+    operand*: Expression
+    index*: Expression
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
@@ -111,6 +118,15 @@ proc newDeclarationStatement*(
 
 # EXPRESSIONS
 
+proc newIndexExpression*(token: Token, operand: Expression, index: Expression): IndexExpression {.inline.} =
+  IndexExpression(token: token, operand: operand, index: index, returnType: getUndefinedType())
+
+proc newArrayExpression*(token: Token): ArrayExpression {.inline.} =
+  ArrayExpression(token: token, returnType: getUndefinedType())
+
+proc addExpr*(self: var ArrayExpression, expr: Expression) {.inline.} =
+  self.values.add(expr)
+
 proc newCharExpression*(token: Token): CharExpression {.inline.} =
   CharExpression(token: token, returnType: getCharType())
 
@@ -118,7 +134,7 @@ proc newDerefExpression*(token: Token, operand: Expression): DerefExpression {.i
   DerefExpression(token: token, operand: operand, returnType: getUndefinedType())
 
 proc newNewExpression*(token: Token, value: Expression): NewExpression {.inline.} =
-  NewExpression(token: token, value: value, returnType: getPtrType(value.returnType))
+  NewExpression(token: token, value: value, returnType: getUndefinedType())
 
 proc newCastExpression*(castToken: Token, castType: Type, value: Expression): CastExpression {.inline.} =
   CastExpression(token: castToken, returnType: castType, value: value)

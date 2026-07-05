@@ -136,6 +136,33 @@ method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpres
   if node.returnType == getUndefinedType():
     node.returnType = node.operand.returnType.ptrBaseType
 
+method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpression): auto =
+  if node.values.len == 0:
+    node.returnType = getArrayType(getUndefinedType())
+    return
+  
+  let firstType = node.values[0].returnType
+  for val in node.values:
+    visitor.visitExpression(val)
+    if val.returnType != firstType:
+      newError(errTypeMismatch, val.token, @{"@0": $firstType, "@1": $val.returnType})
+  
+  node.returnType = getArrayType(firstType)
+
+method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpression): auto =
+  visitor.visitExpression(node.operand)
+  visitor.visitExpression(node.index)
+  
+  if node.index.returnType != getIntType():
+    newError(errTypeMismatch, node.index.token, @{"@0": "int", "@1": $node.index.returnType})
+    return
+  
+  if node.operand.returnType.kind != typeArray:
+    newError(errTypeMismatch, node.operand.token, @{"@0": "array", "@1": $node.operand.returnType})
+    return
+  
+  node.returnType = node.operand.returnType.arrayBaseType
+
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
@@ -238,6 +265,10 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitNewExpression(NewExpression(node))
   elif node of DerefExpression:
     visitor.visitDerefExpression(DerefExpression(node))
+  elif node of ArrayExpression:
+    visitor.visitArrayExpression(ArrayExpression(node))
+  elif node of IndexExpression:
+    visitor.visitIndexExpression(IndexExpression(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled expression"
 
