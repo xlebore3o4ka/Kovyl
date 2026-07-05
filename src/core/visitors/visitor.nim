@@ -27,6 +27,15 @@ method visitCastExpression*(visitor: Visitor, node: CastExpression): auto {.base
 method visitStringExpression*(visitor: Visitor, node: StringExpression): auto {.base.} =
   discard
 
+method visitNewExpression*(visitor: Visitor, node: NewExpression): auto {.base.} =
+  discard
+
+method visitDerefExpression*(visitor: Visitor, node: DerefExpression): auto {.base.} =
+  discard
+
+method visitCharExpression*(visitor: Visitor, node: CharExpression): auto {.base.} =
+  discard
+
 method visitDeclarationStatement*(visitor: Visitor, node: DeclarationStatement): auto {.base.} =
   discard
 
@@ -43,4 +52,7 @@ method visitOutStatement*(visitor: Visitor, node: OutStatement): auto {.base.} =
   discard
 
 method visitBranchingStatement*(visitor: Visitor, node: BranchingStatement): auto {.base.} =
+  discard
+
+method visitFreeStatement*(visitor: Visitor, node: FreeStatement): auto {.base.} =
   discard

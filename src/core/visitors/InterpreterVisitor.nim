@@ -6,12 +6,14 @@ type
   RuntimeError* = object of CatchableError
 
   Value* = object
-    valueType*: ptr Type
+    valueType*: Type
     case valueTypeKind*: TypeKind
     of typeUndefined: discard
     of typeInt: intValue*: int
     of typeUint: uintValue*: uint
     of typeBool: boolValue*: bool
+    of typePtr: ptrValue*: ref Value
+    of typeChar: charValue*: char
 
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()
@@ -24,6 +26,12 @@ proc newUintValue*(uintValue: uint): Value {.inline.} =
 
 proc newBoolValue*(boolValue: bool): Value {.inline.} =
   Value(valueTypeKind: typeBool, valueType: getBoolType(), boolValue: boolValue)
+
+proc newPtrValue*(ptrVal: ref Value, baseType: Type): Value =
+  Value(valueTypeKind: typePtr, valueType: getPtrType(baseType), ptrValue: ptrVal)
+
+proc newCharValue*(ch: char): Value {.inline.} =
+  Value(valueTypeKind: typeChar, valueType: getCharType(), charValue: ch)
 
 proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
   InterpreterVisitor()
@@ -67,12 +75,16 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     of typeInt: return newBoolValue(leftVal.intValue == rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue == rightVal.uintValue)
     of typeBool: return newBoolValue(leftVal.boolValue == rightVal.boolValue)
+    of typePtr: return newBoolValue(leftVal.ptrValue == rightVal.ptrValue)
+    of typeChar: return newBoolValue(leftVal.charValue == rightVal.charValue)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkNEQ:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue != rightVal.intValue)
     of typeUint: return newBoolValue(leftVal.uintValue != rightVal.uintValue)
     of typeBool: return newBoolValue(leftVal.boolValue != rightVal.boolValue)
+    of typePtr: return newBoolValue(leftVal.ptrValue != rightVal.ptrValue)
+    of typeChar: return newBoolValue(leftVal.charValue != rightVal.charValue)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkGT:
     case node.left.returnType.kind:
@@ -127,6 +139,7 @@ method visitIdentifierExpression*(visitor: InterpreterVisitor, node: IdentifierE
 
 method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): Value {.base.} =
   let value = visitor.visitExpression(node.value)
+  let exception = newException(RuntimeError, "Cannot cast " & $value.valueType & " to " & $node.returnType)
 
   case value.valueTypeKind:
   of typeInt:
@@ -134,20 +147,53 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
     of typeInt: return value
     of typeUint: return newUintValue(cast[uint](value.intValue))
     of typeBool: return newBoolValue(value.intValue != 0)
-    else: raise newException(RuntimeError, "Unknown type to convert")
+    of typeChar: return newCharValue(chr(value.intValue))
+    else: raise exception
   of typeUint:
     case node.returnType.kind:
     of typeInt: return newIntValue(cast[int](value.uintValue))
     of typeUint: return value
     of typeBool: return newBoolValue(value.uintValue != 0)
-    else: raise newException(RuntimeError, "Unknown type to convert")
+    of typeChar: return newCharValue(chr(cast[int](value.uintValue)))
+    else: raise exception
   of typeBool:
     case node.returnType.kind:
     of typeInt: return newIntValue(if value.boolValue: 1 else: 0)
     of typeUint: return newUintValue(if value.boolValue: 1 else: 0)
     of typeBool: return value
-    else: raise newException(RuntimeError, "Unknown type to convert")
-  else: raise newException(RuntimeError, "Unknown type to convert")
+    of typeChar: return newCharValue(if value.boolValue: '\1' else: '\0')
+    else: raise exception
+  of typePtr:
+    case node.returnType.kind:
+    of typeBool: return newBoolValue(value.ptrValue != nil)
+    else: raise exception
+  of typeChar:
+    case node.returnType.kind:
+    of typeInt: return newIntValue(ord(value.charValue))
+    of typeUint: return newUintValue(cast[uint](ord(value.charValue)))
+    of typeBool: return newBoolValue(value.charValue != '\0')
+    of typeChar: return value
+    else: raise exception
+  else: raise exception
+
+method visitNewExpression*(visitor: InterpreterVisitor, node: NewExpression): Value {.base.} =
+  let value = visitor.visitExpression(node.value)
+  let ptrValue = new(Value)
+  ptrValue[] = value
+  return newPtrValue(ptrValue, node.value.returnType)
+
+method visitDerefExpression*(visitor: InterpreterVisitor, node: DerefExpression): Value {.base.} =
+  let ptrValue = visitor.visitExpression(node.operand)
+  if ptrValue.valueTypeKind != typePtr:
+    raise newException(RuntimeError, "Cannot dereference non-pointer")
+  return ptrValue.ptrValue[]
+
+method visitCharExpression*(visitor: InterpreterVisitor, node: CharExpression): Value {.base.} =
+  let ch = node.token.lexeme
+  if ch.len == 1:
+    return newCharValue(ch[0])
+  else:
+    raise newException(RuntimeError, "Invalid character literal")
 
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
@@ -157,7 +203,15 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
     visitor.visitStatement(stmt)
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
-  visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
+  if node.left of IdentifierExpression:
+    let name = IdentifierExpression(node.left).token
+    visitor.literalTable[name.lexeme] = visitor.visitExpression(node.value)
+  
+  elif node.left of DerefExpression:
+    let ptrValue = visitor.visitExpression(DerefExpression(node.left).operand)
+    if ptrValue.valueTypeKind != typePtr:
+      raise newException(RuntimeError, "Cannot dereference non-pointer")
+    ptrValue.ptrValue[] = visitor.visitExpression(node.value)
   
 method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto =
   for value in node.values:
@@ -166,6 +220,7 @@ method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto
     of typeInt: stdout.write($val.intValue)
     of typeUint: stdout.write($val.uintValue)
     of typeBool: stdout.write($val.boolValue)
+    of typeChar: stdout.write(val.charValue)
     else: raise newException(RuntimeError, "Unknown type to out")
   stdout.write('\n')
 
@@ -185,6 +240,13 @@ method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStat
   if node.elseBlock != nil:
     visitor.visitStatement(node.elseBlock)
 
+method visitFreeStatement*(visitor: InterpreterVisitor, node: FreeStatement): auto =
+  let val = visitor.visitExpression(node.expr)
+  if val.valueTypeKind != typePtr:
+    raise newException(RuntimeError, "Cannot free non-pointer")
+  if val.ptrValue != nil:
+    val.ptrValue[] = Value(valueTypeKind: typeUndefined, valueType: getUndefinedType())
+
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard
   elif node of IntExpression:
@@ -199,6 +261,12 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     return visitor.visitCastExpression(CastExpression(node))
+  elif node of NewExpression:
+    return visitor.visitNewExpression(NewExpression(node))
+  elif node of DerefExpression:
+    return visitor.visitDerefExpression(DerefExpression(node))
+  elif node of CharExpression:
+    return visitor.visitCharExpression(CharExpression(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled expression"
 
@@ -214,5 +282,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
+  elif node of FreeStatement:
+    visitor.visitFreeStatement(FreeStatement(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled statement"

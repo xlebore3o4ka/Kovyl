@@ -5,7 +5,7 @@ import std/tables
 type
   Symbol = object
     token: Token
-    symbolType: ptr Type
+    symbolType: Type
     index: Natural
 
   SemanticAnalyzerVisitor* = ref object of Visitor
@@ -14,7 +14,7 @@ type
     symbolIndex: Natural = 0
     scopeStack: seq[Natural]
 
-proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: ptr Type) =
+proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
   let symbol = Symbol(
     token: token,
     symbolType: symbolType,
@@ -50,16 +50,34 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
   of tkPlus, tkMinus, tkStar, tkSlash:
     if node.left.returnType == getIntType() and node.right.returnType == getIntType():
       node.returnType = getIntType()
+      
     elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
       node.returnType = getUintType()
-  of tkGT, tkLT, tkEQ, tkNEQ, tkGTE, tkLTE:
+
+  of tkGT, tkLT, tkGTE, tkLTE:
     if node.left.returnType == getIntType() and node.right.returnType == getIntType():
       node.returnType = getBoolType()
+
     elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
       node.returnType = getBoolType()
+
+  of tkEQ, tkNEQ:
+    if node.left.returnType == getIntType() and node.right.returnType == getIntType():
+      node.returnType = getBoolType()
+
+    elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
+      node.returnType = getBoolType()
+      
+    if node.left.returnType == getCharType() and node.right.returnType == getCharType():
+      node.returnType = getBoolType()
+
+    elif node.left.returnType.kind == typePtr and node.right.returnType.kind == typePtr:
+      node.returnType = getBoolType()
+
   of tkAnd, tkOr:
     if node.left.returnType == getBoolType() and node.right.returnType == getBoolType():
       node.returnType = getBoolType()
+
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled binary operator " & node.token.mean()
 
@@ -99,6 +117,25 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
 
+  if node.returnType.kind == typePtr:
+    newError(errProhibitedType, node.token, @{"@0": $node.returnType})
+    node.returnType = getUndefinedType()
+
+method visitNewExpression*(visitor: SemanticAnalyzerVisitor, node: NewExpression): auto =
+  visitor.visitExpression(node.value)
+  
+  node.returnType = getPtrType(node.value.returnType)
+
+method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpression): auto =
+  visitor.visitExpression(node.operand)
+  
+  if node.operand.returnType.kind != typePtr:
+    newError(errTypeMismatch, node.token, @{"@0": "ptr", "@1": $node.operand.returnType})
+    return
+  
+  if node.returnType == getUndefinedType():
+    node.returnType = node.operand.returnType.ptrBaseType
+
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
@@ -123,19 +160,35 @@ method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStateme
 
 method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: AssignmentStatement): auto =
   visitor.visitExpression(node.value)
+  
+  if node.left of IdentifierExpression:
+    let name = IdentifierExpression(node.left).token
+    if name.lexeme notin visitor.symbolTable:
+      newError(errUndeclaredSymbol, name, @{"@0": name.lexeme})
+      return
+    
+    let varType = visitor.getSymbol(name.lexeme).symbolType
+    if varType != node.value.returnType:
+      newError(errTypeMismatch, name, @{"@0": $varType, "@1": $node.value.returnType})
+      return
+  
+  elif node.left of DerefExpression:
+    visitor.visitExpression(DerefExpression(node.left).operand)
 
-  if node.name.lexeme notin visitor.symbolTable:
-    newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
-    return
-
-  let varType = visitor.getSymbol(node.name.lexeme).symbolType
-  if varType != node.value.returnType:
-    newError(errTypeMismatch, node.name, @{"@0": $varType, "@1": $node.value.returnType})
-    return
+    let ptrType = DerefExpression(node.left).operand.returnType
+    if ptrType.kind != typePtr:
+      newError(errTypeMismatch, node.left.token, @{"@0": "ptr", "@1": $ptrType})
+      return
+      
+    if ptrType.ptrBaseType != node.value.returnType:
+      newError(errTypeMismatch, node.left.token, @{"@0": $ptrType.ptrBaseType, "@1": $node.value.returnType})
+      return
 
 method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
   for value in node.values:
     visitor.visitExpression(value)
+    if value.returnType.kind == typePtr:
+      newError(errProhibitedType, value.token, @{"@0": $value.returnType})
 
 method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: BranchingStatement): auto =
   visitor.pushScope()
@@ -162,11 +215,17 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
     visitor.visitStatement(node.elseBlock)
     visitor.popScope()
 
+method visitFreeStatement*(visitor: SemanticAnalyzerVisitor, node: FreeStatement): auto =
+  visitor.visitExpression(node.expr)
+  if node.expr.returnType.kind != typePtr:
+    newError(errTypeMismatch, node.expr.token, @{"@0": "ptr", "@1": $node.expr.returnType})
+
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
   elif node of IntExpression: discard
   elif node of BoolExpression: discard
   elif node of StringExpression: discard
+  elif node of CharExpression: discard
   elif node of BinaryExpression:
     visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:
@@ -175,6 +234,10 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     visitor.visitCastExpression(CastExpression(node))
+  elif node of NewExpression:
+    visitor.visitNewExpression(NewExpression(node))
+  elif node of DerefExpression:
+    visitor.visitDerefExpression(DerefExpression(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled expression"
 
@@ -190,5 +253,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
+  elif node of FreeStatement:
+    visitor.visitFreeStatement(FreeStatement(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled statement"

@@ -43,6 +43,19 @@ method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): a
 method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): auto =
   visitor.output.add("StringExpression(\"" & node.token.lexeme & "\")")
 
+method visitNewExpression*(visitor: ASTPrinterVisitor, node: NewExpression): auto =
+  visitor.output.add("NewExpression(")
+  visitor.visitExpression(node.value)
+  visitor.output.add(")")
+
+method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression): auto =
+  visitor.output.add("DerefExpression(")
+  visitor.visitExpression(node.operand)
+  visitor.output.add(")")
+
+method visitCharExpression*(visitor: ASTPrinterVisitor, node: CharExpression): auto =
+  visitor.output.add("CharExpression('" & node.token.lexeme & "')")
+
 method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
   visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
   visitor.output.add(node.name.lexeme & ", ")
@@ -50,7 +63,9 @@ method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationS
   visitor.output.add(")")
 
 method visitAssignmentStatement*(visitor: ASTPrinterVisitor, node: AssignmentStatement): auto =
-  visitor.output.add("AssignmentStatement(" & node.name.lexeme & ", ")
+  visitor.output.add("AssignmentStatement(")
+  visitor.visitExpression(node.left)
+  visitor.output.add(", ")
   visitor.visitExpression(node.value)
   visitor.output.add(")")
 
@@ -95,6 +110,11 @@ method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingState
   
   visitor.output.add(")")
 
+method visitFreeStatement*(visitor: ASTPrinterVisitor, node: FreeStatement): auto =
+  visitor.output.add("FreeStatement(")
+  visitor.visitExpression(node.expr)
+  visitor.output.add(")")
+
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
   if node of ErrorExpression:
     visitor.visitErrorExpression(ErrorExpression(node))
@@ -112,6 +132,12 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitCastExpression(CastExpression(node))
   elif node of StringExpression:
     visitor.visitStringExpression(StringExpression(node))
+  elif node of NewExpression:
+    visitor.visitNewExpression(NewExpression(node))
+  elif node of DerefExpression:
+    visitor.visitDerefExpression(DerefExpression(node))
+  elif node of CharExpression:
+    visitor.visitCharExpression(CharExpression(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled expression"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")
@@ -129,6 +155,8 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
     visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
+  elif node of FreeStatement:
+    visitor.visitFreeStatement(FreeStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")

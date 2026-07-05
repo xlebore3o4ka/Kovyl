@@ -2,15 +2,17 @@ type
   TokenKind* = enum
     tkIntLiteral
     tkStringLiteral
+    tkCharLiteral
     tkIdentifier
 
     tkPlus, tkMinus, tkStar, tkSlash
     tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
     tkEqual, tkNot
-    tkColon, tkComma
+    tkColon, tkComma, tkArrow
     tkHash, tkPragma
 
     tkLParen, tkRParen
+    tkLBracket, tkRBracket
 
     tkAnd
     tkOr
@@ -21,6 +23,7 @@ type
     tkInt
     tkUint
     tkBool
+    tkChar
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
@@ -44,8 +47,9 @@ func newToken*(
 
 proc mean*(kind: TokenKind): string =
   case kind:
-  of tkIntLiteral: return "number literal"
+  of tkIntLiteral: return "int literal"
   of tkStringLiteral: return "string literal"
+  of tkCharLiteral: return "character literal"
   of tkIdentifier: return "identifier"
   of tkPlus: return "plus operator '+'"
   of tkMinus: return "minus operator '-'"
@@ -61,15 +65,19 @@ proc mean*(kind: TokenKind): string =
   of tkNot: return "not operator '!'"
   of tkColon: return "colon operator ':'"
   of tkComma: return "comma operator ','"
+  of tkArrow: return "arrow operator '->'"
   of tkHash: return "hash operator '#'"
   of tkPragma: return "pragma operator '#!'"
   of tkLParen: return "left parenthesis '('"
   of tkRParen: return "right parenthesis ')'"
+  of tkLBracket: return "left bracket '['"
+  of tkRBracket: return "right bracket ']'"
   of tkAnd: return "and operator 'and'"
   of tkOr: return "or operator 'or'"
   of tkInt: return "int type"
   of tkUint: return "uint type"
   of tkBool: return "bool type"
+  of tkChar: return "char type"
   of tkTrue: return "true literal"
   of tkFalse: return "false literal"
   of tkEOS: return "end of statement"

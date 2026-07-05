@@ -25,16 +25,20 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
 
 proc parseExpr(self: var Parser): Expression
 
-proc parseType(self: var Parser, token: Token): ptr Type =
+proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
-  of tkInt: return getIntType()
-  of tkUint: return getUintType()
-  of tkBool: return getBoolType()
+  of tkInt: result = getIntType()
+  of tkUint: result = getUintType()
+  of tkBool: result = getBoolType()
+  of tkChar: result = getCharType()
   else: 
     self.newError(errSyntax, token)
     return getUndefinedType()
+  while self.lexer.peekToken().kind == tkStar:
+    discard self.lexer.nextToken()
+    result = getPtrType(result)
 
-proc parseType(self: var Parser): ptr Type {.inline.} =
+proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()
   self.parseType(token)
 
@@ -49,92 +53,99 @@ proc parsePrimary(self: var Parser): Expression =
   elif token.kind == tkIntLiteral:
     return newIntExpression(token)
 
+  elif token.kind == tkCharLiteral:
+    return newCharExpression(token)
+
   elif token.kind in {tkTrue, tkFalse}:
     return newBoolExpression(token)
 
   elif token.kind == tkIdentifier:
-    return newIdentifierExpression(token)
+    result = newIdentifierExpression(token)
 
-  elif token.kind in {tkInt, tkUint, tkBool}:
-    let castType = self.parseType(token)
-
-    discard self.expectToken(tkColon)
-    var expectRParen = false
-
-    if self.lexer.peekToken().kind == tkLParen:
-      expectRParen = true
+    if self.lexer.peekToken().kind == tkColon:
       discard self.lexer.nextToken()
+      let name = token
+      var expectParen = false
 
-    result = newCastExpression(token, castType, self.parseExpr())
+      if self.lexer.peekToken().kind == tkLParen:
+        expectParen = true
+        discard self.lexer.nextToken()
 
-    if self.lexer.peekToken().kind == tkComma:
-      self.newError(errSpecialArgumentsNumber, self.lexer.nextToken(), @{"@0": token.lexeme, "@1": "1"})
-      return newErrorExpression(token)
+      if name.lexeme == "new":
+        result = newNewExpression(name, self.parseExpr())
+      else:
+        self.newError(errSpecial, name)
+        result = newErrorExpression(name)
 
-    if expectRParen:
-      discard self.expectToken(tkRParen)
-
+      if expectParen:
+        if (let t = self.expectToken(tkRParen); t.kind == tkInvalid):
+          result = newErrorExpression(t)
+    
     return result
 
   self.newError(errExpression, token, @{"@0": token.mean()})
   return newErrorExpression(token)
 
-proc parseUnary(self: var Parser): Expression =
+proc parsePrefix(self: var Parser): Expression =
   if self.lexer.peekToken().kind in {tkPlus, tkMinus, tkNot}:
     let token = self.lexer.nextToken()
-    return newUnaryExpression(self.parseUnary(), token)
+    return newUnaryExpression(self.parsePrefix(), token)
 
   return self.parsePrimary()
 
+proc parsePostfix(self: var Parser): Expression =
+  result = self.parsePrefix()
+
+  while self.lexer.peekToken().kind in {tkArrow, tkLBracket}:
+    let token = self.lexer.nextToken()
+
+    if token.kind == tkArrow:
+      let castType = self.parseType()
+      result = newCastExpression(token, castType, result)
+
+    elif token.kind == tkLBracket:
+      discard self.expectToken(tkRBracket)
+      result = newDerefExpression(token, result)
+
 proc parseMulDiv(self: var Parser): Expression =
-  var expression = self.parseUnary()
+  result = self.parsePostfix()
 
   while self.lexer.peekToken().kind in {tkStar, tkSlash}:
     let op = self.lexer.nextToken()
-    let right = self.parseUnary()
-    expression = newBinaryExpression(expression, op, right)
-
-  return expression
+    let right = self.parsePostfix()
+    result = newBinaryExpression(result, op, right)
 
 proc parseAddSub(self: var Parser): Expression =
-  var expression = self.parseMulDiv()
+  result = self.parseMulDiv()
 
   while self.lexer.peekToken().kind in {tkPlus, tkMinus}:
     let op = self.lexer.nextToken()
     let right = self.parseMulDiv()
-    expression = newBinaryExpression(expression, op, right)
-
-  return expression
+    result = newBinaryExpression(result, op, right)
 
 proc parseComparison(self: var Parser): Expression =
-  var expression = self.parseAddSub()
+  result = self.parseAddSub()
 
   while self.lexer.peekToken().kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}:
     let op = self.lexer.nextToken()
     let right = self.parseAddSub()
-    expression = newBinaryExpression(expression, op, right)
-
-  return expression
+    result = newBinaryExpression(result, op, right)
 
 proc parseAnd(self: var Parser): Expression =
-  var expression = self.parseComparison()
+  result = self.parseComparison()
 
   while self.lexer.peekToken().kind == tkAnd:
     let op = self.lexer.nextToken()
     let right = self.parseComparison()
-    expression = newBinaryExpression(expression, op, right)
-
-  return expression
+    result = newBinaryExpression(result, op, right)
 
 proc parseOr(self: var Parser): Expression =
-  var expression = self.parseAnd()
+  result = self.parseAnd()
 
   while self.lexer.peekToken().kind == tkOr:
     let op = self.lexer.nextToken()
     let right = self.parseAnd()
-    expression = newBinaryExpression(expression, op, right)
-
-  return expression
+    result = newBinaryExpression(result, op, right)
 
 proc parseExpr(self: var Parser): Expression =
   return self.parseOr()
@@ -145,12 +156,16 @@ proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
   discard self.expectToken(tkEqual)
   return newDeclarationStatement(varType, name, self.parseExpr)
 
-proc parseAssignment(self: var Parser, name: Token): Statement {.inline.} =
-  if self.lexer.peekToken().kind == tkIdentifier:
-    self.newError(errUnknownType, name)
-    return newErrorStatement(self.lexer.nextToken())
+proc parseAssignment(self: var Parser, left: Expression): Statement {.inline.} =
   discard self.expectToken(tkEqual)
-  return newAssignmentStatement(name, self.parseExpr)
+  
+  if left of DerefExpression:
+    return newAssignmentStatement(DerefExpression(left), self.parseExpr())
+  elif left of IdentifierExpression:
+    return newAssignmentStatement(IdentifierExpression(left), self.parseExpr())
+  else:
+    self.newError(errSyntax, left.token)
+    return newErrorStatement(left.token)
 
 type
   pragmaProc = (proc (self: var Parser): Statement)
@@ -224,14 +239,27 @@ proc parseBranching(self: var Parser): Statement =
 
   return branchingStatement
 
-proc parseSpecialStmt(self: var Parser, name: Token): Statement =
+proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
   let token = self.lexer.nextToken()
+  
+  if not (left of IdentifierExpression):
+    self.newError(errSpecial, token)
+    return newErrorStatement(token)
+
+  var expectParen = false
+  defer:
+    if expectParen:
+      discard self.lexer.nextToken()
+
+  if self.lexer.peekToken().kind == tkLParen:
+    expectParen = true
+    discard self.lexer.nextToken()
+  
+  let name = IdentifierExpression(left).token
   if name.lexeme == "out":
     var res: OutStatement = newOutStatement()
 
-    if self.lexer.peekToken().kind == tkLParen:
-      discard self.lexer.nextToken()
-
+    if expectParen:
       while true:
         res.addExpr(self.parseExpr())
 
@@ -242,12 +270,14 @@ proc parseSpecialStmt(self: var Parser, name: Token): Statement =
 
         if self.lexer.peekToken().kind == tkEOS:
           discard self.lexer.nextToken()
-
-      discard self.lexer.nextToken()
     else:
       res.addExpr(self.parseExpr())
 
     return res
+
+  if name.lexeme == "free":
+    return newFreeStatement(self.parseExpr())
+
   else:
     self.newError(errSpecial, token)
     return newErrorStatement(token)
@@ -255,15 +285,31 @@ proc parseSpecialStmt(self: var Parser, name: Token): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint, tkBool}:
+  if token.kind in {tkInt, tkUint, tkBool, tkChar}:
     return self.parseSymbolDecl()
+
   elif token.kind == tkIdentifier:
-    discard self.lexer.nextToken()
+    let rd = self.lexer.getRollbackData()
+    var left: Expression = newIdentifierExpression(self.lexer.nextToken())
+
     if self.lexer.peekToken().kind == tkColon:
-      return self.parseSpecialStmt(token)
-    return self.parseAssignment(token)
+      return self.parseSpecialStmt(left)
+    else:
+      self.lexer.rollback(rd)
+
+    left = self.parsePostfix()
+    let token = self.lexer.peekToken()
+
+    if token.kind == tkEqual:
+      return self.parseAssignment(left)
+
+    else:
+      self.newError(errStatement, token, @{"@0": token.mean()})
+      return newErrorStatement(token)
+
   elif token.kind == tkPragma:
     return self.parsePragma()
+
   elif token.kind == tkIf:
     return self.parseBranching()
   

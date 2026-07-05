@@ -1,21 +1,51 @@
 import std/[unicode, tables]
 import tokens, errors
 
-type Lexer* = object
-  text: string
-  file: string
-  len: Natural
-  line: Positive = 1
-  column: Positive = 1
-  pos: Natural = 0
+type 
+  Lexer* = object
+    text: string
+    file: string
+    len: Natural
+    line: Positive = 1
+    column: Positive = 1
+    pos: Natural = 0
 
-  hasError*: bool = false
+    hasError*: bool = false
 
-  peekedToken*: Token
-  hasPeeked*: bool = false
+    peekedToken*: Token
+    hasPeeked*: bool = false
 
-  bracketStack: seq[Token]
-  lastIsEOS: bool = false
+    bracketStack: seq[Token]
+    lastIsEOS: bool = false
+
+  RollbackData* = object
+    pos*: Natural
+    line*: Positive
+    column*: Positive
+    hasPeeked*: bool
+    peekedToken*: Token
+    lastIsEOS*: bool
+    bracketStack: seq[Token]
+
+proc getRollbackData*(self: Lexer): RollbackData =
+  RollbackData(
+    pos: self.pos,
+    line: self.line,
+    column: self.column,
+    hasPeeked: self.hasPeeked,
+    peekedToken: self.peekedToken,
+    lastIsEOS: self.lastIsEOS,
+    bracketStack: self.bracketStack
+  )
+
+proc rollback*(self: var Lexer, data: RollbackData) =
+  self.pos = data.pos
+  self.line = data.line
+  self.column = data.column
+  self.hasPeeked = data.hasPeeked
+  self.peekedToken = data.peekedToken
+  self.lastIsEOS = data.lastIsEOS
+  self.bracketStack = data.bracketStack
 
 proc getEOFToken*(self: Lexer): Token =
   let lastPos = if self.len > 0: self.len - 1 else: 0
@@ -61,6 +91,7 @@ const operatorTokens = {
   "=": tkEqual,
   ":": tkColon,
   ",": tkComma,
+  "->": tkArrow,
   "!": tkNot,
   ">": tkGT,
   "<": tkLT,
@@ -73,22 +104,27 @@ const operatorTokens = {
 }.toTable
 
 const openBracketTokens = {
-  '('.Rune: tkLParen
+  '('.Rune: tkLParen,
+  '['.Rune: tkLBracket
 }.toTable
 
 const closeBracketTokens = {
-  ')'.Rune: tkRParen
+  ')'.Rune: tkRParen,
+  ']'.Rune: tkRBracket
 }.toTable
 
 const pairBracketTokens = {
   tkLParen: ')'.Rune,
-  tkRParen: '('.Rune
+  tkRParen: '('.Rune,
+  tkLBracket: ']'.Rune,
+  tkRBracket: '['.Rune
 }.toTable
 
 const keywordsTokens = {
   "int": tkInt,
   "uint": tkUint,
   "bool": tkBool,
+  "char": tkChar,
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
@@ -115,14 +151,20 @@ proc nextToken*(self: var Lexer): Token =
       let last = self.bracketStack.pop()
       self.newError(errUnclosedBracket, last.file, last.line, last.column, last.offset, 1)
     result = tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
-  elif c == '\n'.Rune or c == ';'.Rune: 
-    result = tkEOS.newToken($c, self.file, self.line, self.column, self.pos)
-    while self.peek == '\n'.Rune or self.peek == ';'.Rune:
-      self.advance
+  elif c == '\n'.Rune: 
+    result = tkEOS.newToken("\\n", self.file, self.line, self.column, self.pos)
+    while self.peek == '\n'.Rune:
       self.line.inc
+      self.advance
     self.column = 1
     if self.lastIsEOS:
       result = self.nextToken()
+  elif c == ';'.Rune:
+    self.advance
+    if self.lastIsEOS:
+      result = self.nextToken()
+    else:
+      result = tkEOS.newToken(";", self.file, self.line, self.column, self.pos)
   elif c.isDigit:
     let column = self.column
     var start = self.pos
@@ -197,6 +239,26 @@ proc nextToken*(self: var Lexer): Token =
     else:
       self.advance()
       result = tkStringLiteral.newToken(strbuffer, self.file, self.line, column, start)
+  elif c == '\''.Rune:
+    self.advance()
+    let column = self.column
+    let start = self.pos
+    
+    if self.peek == '\''.Rune:
+      self.newError(errEmptyCharLiteral, self.file, self.line, self.column, self.pos, 1)
+      result = tkInvalid.newToken("", self.file, self.line, column, start)
+      self.advance()
+      return result
+    
+    let ch = $self.peek
+    self.advance()
+    
+    if self.peek != '\''.Rune:
+      self.newError(errUnclosedChar, self.file, self.line, self.column, self.pos, 1)
+      result = tkInvalid.newToken(ch, self.file, self.line, column, start)
+    else:
+      self.advance()
+      result = tkCharLiteral.newToken(ch, self.file, self.line, column, start)
   else:
     self.newError(errSyntax, self.file, self.line, self.column, self.pos, 1)
     result = tkInvalid.newToken($c, self.file, self.line, self.column, self.pos)
