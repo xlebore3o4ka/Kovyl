@@ -125,8 +125,8 @@ const pairBracketTokens = {
 }.toTable
 
 const keywordsTokens = {
-  "int": tkInt64, "int64": tkInt64,
-  "uint": tkUint64, "uint64": tkUint64,
+  "int": tkInt64, "int64": tkInt64, "int32": tkInt32, "int16": tkInt16, "int8": tkInt8,
+  "uint": tkUint64, "uint64": tkUint64, "uint32": tkUint32, "uint16": tkUint16, "uint8": tkUint8,
   "bool": tkBool,
   "char": tkChar,
   "nul": tkNul,

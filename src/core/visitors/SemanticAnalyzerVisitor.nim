@@ -14,6 +14,7 @@ type
     symbolIndex: Natural = 0
     scopeStack: seq[Natural]
     loopIndex: Natural = 0
+    expectedLiteralType: Type
 
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
   let symbol = Symbol(
@@ -39,9 +40,22 @@ proc popScope(visitor: SemanticAnalyzerVisitor) {.inline.} =
     visitor.symbolTable.del(symbol.token.lexeme)
 
 proc newSemanticAnalyzerVisitor*(): SemanticAnalyzerVisitor =
-  SemanticAnalyzerVisitor()
+  SemanticAnalyzerVisitor(expectedLiteralType: getUndefinedType())
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) {.base.}
+
+method visitNumberExpression*(visitor: SemanticAnalyzerVisitor, node: NumberExpression): auto =
+  if (visitor.expectedLiteralType.kind == typeInt64 and isValidInt64(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeInt32 and isValidInt32(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeInt16 and isValidInt16(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeInt8 and isValidInt8(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeUInt64 and isValidUint64(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeUInt32 and isValidUint32(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeUInt16 and isValidUint16(node.token.lexeme) or
+      visitor.expectedLiteralType.kind == typeUInt8 and isValidUint8(node.token.lexeme)):
+    node.returnType = visitor.expectedLiteralType
+  elif isNumber(visitor.expectedLiteralType):
+    newError(errNumberLiteral, node.token, @{"@0": node.token.lexeme, "@1": $visitor.expectedLiteralType.kind})
 
 method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpression): auto =
   visitor.visitExpression(node.left)
@@ -151,7 +165,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   if node.values.len == 0:
     node.returnType = getArrayType(getUndefinedType())
     return
-  
+
   for val in node.values:
     visitor.visitExpression(val)
   
@@ -173,7 +187,7 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   visitor.visitExpression(node.operand)
   visitor.visitExpression(node.index)
   
-  if node.index.returnType != getInt64Type():
+  if not isNumber(node.index.returnType):
     newError(errTypeMismatch, node.index.token, @{"@0": "int", "@1": $node.index.returnType})
     return
   
@@ -188,9 +202,13 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
+  var varType = node.varType
+
+  visitor.expectedLiteralType = getPrimitiveType(varType)
+
   visitor.visitExpression(node.value)
 
-  var varType = node.varType
+  visitor.expectedLiteralType = getUndefinedType()
 
   if node.name.lexeme in visitor.symbolTable:
     let name = visitor.getSymbol(node.name.lexeme).token
@@ -212,8 +230,6 @@ method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStateme
     visitor.visitStatement(stmt)
 
 method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: AssignmentStatement): auto =
-  visitor.visitExpression(node.value)
-  
   if node.left of IdentifierExpression:
     let name = IdentifierExpression(node.left).token
     if name.lexeme notin visitor.symbolTable:
@@ -221,6 +237,11 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       return
     
     let varType = visitor.getSymbol(name.lexeme).symbolType
+
+    visitor.expectedLiteralType = getPrimitiveType(varType)
+    visitor.visitExpression(node.value)
+    visitor.expectedLiteralType = getUndefinedType()
+
     if varType != node.value.returnType and not (
         varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
       ):
@@ -234,6 +255,10 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     if ptrType.kind != typePtr:
       newError(errTypeMismatch, node.left.token, @{"@0": "ptr", "@1": $ptrType})
       return
+
+    visitor.expectedLiteralType = getPrimitiveType(ptrType.ptrBaseType)
+    visitor.visitExpression(node.value)
+    visitor.expectedLiteralType = getUndefinedType()
       
     if ptrType.ptrBaseType != node.value.returnType and not (
         ptrType.ptrBaseType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
@@ -250,11 +275,16 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errTypeMismatch, node.left.token, @{"@0": "array", "@1": $indexExpr.operand.returnType})
       return
     
-    if indexExpr.index.returnType != getInt64Type():
+    if not isNumber(indexExpr.index.returnType):
       newError(errTypeMismatch, indexExpr.index.token, @{"@0": "int", "@1": $indexExpr.index.returnType})
       return
     
     let elemType = indexExpr.operand.returnType.arrayBaseType
+
+    visitor.expectedLiteralType = getPrimitiveType(elemType)
+    visitor.visitExpression(node.value)
+    visitor.expectedLiteralType = getUndefinedType()
+
     if elemType != node.value.returnType and not (
         elemType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
       ):
@@ -387,7 +417,8 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
-  elif node of IntExpression: discard
+  elif node of NumberExpression: 
+    visitor.visitNumberExpression(NumberExpression(node))
   elif node of BoolExpression: discard
   elif node of StringExpression: discard
   elif node of CharExpression: discard

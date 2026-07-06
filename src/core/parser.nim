@@ -5,7 +5,12 @@ type Parser* = object
   file: string
   lexer: Lexer
 
-const TOKEN_TYPE_KINDS = {tkInt64, tkUint64, tkBool, tkChar}
+const TOKEN_TYPE_KINDS = {
+  tkInt64, tkInt32, tkInt16, tkInt8, 
+  tkUint64, tkUint32, tkUint16, tkUint8, 
+  tkBool, 
+  tkChar
+  }
   
 proc newParser*(text, file: string): Parser =
   Parser(file: file, lexer: newLexer(text, file))
@@ -30,11 +35,17 @@ proc parseExpr(self: var Parser): Expression
 proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
   of tkInt64: result = getInt64Type()
+  of tkInt32: result = getInt32Type()
+  of tkInt16: result = getInt16Type()
+  of tkInt8: result = getInt8Type()
   of tkUint64: result = getUint64Type()
+  of tkUint32: result = getUint32Type()
+  of tkUint16: result = getUint16Type()
+  of tkUint8: result = getUint8Type()
   of tkBool: result = getBoolType()
   of tkChar: result = getCharType()
   else: 
-    self.newError(errProhibitedType, token)
+    self.newError(errProhibitedType, token, @{"@0": token.lexeme})
     return getUndefinedType()
   while self.lexer.peekToken().kind in {tkStar, tkLBracket}:
     let token = self.lexer.nextToken()
@@ -87,7 +98,7 @@ proc parsePrimary(self: var Parser): Expression =
     return result
 
   elif token.kind == tkIntLiteral:
-    return newIntExpression(token)
+    return newNumberExpression(token)
 
   elif token.kind == tkCharLiteral:
     return newCharExpression(token)

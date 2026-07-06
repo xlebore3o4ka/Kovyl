@@ -14,7 +14,13 @@ type
     case valueTypeKind*: TypeKind
     of typeUndefined: discard
     of typeInt64: int64Value*: int64
+    of typeInt32: int32Value*: int32
+    of typeInt16: int16Value*: int16
+    of typeInt8: int8Value*: int8
     of typeUint64: uint64Value*: uint64
+    of typeUint32: uint32Value*: uint32
+    of typeUint16: uint16Value*: uint16
+    of typeUint8: uint8Value*: uint8
     of typeBool: boolValue*: bool
     of typePtr, typeNul: ptrValue*: ref Value
     of typeChar: charValue*: char
@@ -78,7 +84,7 @@ proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.base.}
 method visitStatement*(visitor: InterpreterVisitor, node: Statement) {.base.}
 
-method visitIntExpression*(visitor: InterpreterVisitor, node: IntExpression): Value {.base.} =
+method visitNumberExpression*(visitor: InterpreterVisitor, node: NumberExpression): Value {.base.} =
   return newInt64Value(parseInt(node.token.lexeme))
 
 method visitBoolExpression*(visitor: InterpreterVisitor, node: BoolExpression): Value {.base.} =
@@ -391,8 +397,8 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard
   elif node of TypeExpression: return Value(valueType: getUndefinedType(), valueTypeKind: typeUndefined)
-  elif node of IntExpression:
-    return visitor.visitIntExpression(IntExpression(node))
+  elif node of NumberExpression:
+    return visitor.visitNumberExpression(NumberExpression(node))
   elif node of BoolExpression:
     return visitor.visitBoolExpression(BoolExpression(node))
   elif node of BinaryExpression:

@@ -6,7 +6,7 @@ type
 method visitErrorExpression*(visitor: Visitor, node: ErrorExpression): auto {.base.} =
   discard
 
-method visitIntExpression*(visitor: Visitor, node: IntExpression): auto {.base.} =
+method visitNumberExpression*(visitor: Visitor, node: NumberExpression): auto {.base.} =
   discard
 
 method visitBoolExpression*(visitor: Visitor, node: BoolExpression): auto {.base.} =

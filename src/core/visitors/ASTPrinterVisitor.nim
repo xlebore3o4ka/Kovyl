@@ -14,7 +14,7 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression): JsonNode 
 method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): JsonNode {.base.} =
   %*{"kind": "ErrorExpression", "token": node.token.mean()}
 
-method visitIntExpression*(visitor: ASTPrinterVisitor, node: IntExpression): JsonNode {.base.} =
+method visitNumberExpression*(visitor: ASTPrinterVisitor, node: NumberExpression): JsonNode {.base.} =
   %*{"kind": "IntExpression", "value": node.token.lexeme}
 
 method visitBoolExpression*(visitor: ASTPrinterVisitor, node: BoolExpression): JsonNode {.base.} =
@@ -162,8 +162,8 @@ method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression): JsonNode {.base.} =
   if node of ErrorExpression:
     return visitor.visitErrorExpression(ErrorExpression(node))
-  elif node of IntExpression:
-    return visitor.visitIntExpression(IntExpression(node))
+  elif node of NumberExpression:
+    return visitor.visitNumberExpression(NumberExpression(node))
   elif node of BoolExpression:
     return visitor.visitBoolExpression(BoolExpression(node))
   elif node of BinaryExpression:

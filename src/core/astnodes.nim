@@ -9,7 +9,7 @@ type
 
   ErrorExpression* = ref object of Expression
 
-  IntExpression* = ref object of Expression
+  NumberExpression* = ref object of Expression
 
   BoolExpression* = ref object of Expression
 
@@ -100,6 +100,8 @@ type
     kind*: SpecialStmtKind
     args*: seq[Expression]
 
+# SPECIALS
+
 proc newSpecialExpression*(token: Token, kind: SpecialExprKind, args: seq[Expression]): SpecialExpression =
   SpecialExpression(token: token, kind: kind, args: args, returnType: getUndefinedType())
 
@@ -152,8 +154,8 @@ proc newCastExpression*(castToken: Token, castType: Type, value: Expression): Ca
 proc newErrorExpression*(token: Token): ErrorExpression {.inline.} =
   ErrorExpression(token: token, returnType: getUndefinedType())
 
-proc newIntExpression*(value: Token): IntExpression {.inline.} =
-  IntExpression(token: value, returnType: getInt64Type())
+proc newNumberExpression*(value: Token): NumberExpression {.inline.} =
+  NumberExpression(token: value, returnType: getInt64Type())
 
 proc newBoolExpression*(value: Token): BoolExpression {.inline.} =
   BoolExpression(token: value, returnType: getBoolType())
@@ -166,6 +168,9 @@ proc newUnaryExpression*(operand: Expression, op: Token): UnaryExpression {.inli
 
 proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
+
+proc newStringExpression*(token: Token): StringExpression {.inline.} =
+  StringExpression(token: token, returnType: getArrayType(getCharType()))
 
 # STATEMENTS
 

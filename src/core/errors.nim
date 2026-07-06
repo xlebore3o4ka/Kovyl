@@ -3,7 +3,7 @@ import tokens
 type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax, errCannotAssign
-    errForbiddenLocation
+    errForbiddenLocation, errNumberLiteral
 
     errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, 
     errUnclosedString, errUnclosedChar, errEmptyCharLiteral
@@ -37,6 +37,7 @@ proc message(kind: ErrorKind): string =
     of errExpectedSyntax: "Expected @0, got @1"
     of errCannotAssign: "Cannot assign to this expression"
     of errForbiddenLocation: "The statement is in the forbidden location"
+    of errNumberLiteral: "Number literal '@0' does not fit in type @1"
     of errMismatchedBracket: "Mismatched bracket"
     of errUnexpectedBracket: "Unexpected closing bracket"
     of errUnclosedBracket: "Unclosed bracket"

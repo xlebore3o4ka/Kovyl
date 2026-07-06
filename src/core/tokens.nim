@@ -22,8 +22,8 @@ type
     tkTrue
     tkFalse
 
-    tkInt64
-    tkUint64
+    tkInt64, tkInt32, tkInt16, tkInt8
+    tkUint64, tkUint32, tkUint16, tkUint8
     tkBool
     tkChar
 
@@ -81,7 +81,13 @@ proc mean*(kind: TokenKind): string =
   of tkAnd: return "and operator 'and'"
   of tkOr: return "or operator 'or'"
   of tkInt64: return "int64 type"
+  of tkInt32: return "int32 type"
+  of tkInt16: return "int16 type"
+  of tkInt8: return "int8 type"
   of tkUint64: return "uint64 type"
+  of tkUint32: return "uint32 type"
+  of tkUint16: return "uint16 type"
+  of tkUint8: return "uint8 type"
   of tkBool: return "bool type"
   of tkChar: return "char type"
   of tkTrue: return "true literal"

@@ -1,2 +1,5 @@
-int64 x = 10
-out: x
+int* x = nul
+if x == nul do
+  out: "Лол, нет значений"
+end
+x = new: 10
