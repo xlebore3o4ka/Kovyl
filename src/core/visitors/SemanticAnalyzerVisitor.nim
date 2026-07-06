@@ -74,6 +74,21 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
     elif node.left.returnType.kind == typePtr and node.right.returnType.kind == typePtr:
       node.returnType = getBoolType()
 
+    elif node.left.returnType.kind == typeArray and node.right.returnType.kind == typeArray:
+      node.returnType = getBoolType()
+
+    elif node.left.returnType.kind == typePtr and node.right.returnType.kind == typeNul:
+      node.returnType = getBoolType()
+
+    elif node.left.returnType.kind == typeArray and node.right.returnType.kind == typeNul:
+      node.returnType = getBoolType()
+
+    elif node.left.returnType.kind == typeNul and node.right.returnType.kind == typePtr:
+      node.returnType = getBoolType()
+
+    elif node.left.returnType.kind == typeNul and node.right.returnType.kind == typeArray:
+      node.returnType = getBoolType()
+
   of tkAnd, tkOr:
     if node.left.returnType == getBoolType() and node.right.returnType == getBoolType():
       node.returnType = getBoolType()
@@ -117,14 +132,9 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
   visitor.visitExpression(node.value)
 
-  if node.returnType.kind == typePtr:
+  if node.returnType.kind in {typePtr, typeArray, typeNul}:
     newError(errProhibitedType, node.token, @{"@0": $node.returnType})
     node.returnType = getUndefinedType()
-
-method visitNewExpression*(visitor: SemanticAnalyzerVisitor, node: NewExpression): auto =
-  visitor.visitExpression(node.value)
-  
-  node.returnType = getPtrType(node.value.returnType)
 
 method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpression): auto =
   visitor.visitExpression(node.operand)
@@ -144,8 +154,15 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   for val in node.values:
     visitor.visitExpression(val)
   
-  let firstType = node.values[0].returnType
+  var i = 0
+  var firstType: Type
+  while (firstType = node.values[i].returnType; firstType == getNulType()):
+    i.inc
+
   for val in node.values:
+    if firstType.kind == typePtr and val.returnType == getNulType():
+      continue
+
     if val.returnType != firstType:
       newError(errTypeMismatch, val.token, @{"@0": $firstType, "@1": $val.returnType})
   
@@ -165,23 +182,29 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   
   node.returnType = node.operand.returnType.arrayBaseType
 
+# STATEMENTS
+
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base.}
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
   visitor.visitExpression(node.value)
+
+  var varType = node.varType
 
   if node.name.lexeme in visitor.symbolTable:
     let name = visitor.getSymbol(node.name.lexeme).token
     newError(errRedeclaration, node.name, 
       @{"@0": node.name.lexeme, "@1": name.file, "@2": $name.line, "@3": $name.column}
     )
-    return
+    varType = getUndefinedType()
 
-  if node.varType != node.value.returnType:
+  if node.varType != node.value.returnType and not (
+      node.varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
+    ):
     newError(errTypeMismatch, node.name, @{"@0": $node.varType, "@1": $node.value.returnType})
-    return
+    varType = getUndefinedType()
 
-  visitor.newSymbol(node.name, node.varType)
+  visitor.newSymbol(node.name, varType)
 
 method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStatement): auto =
   for stmt in node.statements:
@@ -197,7 +220,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       return
     
     let varType = visitor.getSymbol(name.lexeme).symbolType
-    if varType != node.value.returnType:
+    if varType != node.value.returnType and not (
+        varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
+      ):
       newError(errTypeMismatch, name, @{"@0": $varType, "@1": $node.value.returnType})
       return
   
@@ -209,7 +234,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errTypeMismatch, node.left.token, @{"@0": "ptr", "@1": $ptrType})
       return
       
-    if ptrType.ptrBaseType != node.value.returnType:
+    if ptrType.ptrBaseType != node.value.returnType and not (
+        ptrType.ptrBaseType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
+      ):
       newError(errTypeMismatch, node.left.token, @{"@0": $ptrType.ptrBaseType, "@1": $node.value.returnType})
       return
 
@@ -227,15 +254,11 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       return
     
     let elemType = indexExpr.operand.returnType.arrayBaseType
-    if elemType != node.value.returnType:
+    if elemType != node.value.returnType and not (
+        elemType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
+      ):
       newError(errTypeMismatch, node.left.token, @{"@0": $elemType, "@1": $node.value.returnType})
       return
-
-method visitOutStatement*(visitor: SemanticAnalyzerVisitor, node: OutStatement): auto =
-  for value in node.values:
-    visitor.visitExpression(value)
-    if value.returnType.kind == typePtr:
-      newError(errProhibitedType, value.token, @{"@0": $value.returnType})
 
 method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: BranchingStatement): auto =
   visitor.pushScope()
@@ -262,10 +285,82 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
     visitor.visitStatement(node.elseBlock)
     visitor.popScope()
 
-method visitFreeStatement*(visitor: SemanticAnalyzerVisitor, node: FreeStatement): auto =
-  visitor.visitExpression(node.expr)
-  if node.expr.returnType.kind != typePtr:
-    newError(errTypeMismatch, node.expr.token, @{"@0": "ptr", "@1": $node.expr.returnType})
+# SPECIALS
+
+proc expectArgsLen(self: SpecialExpression | SpecialStatement, len: int) {.inline.} =
+  if self.args.len != len:
+    newError(errArgumentCount, self.token, @{"@0": $self.token.lexeme, "@1": $len, "@2": $self.args.len})
+
+proc get(self: SpecialExpression | SpecialStatement, idx: int): Expression {.inline.} =
+  return self.args[idx]
+
+proc getTyped(self: SpecialExpression | SpecialStatement, idx: int, 
+    expectedType: TypeKind): Expression {.inline.} =
+  result = self.args[idx]
+  if result.returnType.kind != expectedType:
+    newError(errTypeMismatch, result.token, @{"@0": $expectedType, "@1": $result.returnType})
+    result = newErrorExpression(result.token)
+
+proc getTypedAny(self: SpecialExpression | SpecialStatement, idx: int, 
+    expectedTypes: set[TypeKind]): Expression {.inline.} =
+  result = self.args[idx]
+  if result.returnType.kind notin expectedTypes:
+    newError(errTypeMismatch, result.token, @{"@0": $expectedTypes, "@1": $result.returnType})
+    result = newErrorExpression(result.token)
+
+method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialExpression): auto =
+  for arg in node.args:
+    visitor.visitExpression(arg)
+
+  case node.kind:
+  of skNew: 
+    node.expectArgsLen(1)
+    node.returnType = getPtrType(node.get(0).returnType)
+
+  of skArr: 
+    node.expectArgsLen(2)
+
+    let arrayBaseType = node.get(0)
+    if not (arrayBaseType of TypeExpression):
+      newError(errTypeMismatch, arrayBaseType.token, @{"@0": "type", "@1": $arrayBaseType.returnType})
+      return
+
+    let size = node.getTyped(1, typeUint)
+    if size of ErrorExpression: return
+
+    node.returnType = getArrayType(arrayBaseType.returnType)
+
+  of skLen:
+    node.expectArgsLen(1)
+
+    let arr = node.getTyped(0, typeArray)
+    if arr of ErrorExpression: return
+
+    node.returnType = getUintType()
+  else: 
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled special expression"
+
+method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialStatement): auto =
+  for arg in node.args:
+    visitor.visitExpression(arg)
+  
+  case node.kind:
+  of skOut:
+    for arg in node.args:
+      if arg.returnType == getArrayType(getCharType()):
+        continue
+      elif arg.returnType.kind in {typePtr, typeArray, typeNul}:
+        newError(errProhibitedType, arg.token, @{"@0": $arg.returnType})
+  
+  of skFree:
+    node.expectArgsLen(1)
+    let arg = node.getTypedAny(0, {typePtr, typeArray})
+    if arg of ErrorExpression: return
+  
+  else:
+    echo "[SemanticAnalyzerVisitor] WARNING: unhandled special statement"
+
+# GENERAL
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   if node of ErrorExpression: discard
@@ -273,6 +368,8 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   elif node of BoolExpression: discard
   elif node of StringExpression: discard
   elif node of CharExpression: discard
+  elif node of NulExpression: discard
+  elif node of TypeExpression: discard
   elif node of BinaryExpression:
     visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:
@@ -281,14 +378,14 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     visitor.visitCastExpression(CastExpression(node))
-  elif node of NewExpression:
-    visitor.visitNewExpression(NewExpression(node))
   elif node of DerefExpression:
     visitor.visitDerefExpression(DerefExpression(node))
   elif node of ArrayExpression:
     visitor.visitArrayExpression(ArrayExpression(node))
   elif node of IndexExpression:
     visitor.visitIndexExpression(IndexExpression(node))
+  elif node of SpecialExpression:
+    visitor.visitSpecialExpression(SpecialExpression(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled expression"
 
@@ -300,11 +397,9 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitBlockStatement(BlockStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
-  elif node of OutStatement:
-    visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
-  elif node of FreeStatement:
-    visitor.visitFreeStatement(FreeStatement(node))
+  elif node of SpecialStatement:
+    visitor.visitSpecialStatement(SpecialStatement(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled statement"

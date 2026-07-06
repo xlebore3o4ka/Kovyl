@@ -7,7 +7,7 @@ type
     errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType, errCannotCast, errProhibitedType
     errRedeclaration, errUndeclaredSymbol, errSpecial
     errUnknownPragma
-    errSpecialArgumentsNumber
+    errArgumentCount
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -44,7 +44,7 @@ proc message(kind: ErrorKind): string =
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
     of errSpecial: "Unknown special"
     of errUnknownPragma: "Unknown pragma"
-    of errSpecialArgumentsNumber: "Invalid number of arguments for the '@0' special (expected @1)"
+    of errArgumentCount: "Invalid number of arguments for '@0' (expected @1, got @2)"
 
 proc newError*(
               kind: ErrorKind, token: Token, 

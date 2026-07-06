@@ -4,6 +4,8 @@ import std/tables
 type Parser* = object
   file: string
   lexer: Lexer
+
+const TOKEN_TYPE_KINDS = {tkInt, tkUint, tkBool, tkChar}
   
 proc newParser*(text, file: string): Parser =
   Parser(file: file, lexer: newLexer(text, file))
@@ -31,20 +33,50 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkUint: result = getUintType()
   of tkBool: result = getBoolType()
   of tkChar: result = getCharType()
-  of tkLBrace:
-    let baseType = self.parseType(self.lexer.nextToken())
-    discard self.expectToken(tkRBrace)
-    result = getArrayType(baseType)
   else: 
-    self.newError(errSyntax, token)
+    self.newError(errProhibitedType, token)
     return getUndefinedType()
-  while self.lexer.peekToken().kind == tkStar:
-    discard self.lexer.nextToken()
-    result = getPtrType(result)
+  while self.lexer.peekToken().kind in {tkStar, tkLBracket}:
+    let token = self.lexer.nextToken()
+
+    if token.kind == tkStar:
+      result = getPtrType(result)
+    elif token.kind == tkLBracket:
+      discard self.expectToken(tkRBracket)
+      result = getArrayType(result)
 
 proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()
   self.parseType(token)
+
+proc parseSpecialExpr(self: var Parser, name: Token): Expression =
+  discard self.lexer.nextToken()
+
+  var args: seq[Expression] = @[]
+
+  if self.lexer.peekToken().kind == tkLParen:
+    discard self.lexer.nextToken()
+    args.add(self.parseExpr())
+
+    while self.lexer.peekToken().kind == tkComma:
+      discard self.lexer.nextToken()
+
+      if self.lexer.peekToken().kind == tkEOS:
+        discard self.lexer.nextToken()
+
+      args.add(self.parseExpr())
+
+    discard self.expectToken(tkRParen)
+
+  else:
+    args.add(self.parseExpr())
+
+  let specialKind = getSpecialExprKind(name)
+
+  if specialKind == skExprError:
+    return newErrorExpression(name)
+
+  return newSpecialExpression(name, specialKind, args)
 
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
@@ -60,6 +92,9 @@ proc parsePrimary(self: var Parser): Expression =
   elif token.kind == tkCharLiteral:
     return newCharExpression(token)
 
+  elif token.kind == tkNul:
+    return newNulExpression(token)
+
   elif token.kind in {tkTrue, tkFalse}:
     return newBoolExpression(token)
 
@@ -67,23 +102,7 @@ proc parsePrimary(self: var Parser): Expression =
     result = newIdentifierExpression(token)
 
     if self.lexer.peekToken().kind == tkColon:
-      discard self.lexer.nextToken()
-      let name = token
-      var expectParen = false
-
-      if self.lexer.peekToken().kind == tkLParen:
-        expectParen = true
-        discard self.lexer.nextToken()
-
-      if name.lexeme == "new":
-        result = newNewExpression(name, self.parseExpr())
-      else:
-        self.newError(errSpecial, name)
-        result = newErrorExpression(name)
-
-      if expectParen:
-        if (let t = self.expectToken(tkRParen); t.kind == tkInvalid):
-          result = newErrorExpression(t)
+      result = self.parseSpecialExpr(token)
     
     return result
 
@@ -104,6 +123,19 @@ proc parsePrimary(self: var Parser): Expression =
     discard self.expectToken(tkRBrace)
     
     return arrayExpr
+
+  elif token.kind == tkStringLiteral:
+    var arrayExpr = newArrayExpression(token)
+    let str = token.lexeme
+    
+    for ch in str:
+      let charToken = tkCharLiteral.newToken($ch, token.file, token.line, token.column, token.offset)
+      arrayExpr.addExpr(newCharExpression(charToken))
+    
+    return arrayExpr
+
+  elif token.kind in TOKEN_TYPE_KINDS:
+    return newTypeExpression(token, self.parseType(token))
 
   self.newError(errExpression, token, @{"@0": token.mean()})
   return newErrorExpression(token)
@@ -217,55 +249,63 @@ proc parsePragma(self: var Parser): Statement =
 
 proc parseStmt(self: var Parser): Statement
 
+proc parseBranchBlock(self: var Parser, startToken: Token): BlockStatement =
+  if self.lexer.peekToken().kind == tkEOS:
+    discard self.lexer.nextToken()
+
+    let blockStmt = newBlockStatement(startToken)
+
+    while self.lexer.peekToken().kind notin {tkElif, tkElse, tkEnd}:
+      blockStmt.addStatement(self.parseStmt())
+      discard self.expectToken(tkEOS)
+
+    blockStmt.endToken = self.lexer.peekToken()
+    return blockStmt
+
+  else:
+    let blockStmt = newBlockStatement(startToken)
+
+    blockStmt.addStatement(self.parseStmt())
+    blockStmt.endToken = self.lexer.peekToken()
+
+    return blockStmt
+
 proc parseBranching(self: var Parser): Statement =
   discard self.lexer.nextToken()
   let condition = self.parseExpr()
-
-  let ifBlock = newBlockStatement(self.expectToken(tkDo))
-  discard self.expectToken(tkEOS)
-
-  while self.lexer.peekToken().kind notin {tkElif, tkElse, tkEnd}:
-    ifBlock.addStatement(self.parseStmt())
-    discard self.expectToken(tkEOS)
-
-  ifBlock.endToken = self.lexer.peekToken()
-
+  let doToken = self.expectToken(tkDo)
+  
+  let ifBlock = self.parseBranchBlock(doToken)
   var branchingStatement = newBranchingStatement(condition, ifBlock)
 
   while true:
     let tok = self.lexer.peekToken()
-    if tok.kind == tkEnd: break
+    if tok.kind == tkEnd: 
+      discard self.lexer.nextToken()
+      break
+
     elif tok.kind == tkElse:
       discard self.lexer.nextToken()
-      let elseBlock = newBlockStatement(tok)
-      discard self.expectToken(tkEOS)
 
-      while self.lexer.peekToken().kind != tkEnd:
-        elseBlock.addStatement(self.parseStmt())
-        discard self.expectToken(tkEOS)
-
-      elseBlock.endToken = self.lexer.peekToken()
-
+      let elseBlock = self.parseBranchBlock(tok)
       branchingStatement.setElse(elseBlock)
+
       break
+
     elif tok.kind == tkElif:
       discard self.lexer.nextToken()
+
       let condition = self.parseExpr()
-
-      let elifBlock = newBlockStatement(self.expectToken(tkDo))
-      discard self.expectToken(tkEOS)
-
-      while self.lexer.peekToken().kind notin {tkElif, tkElse, tkEnd}:
-        elifBlock.addStatement(self.parseStmt())
-        discard self.expectToken(tkEOS)
-
-      elifBlock.endToken = self.lexer.peekToken()
+      let doToken = self.expectToken(tkDo)
+      let elifBlock = self.parseBranchBlock(doToken)
 
       branchingStatement.addElif(condition, elifBlock)
       continue
+
     break
 
-  discard self.expectToken(tkEnd)
+  if ifBlock.endToken.kind != tkEnd:
+    discard self.expectToken(tkEnd)
 
   return branchingStatement
 
@@ -275,47 +315,39 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
   if not (left of IdentifierExpression):
     self.newError(errSpecial, token)
     return newErrorStatement(token)
-
-  var expectParen = false
-  defer:
-    if expectParen:
-      discard self.lexer.nextToken()
-
-  if self.lexer.peekToken().kind == tkLParen:
-    expectParen = true
-    discard self.lexer.nextToken()
   
   let name = IdentifierExpression(left).token
-  if name.lexeme == "out":
-    var res: OutStatement = newOutStatement()
-
-    if expectParen:
-      while true:
-        res.addExpr(self.parseExpr())
-
-        if self.lexer.peekToken().kind == tkRParen:
-          break
-
-        discard self.expectToken(tkComma)
-
-        if self.lexer.peekToken().kind == tkEOS:
-          discard self.lexer.nextToken()
-    else:
-      res.addExpr(self.parseExpr())
-
-    return res
-
-  if name.lexeme == "free":
-    return newFreeStatement(self.parseExpr())
-
+  var args: seq[Expression] = @[]
+  
+  if self.lexer.peekToken().kind == tkLParen:
+    discard self.lexer.nextToken()
+    
+    while true:
+      args.add(self.parseExpr())
+      
+      if self.lexer.peekToken().kind == tkRParen:
+        break
+      
+      discard self.expectToken(tkComma)
+      
+      if self.lexer.peekToken().kind == tkEOS:
+        discard self.lexer.nextToken()
+    
+    discard self.expectToken(tkRParen)
   else:
-    self.newError(errSpecial, token)
-    return newErrorStatement(token)
+    args.add(self.parseExpr())
+  
+  let specialKind = getSpecialStmtKind(name)
+  
+  if specialKind == skStmtError:
+    return newErrorStatement(name)
+  
+  return newSpecialStatement(name, specialKind, args)
 
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkInt, tkUint, tkBool, tkChar, tkLBrace}:
+  if token.kind in TOKEN_TYPE_KINDS:
     return self.parseSymbolDecl()
 
   elif token.kind == tkIdentifier:
@@ -342,6 +374,12 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkIf:
     return self.parseBranching()
+
+  elif token.kind == tkBreak:
+    return newBreakStatement(self.lexer.nextToken())
+
+  elif token.kind == tkContinue:
+    return newContinueStatement(self.lexer.nextToken())
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)

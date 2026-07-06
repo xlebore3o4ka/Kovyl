@@ -16,12 +16,36 @@ type
     of typeInt: intValue*: int
     of typeUint: uintValue*: uint
     of typeBool: boolValue*: bool
-    of typePtr: ptrValue*: ref Value
+    of typePtr, typeNul: ptrValue*: ref Value
     of typeChar: charValue*: char
     of typeArray: arrayValue*: ArrayValue
 
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()
+
+proc `==`*(a, b: Value): bool =
+  if a.valueType != b.valueType:
+    return false
+  if a.valueTypeKind != b.valueTypeKind:
+    return false
+  
+  case a.valueTypeKind
+  of typeInt: return a.intValue == b.intValue
+  of typeUint: return a.uintValue == b.uintValue
+  of typeBool: return a.boolValue == b.boolValue
+  of typeChar: return a.charValue == b.charValue
+  of typePtr: return a.ptrValue == b.ptrValue
+  of typeArray: return a.arrayValue == b.arrayValue
+  else: 
+    raise newException(RuntimeError, "The type '" & $a.valueType & "' cannot be compared")
+
+proc `==`*(a, b: ArrayValue): bool =
+  if a.elements.len != b.elements.len:
+    return false
+  for i in 0..<a.elements.len:
+    if a.elements[i] != b.elements[i]:
+      return false
+  return true
 
 proc newIntValue*(intValue: int): Value {.inline.} =
   Value(valueTypeKind: typeInt, valueType: getIntType(), intValue: intValue)
@@ -41,6 +65,9 @@ proc newCharValue*(ch: char): Value {.inline.} =
 proc newArrayValue*(elements: seq[Value], baseType: Type): Value =
   Value(valueTypeKind: typeArray, valueType: getArrayType(baseType), arrayValue: 
     ArrayValue(elements: elements, length: newUintValue(uint(elements.len))))
+
+proc newNulValue(): Value =
+  Value(valueTypeKind: typeNul, valueType: getNulType())
 
 proc newInterpreterVisitor*(): InterpreterVisitor {.inline.} =
   InterpreterVisitor()
@@ -80,21 +107,9 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     of typeUint: return newUintValue(leftVal.uintValue div rightVal.uintValue)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkEQ:
-    case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue == rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue == rightVal.uintValue)
-    of typeBool: return newBoolValue(leftVal.boolValue == rightVal.boolValue)
-    of typePtr: return newBoolValue(leftVal.ptrValue == rightVal.ptrValue)
-    of typeChar: return newBoolValue(leftVal.charValue == rightVal.charValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
+    return newBoolValue(leftVal == rightVal)
   of tkNEQ:
-    case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue != rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue != rightVal.uintValue)
-    of typeBool: return newBoolValue(leftVal.boolValue != rightVal.boolValue)
-    of typePtr: return newBoolValue(leftVal.ptrValue != rightVal.ptrValue)
-    of typeChar: return newBoolValue(leftVal.charValue != rightVal.charValue)
-    else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
+    return newBoolValue(leftVal != rightVal)
   of tkGT:
     case node.left.returnType.kind:
     of typeInt: return newBoolValue(leftVal.intValue > rightVal.intValue)
@@ -185,14 +200,10 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
     else: raise exception
   else: raise exception
 
-method visitNewExpression*(visitor: InterpreterVisitor, node: NewExpression): Value {.base.} =
-  let value = visitor.visitExpression(node.value)
-  let ptrValue = new(Value)
-  ptrValue[] = value
-  return newPtrValue(ptrValue, node.value.returnType)
-
 method visitDerefExpression*(visitor: InterpreterVisitor, node: DerefExpression): Value {.base.} =
   let ptrValue = visitor.visitExpression(node.operand)
+  if ptrValue.valueTypeKind == typeNul:
+    raise newException(RuntimeError, "Cannot dereference nul pointer")
   if ptrValue.valueTypeKind != typePtr:
     raise newException(RuntimeError, "Cannot dereference non-pointer")
   return ptrValue.ptrValue[]
@@ -230,6 +241,11 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   
   return arr.arrayValue.elements[index]
 
+method visitNulExpression*(visitor: InterpreterVisitor, node: NulExpression): Value {.base.} =
+  return newNulValue()
+
+# STATEMENTS
+
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   visitor.literalTable[node.name.lexeme] = visitor.visitExpression(node.value)
 
@@ -244,6 +260,8 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
   
   elif node.left of DerefExpression:
     let ptrValue = visitor.visitExpression(DerefExpression(node.left).operand)
+    if ptrValue.valueTypeKind == typeNul:
+      raise newException(RuntimeError, "Cannot dereference nul pointer")
     if ptrValue.valueTypeKind != typePtr:
       raise newException(RuntimeError, "Cannot dereference non-pointer")
     ptrValue.ptrValue[] = visitor.visitExpression(node.value)
@@ -267,17 +285,6 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
     let actualIdx = ((index mod len) + len) mod len
     
     arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
-  
-method visitOutStatement*(visitor: InterpreterVisitor, node: OutStatement): auto =
-  for value in node.values:
-    let val = visitor.visitExpression(value)
-    case val.valueTypeKind:
-    of typeInt: stdout.write($val.intValue)
-    of typeUint: stdout.write($val.uintValue)
-    of typeBool: stdout.write($val.boolValue)
-    of typeChar: stdout.write(val.charValue)
-    else: raise newException(RuntimeError, "Unknown type to out")
-  stdout.write('\n')
 
 method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
   let conditionValue = visitor.visitExpression(node.condition)
@@ -295,15 +302,79 @@ method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStat
   if node.elseBlock != nil:
     visitor.visitStatement(node.elseBlock)
 
-method visitFreeStatement*(visitor: InterpreterVisitor, node: FreeStatement): auto =
-  let val = visitor.visitExpression(node.expr)
-  if val.valueTypeKind != typePtr:
-    raise newException(RuntimeError, "Cannot free non-pointer")
-  if val.ptrValue != nil:
-    val.ptrValue[] = Value(valueTypeKind: typeUndefined, valueType: getUndefinedType())
+# SPECIALS
+
+method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpression): Value {.base.} =
+  case node.kind:
+  of skNew: 
+    let val = visitor.visitExpression(node.args[0])
+    let ptrValue = new(Value)
+    ptrValue[] = val
+    return newPtrValue(ptrValue, val.valueType)
+
+  of skArr:     
+    let sizeVal = visitor.visitExpression(node.args[1])
+
+    let size = int(sizeVal.uintValue)
+    var elements: seq[Value]
+
+    for i in 0..<size:
+      let baseType = node.args[0].returnType
+      elements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
+
+    return newArrayValue(elements, node.args[0].returnType)
+
+  of skLen: 
+    let arr = visitor.visitExpression(node.args[0])
+    return arr.arrayValue.length
+
+  else: 
+    echo "[InterpreterVisitor] WARNING: unhandled special expression"
+
+method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatement): auto =
+  case node.kind:
+  of skOut:
+    for arg in node.args:
+      let val = visitor.visitExpression(arg)
+      case val.valueTypeKind:
+      of typeInt: stdout.write($val.intValue)
+      of typeUint: stdout.write($val.uintValue)
+      of typeBool: stdout.write($val.boolValue)
+      of typeChar: stdout.write(val.charValue)
+      of typeArray:
+        if val.valueType.arrayBaseType == getCharType():
+          var s = ""
+          for ch in val.arrayValue.elements:
+            s.add(ch.charValue)
+          stdout.write(s)
+        else:
+          raise newException(RuntimeError, "Cannot output " & $val.valueType)
+      else: raise newException(RuntimeError, "Cannot output " & $val.valueType)
+    stdout.write('\n')
+  
+  of skFree:
+    let val = visitor.visitExpression(node.args[0])
+    
+    case val.valueTypeKind:
+    of typePtr:
+      if val.ptrValue != nil:
+        val.ptrValue[] = Value(valueTypeKind: typeUndefined, valueType: getUndefinedType())
+
+    of typeArray:
+      if val.arrayValue.length.uintValue != 0u:
+        val.arrayValue.elements = @[]
+        val.arrayValue.length = newUintValue(0)
+    else:
+      raise newException(RuntimeError, "free expects pointer or array")
+
+  else: 
+    echo "[InterpreterVisitor] WARNING: unhandled special expression"
+
+# GENERAL
 
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
   if node of ErrorExpression: discard
+  elif node of TypeExpression: return Value(valueType: getUndefinedType(), valueTypeKind: typeUndefined)
   elif node of IntExpression:
     return visitor.visitIntExpression(IntExpression(node))
   elif node of BoolExpression:
@@ -316,8 +387,6 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     return visitor.visitCastExpression(CastExpression(node))
-  elif node of NewExpression:
-    return visitor.visitNewExpression(NewExpression(node))
   elif node of DerefExpression:
     return visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
@@ -326,6 +395,10 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value =
     return visitor.visitArrayExpression(ArrayExpression(node))
   elif node of IndexExpression:
     return visitor.visitIndexExpression(IndexExpression(node))
+  elif node of NulExpression:
+    return visitor.visitNulExpression(NulExpression(node))
+  elif node of SpecialExpression:
+    return visitor.visitSpecialExpression(SpecialExpression(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled expression"
 
@@ -337,11 +410,9 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitBlockStatement(BlockStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
-  elif node of OutStatement:
-    visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
-  elif node of FreeStatement:
-    visitor.visitFreeStatement(FreeStatement(node))
+  elif node of SpecialStatement:
+    visitor.visitSpecialStatement(SpecialStatement(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled statement"

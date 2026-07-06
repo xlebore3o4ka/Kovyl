@@ -129,6 +129,7 @@ const keywordsTokens = {
   "uint": tkUint,
   "bool": tkBool,
   "char": tkChar,
+  "nul": tkNul,
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
@@ -137,8 +138,11 @@ const keywordsTokens = {
   "end": tkEnd,
   "if": tkIf,
   "elif": tkElif,
-  "else": tkElse
+  "else": tkElse,
+  "break": tkBreak,
+  "continue": tkContinue
 }.toTable
+
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
               args: seq[(string, string)] = @[]) =
   self.hasError = true

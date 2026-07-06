@@ -1,4 +1,4 @@
-import types, tokens
+import types, tokens, errors
 
 type
   # EXPRESSIONS
@@ -27,9 +27,6 @@ type
 
   StringExpression* = ref object of Expression
 
-  NewExpression* = ref object of Expression
-    value*: Expression
-
   DerefExpression* = ref object of Expression
     operand*: Expression
 
@@ -41,6 +38,10 @@ type
   IndexExpression* = ref object of Expression
     operand*: Expression
     index*: Expression
+
+  NulExpression* = ref object of Expression
+
+  TypeExpression* = ref object of Expression
 
   # STATEMENTS
 
@@ -63,60 +64,67 @@ type
   ErrorStatement* = ref object of Statement
     token*: Token
 
-  OutStatement* = ref object of Statement
-    values*: seq[Expression] = @[]
-
   BranchingStatement* = ref object of Statement
     condition*: Expression
     ifBlock*: BlockStatement
     elifBlocks*: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
     elseBlock*: BlockStatement
 
-  FreeStatement* = ref object of Statement
-    expr*: Expression
+  BreakStatement* = ref object of Statement
+    token*: Token
 
-#STATEMENTS
+  ContinueStatement* = ref object of Statement
+    token*: Token
 
-proc newFreeStatement*(expr: Expression): FreeStatement {.inline.} =
-  FreeStatement(expr: expr)
+  # SPECIALS
 
-proc newBranchingStatement*(condition: Expression, ifBlock: BlockStatement): BranchingStatement {.inline.} =
-  BranchingStatement(condition: condition, ifBlock: ifBlock, elifBlocks: @[], elseBlock: nil)
+  SpecialExprKind* = enum
+    skExprError
+    skNew, skArr, skLen
 
-proc addElif*(self: var BranchingStatement, condition: Expression, elifBlock: BlockStatement) {.inline.} =
-  self.elifBlocks.add((condition, elifBlock))
+  SpecialExpression* = ref object of Expression
+    kind*: SpecialExprKind
+    args*: seq[Expression]
 
-proc setElse*(self: var BranchingStatement, elseBlock: BlockStatement) {.inline.} =
-  self.elseBlock = elseBlock
+  SpecialStmtKind* = enum
+    skStmtError
+    skOut, skFree
 
-proc newOutStatement*(): OutStatement {.inline.} =
-  OutStatement()
+  SpecialStatement* = ref object of Statement
+    token*: Token
+    kind*: SpecialStmtKind
+    args*: seq[Expression]
 
-proc addExpr*(self: var OutStatement, expr: Expression) {.inline.} =
-  self.values.add(expr)
+proc newSpecialExpression*(token: Token, kind: SpecialExprKind, args: seq[Expression]): SpecialExpression =
+  SpecialExpression(token: token, kind: kind, args: args, returnType: getUndefinedType())
 
-proc newAssignmentStatement*(left: Expression, value: Expression): AssignmentStatement {.inline.} =
-  AssignmentStatement(left: left, value: value)
+proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, args: seq[Expression]): SpecialStatement =
+  SpecialStatement(token: token, kind: kind, args: args)
 
-proc newErrorStatement*(token: Token): ErrorStatement {.inline.} =
-  ErrorStatement(token: token)
+proc getSpecialExprKind*(token: Token): SpecialExprKind =
+  case token.lexeme
+  of "new": skNew
+  of "arr": skArr
+  of "len": skLen
+  else:
+    newError(errSpecial, token)
+    return skExprError
 
-proc newBlockStatement*(startToken: Token, endToken: Token): BlockStatement {.inline.} =
-  BlockStatement(startToken: startToken, endToken: endToken, statements: @[])
-
-proc newBlockStatement*(startToken: Token): BlockStatement {.inline.} =
-  BlockStatement(startToken: startToken, endToken: tkInvalid.newToken(startToken.lexeme, 
-    startToken.file, startToken.line, startToken.column, startToken.offset), statements: @[])
-
-proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
-  blockStmt.statements.add(stmt)
-
-proc newDeclarationStatement*(
-    varType: Type, name: Token, value: Expression
-  ): DeclarationStatement {.inline.} =
-  DeclarationStatement(name: name, value: value, varType: varType)
+proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
+  case token.lexeme
+  of "out": skOut
+  of "free": skFree
+  else:
+    newError(errSpecial, token)
+    return skStmtError
 
 # EXPRESSIONS
+
+proc newTypeExpression*(token: Token, returnType: Type): TypeExpression =
+  TypeExpression(token: token, returnType: returnType)
+
+proc newNulExpression*(token: Token): NulExpression {.inline.} =
+  NulExpression(token: token, returnType: getNulType())
 
 proc newIndexExpression*(token: Token, operand: Expression, index: Expression): IndexExpression {.inline.} =
   IndexExpression(token: token, operand: operand, index: index, returnType: getUndefinedType())
@@ -132,9 +140,6 @@ proc newCharExpression*(token: Token): CharExpression {.inline.} =
 
 proc newDerefExpression*(token: Token, operand: Expression): DerefExpression {.inline.} =
   DerefExpression(token: token, operand: operand, returnType: getUndefinedType())
-
-proc newNewExpression*(token: Token, value: Expression): NewExpression {.inline.} =
-  NewExpression(token: token, value: value, returnType: getUndefinedType())
 
 proc newCastExpression*(castToken: Token, castType: Type, value: Expression): CastExpression {.inline.} =
   CastExpression(token: castToken, returnType: castType, value: value)
@@ -156,3 +161,41 @@ proc newUnaryExpression*(operand: Expression, op: Token): UnaryExpression {.inli
 
 proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
+
+# STATEMENTS
+
+proc newBreakStatement*(token: Token): BreakStatement {.inline.} =
+  BreakStatement(token: token)
+
+proc newContinueStatement*(token: Token): ContinueStatement {.inline.} =
+  ContinueStatement(token: token)
+
+proc newBranchingStatement*(condition: Expression, ifBlock: BlockStatement): BranchingStatement {.inline.} =
+  BranchingStatement(condition: condition, ifBlock: ifBlock, elifBlocks: @[], elseBlock: nil)
+
+proc addElif*(self: var BranchingStatement, condition: Expression, elifBlock: BlockStatement) {.inline.} =
+  self.elifBlocks.add((condition, elifBlock))
+
+proc setElse*(self: var BranchingStatement, elseBlock: BlockStatement) {.inline.} =
+  self.elseBlock = elseBlock
+
+proc newAssignmentStatement*(left: Expression, value: Expression): AssignmentStatement {.inline.} =
+  AssignmentStatement(left: left, value: value)
+
+proc newErrorStatement*(token: Token): ErrorStatement {.inline.} =
+  ErrorStatement(token: token)
+
+proc newBlockStatement*(startToken: Token, endToken: Token): BlockStatement {.inline.} =
+  BlockStatement(startToken: startToken, endToken: endToken, statements: @[])
+
+proc newBlockStatement*(startToken: Token): BlockStatement {.inline.} =
+  BlockStatement(startToken: startToken, endToken: tkInvalid.newToken(startToken.lexeme, 
+    startToken.file, startToken.line, startToken.column, startToken.offset), statements: @[])
+
+proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
+  blockStmt.statements.add(stmt)
+
+proc newDeclarationStatement*(
+    varType: Type, name: Token, value: Expression
+  ): DeclarationStatement {.inline.} =
+  DeclarationStatement(name: name, value: value, varType: varType)

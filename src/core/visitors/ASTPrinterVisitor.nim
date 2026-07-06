@@ -43,11 +43,6 @@ method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): a
 method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): auto =
   visitor.output.add("StringExpression(\"" & node.token.lexeme & "\")")
 
-method visitNewExpression*(visitor: ASTPrinterVisitor, node: NewExpression): auto =
-  visitor.output.add("NewExpression(")
-  visitor.visitExpression(node.value)
-  visitor.output.add(")")
-
 method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression): auto =
   visitor.output.add("DerefExpression(")
   visitor.visitExpression(node.operand)
@@ -57,18 +52,32 @@ method visitCharExpression*(visitor: ASTPrinterVisitor, node: CharExpression): a
   visitor.output.add("CharExpression('" & node.token.lexeme & "')")
 
 method visitArrayExpression*(visitor: ASTPrinterVisitor, node: ArrayExpression): auto =
-  visitor.output.add("ArrayExpression([")
-  for i, val in node.values:
-    if i > 0: visitor.output.add(", ")
-    visitor.visitExpression(val)
-  visitor.output.add("])")
-
+  if node.returnType.kind == typeArray and node.returnType.arrayBaseType == getCharType():
+    visitor.output.add("\"")
+    for val in node.values:
+      visitor.output.add(CharExpression(val).token.lexeme)
+    visitor.output.add("\"")
+  else:
+    visitor.output.add("ArrayExpression([")
+    for i, val in node.values:
+      if i > 0: visitor.output.add(", ")
+      visitor.visitExpression(val)
+    visitor.output.add("])")
+    
 method visitIndexExpression*(visitor: ASTPrinterVisitor, node: IndexExpression): auto =
   visitor.output.add("IndexExpression(")
   visitor.visitExpression(node.operand)
   visitor.output.add(", ")
   visitor.visitExpression(node.index)
   visitor.output.add(")")
+
+method visitNulExpression*(visitor: ASTPrinterVisitor, node: NulExpression): auto =
+  visitor.output.add("NulExpression")
+
+method visitTypeExpression*(visitor: ASTPrinterVisitor, node: TypeExpression): auto =
+  visitor.output.add("TypeExpression(" & $node.returnType & ")")
+
+# STATEMENTS
 
 method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
   visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
@@ -96,14 +105,6 @@ method visitBlockStatement*(visitor: ASTPrinterVisitor, node: BlockStatement): a
 method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): auto =
   visitor.output.add("ErrorStatement(" & node.token.mean & ")")
 
-method visitOutStatement*(visitor: ASTPrinterVisitor, node: OutStatement): auto =
-  visitor.output.add("OutStatement(")
-  for i, expr in node.values:
-    if i > 0:
-      visitor.output.add(", ")
-    visitor.visitExpression(expr)
-  visitor.output.add(")")
-
 method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingStatement): auto =
   visitor.output.add("BranchingStatement(")
   visitor.visitExpression(node.condition)
@@ -124,10 +125,23 @@ method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingState
   
   visitor.output.add(")")
 
-method visitFreeStatement*(visitor: ASTPrinterVisitor, node: FreeStatement): auto =
-  visitor.output.add("FreeStatement(")
-  visitor.visitExpression(node.expr)
-  visitor.output.add(")")
+# SPECIALS
+
+method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): auto =
+  visitor.output.add("SpecialExpression(" & $node.kind & ", [")
+  for i, arg in node.args:
+    if i > 0: visitor.output.add(", ")
+    visitor.visitExpression(arg)
+  visitor.output.add("])")
+
+method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement): auto =
+  visitor.output.add("SpecialStatement(" & $node.kind & ", [")
+  for i, arg in node.args:
+    if i > 0: visitor.output.add(", ")
+    visitor.visitExpression(arg)
+  visitor.output.add("])")
+  
+# GENERAL
 
 method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
   if node of ErrorExpression:
@@ -146,8 +160,6 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitCastExpression(CastExpression(node))
   elif node of StringExpression:
     visitor.visitStringExpression(StringExpression(node))
-  elif node of NewExpression:
-    visitor.visitNewExpression(NewExpression(node))
   elif node of DerefExpression:
     visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
@@ -156,6 +168,12 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
     visitor.visitArrayExpression(ArrayExpression(node))
   elif node of IndexExpression:
     visitor.visitIndexExpression(IndexExpression(node))
+  elif node of NulExpression:
+    visitor.visitNulExpression(NulExpression(node))
+  elif node of SpecialExpression:
+    visitor.visitSpecialExpression(SpecialExpression(node))
+  elif node of TypeExpression:
+    visitor.visitTypeExpression(TypeExpression(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled expression"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")
@@ -169,12 +187,10 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
     visitor.visitErrorStatement(ErrorStatement(node))
   elif node of AssignmentStatement:
     visitor.visitAssignmentStatement(AssignmentStatement(node))
-  elif node of OutStatement:
-    visitor.visitOutStatement(OutStatement(node))
   elif node of BranchingStatement:
     visitor.visitBranchingStatement(BranchingStatement(node))
-  elif node of FreeStatement:
-    visitor.visitFreeStatement(FreeStatement(node))
+  elif node of SpecialStatement:
+    visitor.visitSpecialStatement(SpecialStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
     visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")

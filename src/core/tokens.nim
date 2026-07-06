@@ -4,6 +4,7 @@ type
     tkStringLiteral
     tkCharLiteral
     tkIdentifier
+    tkNul
 
     tkPlus, tkMinus, tkStar, tkSlash
     tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
@@ -28,6 +29,7 @@ type
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
+    tkBreak, tkContinue
 
     tkEOS
     tkEOF
@@ -52,6 +54,7 @@ proc mean*(kind: TokenKind): string =
   of tkStringLiteral: return "string literal"
   of tkCharLiteral: return "character literal"
   of tkIdentifier: return "identifier"
+  of tkNul: return "nul"
   of tkPlus: return "plus operator '+'"
   of tkMinus: return "minus operator '-'"
   of tkStar: return "star operator '*'"
@@ -91,6 +94,8 @@ proc mean*(kind: TokenKind): string =
   of tkIf: return "keyword if"
   of tkElif: return "keyword elif"
   of tkElse: return "keyword else"
+  of tkBreak: return "keyword break"
+  of tkContinue: return "keyword continue"
 
 proc mean*(token: Token): string =
   mean(token.kind)

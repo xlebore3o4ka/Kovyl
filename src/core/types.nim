@@ -8,6 +8,8 @@ type
     typeChar
     typeArray
 
+    typeNul
+
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBaseType*: Type
@@ -21,6 +23,8 @@ let
   boolType* = Type(kind: typeBool)
   charType* = Type(kind: typeChar)
 
+  nulType* = Type(kind: typeNul)
+
 var ptrTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
 
@@ -29,6 +33,8 @@ proc getIntType*(): Type {.inline.} = intType
 proc getUintType*(): Type {.inline.} = uintType
 proc getBoolType*(): Type {.inline.} = boolType
 proc getCharType*(): Type {.inline.} = charType
+
+proc getNulType*(): Type {.inline.} = nulType
 
 proc getPtrType*(baseType: Type): Type =
   if baseType.kind == typeUndefined:
@@ -53,7 +59,7 @@ proc getArrayType*(baseType: Type): Type =
   arrayTypes.add(result)
 
 proc `$`*(t: Type): string =
-  if t == nil: return "nil"
+  if t == nil: return "nilType"
   case t.kind
   of typeUndefined: "undefined"
   of typeInt: "int"
@@ -61,4 +67,17 @@ proc `$`*(t: Type): string =
   of typeBool: "bool"
   of typePtr: $t.ptrBaseType & "*"
   of typeChar: "char"
-  of typeArray: "[" & $t.arrayBaseType & "]"
+  of typeArray: $t.arrayBaseType & "[]"
+
+  of typeNul: "nul"
+
+proc `$`*(k: TypeKind): string =
+  case k
+  of typeUndefined: "undefined"
+  of typeInt: "int"
+  of typeUint: "uint"
+  of typeBool: "bool"
+  of typePtr: "ptr"
+  of typeChar: "char"
+  of typeArray: "array"
+  of typeNul: "nul"
