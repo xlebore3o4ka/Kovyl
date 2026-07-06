@@ -33,6 +33,15 @@ type
   ContinueException* = object of CatchableError
 
 proc `==`*(a, b: Value): bool =
+  if a.valueTypeKind == typeNul and b.valueTypeKind == typePtr:
+    return b.ptrValue[].valueTypeKind == typeNul
+  if a.valueTypeKind == typePtr and b.valueTypeKind == typeNul:
+    return a.ptrValue[].valueTypeKind == typeNul
+  if a.valueTypeKind == typeNul and b.valueTypeKind == typeArray:
+    return b.arrayValue.elements.len == 0
+  if a.valueTypeKind == typeArray and b.valueTypeKind == typeNul:
+    return a.arrayValue.elements.len == 0
+
   if a.valueType != b.valueType:
     return false
   if a.valueTypeKind != b.valueTypeKind:
@@ -45,6 +54,7 @@ proc `==`*(a, b: Value): bool =
   of typeChar: return a.charValue == b.charValue
   of typePtr: return a.ptrValue == b.ptrValue
   of typeArray: return a.arrayValue == b.arrayValue
+  of typeNul: return true
   else: 
     raise newException(RuntimeError, "The type '" & $a.valueType & "' cannot be compared")
 
@@ -379,15 +389,15 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
     
     case val.valueTypeKind:
     of typePtr:
-      if val.ptrValue != nil:
-        val.ptrValue[] = Value(valueTypeKind: typeUndefined, valueType: getUndefinedType())
+      if val.ptrValue[].valueTypeKind != typeNul:
+        val.ptrValue[] = Value(valueTypeKind: typeNul, valueType: getNulType())
 
     of typeArray:
       if val.arrayValue.length.uint64Value != 0u:
         val.arrayValue.elements = @[]
         val.arrayValue.length = newUint64Value(0)
     else:
-      raise newException(RuntimeError, "free expects pointer or array")
+      raise newException(RuntimeError, "free expects ptr or array")
 
   else: 
     echo "[InterpreterVisitor] WARNING: unhandled special expression"
