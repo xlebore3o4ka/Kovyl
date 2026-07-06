@@ -11,11 +11,14 @@ proc main() =
     quit(1)
   
   var shortErrors = false
+  var showAST = false
   var filePath = ""
   
   for arg in args:
     if arg == "-s":
       shortErrors = true
+    if arg == "-a":
+      showAST = true
     else:
       filePath = arg
   
@@ -37,7 +40,9 @@ proc main() =
   if errors.errors.len == 0:
     newSemanticAnalyzerVisitor().visitStatement(blockStatement)
   
-  echo newASTPrinterVisitor().printStatement(blockStatement)
+  if showAST:
+    echo newASTPrinterVisitor().printStatement(blockStatement)
+
   if errors.errors.len == 0:
     echo "[KOVYL] INFO: Compilation successful!"
     let interpreter = newInterpreterVisitor()

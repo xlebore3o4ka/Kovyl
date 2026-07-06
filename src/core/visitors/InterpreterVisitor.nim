@@ -13,8 +13,8 @@ type
     valueType*: Type
     case valueTypeKind*: TypeKind
     of typeUndefined: discard
-    of typeInt: intValue*: int
-    of typeUint: uintValue*: uint
+    of typeInt64: int64Value*: int64
+    of typeUint64: uint64Value*: uint64
     of typeBool: boolValue*: bool
     of typePtr, typeNul: ptrValue*: ref Value
     of typeChar: charValue*: char
@@ -23,6 +23,9 @@ type
   InterpreterVisitor* = ref object of Visitor
     literalTable*: Table[string, Value] = initTable[string, Value]()
 
+  BreakException* = object of CatchableError
+  ContinueException* = object of CatchableError
+
 proc `==`*(a, b: Value): bool =
   if a.valueType != b.valueType:
     return false
@@ -30,8 +33,8 @@ proc `==`*(a, b: Value): bool =
     return false
   
   case a.valueTypeKind
-  of typeInt: return a.intValue == b.intValue
-  of typeUint: return a.uintValue == b.uintValue
+  of typeInt64: return a.int64Value == b.int64Value
+  of typeUint64: return a.uint64Value == b.uint64Value
   of typeBool: return a.boolValue == b.boolValue
   of typeChar: return a.charValue == b.charValue
   of typePtr: return a.ptrValue == b.ptrValue
@@ -47,11 +50,11 @@ proc `==`*(a, b: ArrayValue): bool =
       return false
   return true
 
-proc newIntValue*(intValue: int): Value {.inline.} =
-  Value(valueTypeKind: typeInt, valueType: getIntType(), intValue: intValue)
+proc newInt64Value*(int64Value: int): Value {.inline.} =
+  Value(valueTypeKind: typeInt64, valueType: getInt64Type(), int64Value: int64Value)
 
-proc newUintValue*(uintValue: uint): Value {.inline.} =
-  Value(valueTypeKind: typeUint, valueType: getUintType(), uintValue: uintValue)
+proc newUint64Value*(uint64Value: uint): Value {.inline.} =
+  Value(valueTypeKind: typeUint64, valueType: getUint64Type(), uint64Value: uint64Value)
 
 proc newBoolValue*(boolValue: bool): Value {.inline.} =
   Value(valueTypeKind: typeBool, valueType: getBoolType(), boolValue: boolValue)
@@ -64,7 +67,7 @@ proc newCharValue*(ch: char): Value {.inline.} =
 
 proc newArrayValue*(elements: seq[Value], baseType: Type): Value =
   Value(valueTypeKind: typeArray, valueType: getArrayType(baseType), arrayValue: 
-    ArrayValue(elements: elements, length: newUintValue(uint(elements.len))))
+    ArrayValue(elements: elements, length: newUint64Value(uint(elements.len))))
 
 proc newNulValue(): Value =
   Value(valueTypeKind: typeNul, valueType: getNulType())
@@ -76,7 +79,7 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
 method visitStatement*(visitor: InterpreterVisitor, node: Statement) {.base.}
 
 method visitIntExpression*(visitor: InterpreterVisitor, node: IntExpression): Value {.base.} =
-  return newIntValue(parseInt(node.token.lexeme))
+  return newInt64Value(parseInt(node.token.lexeme))
 
 method visitBoolExpression*(visitor: InterpreterVisitor, node: BoolExpression): Value {.base.} =
   return newBoolValue(node.token.kind == tkTrue)
@@ -88,23 +91,23 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
   case node.token.kind:
   of tkPlus:
     case node.returnType.kind:
-    of typeInt: return newIntValue(leftVal.intValue + rightVal.intValue)
-    of typeUint: return newUintValue(leftVal.uintValue + rightVal.uintValue)
+    of typeInt64: return newInt64Value(leftVal.int64Value + rightVal.int64Value)
+    of typeUint64: return newUint64Value(leftVal.uint64Value + rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkMinus:
     case node.returnType.kind:
-    of typeInt: return newIntValue(leftVal.intValue - rightVal.intValue)
-    of typeUint: return newUintValue(leftVal.uintValue - rightVal.uintValue)
+    of typeInt64: return newInt64Value(leftVal.int64Value - rightVal.int64Value)
+    of typeUint64: return newUint64Value(leftVal.uint64Value - rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkStar:
     case node.returnType.kind:
-    of typeInt: return newIntValue(leftVal.intValue * rightVal.intValue)
-    of typeUint: return newUintValue(leftVal.uintValue * rightVal.uintValue)
+    of typeInt64: return newInt64Value(leftVal.int64Value * rightVal.int64Value)
+    of typeUint64: return newUint64Value(leftVal.uint64Value * rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkSlash:
     case node.returnType.kind:
-    of typeInt: return newIntValue(leftVal.intValue div rightVal.intValue)
-    of typeUint: return newUintValue(leftVal.uintValue div rightVal.uintValue)
+    of typeInt64: return newInt64Value(leftVal.int64Value div rightVal.int64Value)
+    of typeUint64: return newUint64Value(leftVal.uint64Value div rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkEQ:
     return newBoolValue(leftVal == rightVal)
@@ -112,23 +115,23 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     return newBoolValue(leftVal != rightVal)
   of tkGT:
     case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue > rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue > rightVal.uintValue)
+    of typeInt64: return newBoolValue(leftVal.int64Value > rightVal.int64Value)
+    of typeUint64: return newBoolValue(leftVal.uint64Value > rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkLT:
     case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue < rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue < rightVal.uintValue)
+    of typeInt64: return newBoolValue(leftVal.int64Value < rightVal.int64Value)
+    of typeUint64: return newBoolValue(leftVal.uint64Value < rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkGTE:
     case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue >= rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue >= rightVal.uintValue)
+    of typeInt64: return newBoolValue(leftVal.int64Value >= rightVal.int64Value)
+    of typeUint64: return newBoolValue(leftVal.uint64Value >= rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkLTE:
     case node.left.returnType.kind:
-    of typeInt: return newBoolValue(leftVal.intValue <= rightVal.intValue)
-    of typeUint: return newBoolValue(leftVal.uintValue <= rightVal.uintValue)
+    of typeInt64: return newBoolValue(leftVal.int64Value <= rightVal.int64Value)
+    of typeUint64: return newBoolValue(leftVal.uint64Value <= rightVal.uint64Value)
     else: raise newException(RuntimeError, "Unsupported type for binary " & node.token.mean())
   of tkAnd:
     case node.returnType.kind:
@@ -146,11 +149,11 @@ method visitUnaryExpression*(visitor: InterpreterVisitor, node: UnaryExpression)
   case node.token.kind:
   of tkPlus: 
     case node.returnType.kind:
-    of typeInt, typeUint: return value
+    of typeInt64, typeUint64: return value
     else: raise newException(RuntimeError, "Unsupported type for unary +")
   of tkMinus:
     case node.returnType.kind:
-    of typeInt: return newIntValue(-value.intValue)
+    of typeInt64: return newInt64Value(-value.int64Value)
     else: raise newException(RuntimeError, "Unsupported type for unary -")
   of tkNot:
     case node.returnType.kind:
@@ -166,24 +169,24 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
   let exception = newException(RuntimeError, "Cannot cast " & $value.valueType & " to " & $node.returnType)
 
   case value.valueTypeKind:
-  of typeInt:
+  of typeInt64:
     case node.returnType.kind:
-    of typeInt: return value
-    of typeUint: return newUintValue(cast[uint](value.intValue))
-    of typeBool: return newBoolValue(value.intValue != 0)
-    of typeChar: return newCharValue(chr(value.intValue))
+    of typeInt64: return value
+    of typeUint64: return newUint64Value(cast[uint](value.int64Value))
+    of typeBool: return newBoolValue(value.int64Value != 0)
+    of typeChar: return newCharValue(chr(value.int64Value))
     else: raise exception
-  of typeUint:
+  of typeUint64:
     case node.returnType.kind:
-    of typeInt: return newIntValue(cast[int](value.uintValue))
-    of typeUint: return value
-    of typeBool: return newBoolValue(value.uintValue != 0)
-    of typeChar: return newCharValue(chr(cast[int](value.uintValue)))
+    of typeInt64: return newInt64Value(cast[int](value.uint64Value))
+    of typeUint64: return value
+    of typeBool: return newBoolValue(value.uint64Value != 0)
+    of typeChar: return newCharValue(chr(cast[int](value.uint64Value)))
     else: raise exception
   of typeBool:
     case node.returnType.kind:
-    of typeInt: return newIntValue(if value.boolValue: 1 else: 0)
-    of typeUint: return newUintValue(if value.boolValue: 1 else: 0)
+    of typeInt64: return newInt64Value(if value.boolValue: 1 else: 0)
+    of typeUint64: return newUint64Value(if value.boolValue: 1 else: 0)
     of typeBool: return value
     of typeChar: return newCharValue(if value.boolValue: '\1' else: '\0')
     else: raise exception
@@ -193,8 +196,8 @@ method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): 
     else: raise exception
   of typeChar:
     case node.returnType.kind:
-    of typeInt: return newIntValue(ord(value.charValue))
-    of typeUint: return newUintValue(cast[uint](ord(value.charValue)))
+    of typeInt64: return newInt64Value(ord(value.charValue))
+    of typeUint64: return newUint64Value(cast[uint](ord(value.charValue)))
     of typeBool: return newBoolValue(value.charValue != '\0')
     of typeChar: return value
     else: raise exception
@@ -229,15 +232,15 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
     raise newException(RuntimeError, "Cannot index non-array")
   
   let idx = visitor.visitExpression(node.index)
-  if idx.valueTypeKind != typeInt:
+  if idx.valueTypeKind != typeInt64:
     raise newException(RuntimeError, "Index must be int")
 
-  let len = int(arr.arrayValue.length.uintValue)
+  let len = int(arr.arrayValue.length.uint64Value)
 
-  if idx.intValue >= len or (idx.intValue) < -len:
+  if idx.int64Value >= len or (idx.int64Value) < -len:
     raise newException(RuntimeError, "Index out of bounds")
   
-  let index = ((idx.intValue mod len) + len) mod len
+  let index = ((idx.int64Value mod len) + len) mod len
   
   return arr.arrayValue.elements[index]
 
@@ -273,23 +276,21 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
       raise newException(RuntimeError, "Cannot index non-array")
     
     let idx = visitor.visitExpression(indexExpr.index)
-    if idx.valueTypeKind != typeInt:
+    if idx.valueTypeKind != typeInt64:
       raise newException(RuntimeError, "Index must be int")
 
-    let len = int(arr.arrayValue.length.uintValue)
+    let len = int(arr.arrayValue.length.uint64Value)
     
-    if idx.intValue >= len or (idx.intValue) < -len:
+    if idx.int64Value >= len or (idx.int64Value) < -len:
       raise newException(RuntimeError, "Index out of bounds")
     
-    let index = idx.intValue
+    let index = idx.int64Value
     let actualIdx = ((index mod len) + len) mod len
     
     arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
 
 method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
-  let conditionValue = visitor.visitExpression(node.condition)
-  
-  if conditionValue.boolValue:
+  if visitor.visitExpression(node.condition).boolValue:
     visitor.visitStatement(node.ifBlock)
     return
   
@@ -301,6 +302,21 @@ method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStat
   
   if node.elseBlock != nil:
     visitor.visitStatement(node.elseBlock)
+
+method visitBreakStatement*(visitor: InterpreterVisitor, node: BreakStatement): auto =
+  raise newException(BreakException, "")
+
+method visitContinueStatement*(visitor: InterpreterVisitor, node: ContinueStatement): auto =
+  raise newException(ContinueException, "")
+
+method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): auto =
+  while visitor.visitExpression(node.condition).boolValue:
+    try:
+      visitor.visitStatement(node.whileBlock)
+    except BreakException: 
+      break
+    except ContinueException: 
+      continue
 
 # SPECIALS
 
@@ -315,7 +331,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
   of skArr:     
     let sizeVal = visitor.visitExpression(node.args[1])
 
-    let size = int(sizeVal.uintValue)
+    let size = int(sizeVal.uint64Value)
     var elements: seq[Value]
 
     for i in 0..<size:
@@ -337,8 +353,8 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
     for arg in node.args:
       let val = visitor.visitExpression(arg)
       case val.valueTypeKind:
-      of typeInt: stdout.write($val.intValue)
-      of typeUint: stdout.write($val.uintValue)
+      of typeInt64: stdout.write($val.int64Value)
+      of typeUint64: stdout.write($val.uint64Value)
       of typeBool: stdout.write($val.boolValue)
       of typeChar: stdout.write(val.charValue)
       of typeArray:
@@ -361,9 +377,9 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
         val.ptrValue[] = Value(valueTypeKind: typeUndefined, valueType: getUndefinedType())
 
     of typeArray:
-      if val.arrayValue.length.uintValue != 0u:
+      if val.arrayValue.length.uint64Value != 0u:
         val.arrayValue.elements = @[]
-        val.arrayValue.length = newUintValue(0)
+        val.arrayValue.length = newUint64Value(0)
     else:
       raise newException(RuntimeError, "free expects pointer or array")
 
@@ -414,5 +430,11 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitBranchingStatement(BranchingStatement(node))
   elif node of SpecialStatement:
     visitor.visitSpecialStatement(SpecialStatement(node))
+  elif node of BreakStatement:
+    visitor.visitBreakStatement(BreakStatement(node))
+  elif node of ContinueStatement:
+    visitor.visitContinueStatement(ContinueStatement(node))
+  elif node of WhileStatement:
+    visitor.visitWhileStatement(WhileStatement(node))
   else:
     echo "[InterpreterVisitor] WARNING: unhandled statement"

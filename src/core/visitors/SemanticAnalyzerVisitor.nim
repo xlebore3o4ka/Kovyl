@@ -13,6 +13,7 @@ type
     scopedSymbolPool: seq[Symbol]
     symbolIndex: Natural = 0
     scopeStack: seq[Natural]
+    loopIndex: Natural = 0
 
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
   let symbol = Symbol(
@@ -48,24 +49,24 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
 
   case node.token.kind:
   of tkPlus, tkMinus, tkStar, tkSlash:
-    if node.left.returnType == getIntType() and node.right.returnType == getIntType():
-      node.returnType = getIntType()
+    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
+      node.returnType = getInt64Type()
       
-    elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
-      node.returnType = getUintType()
+    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
+      node.returnType = getUint64Type()
 
   of tkGT, tkLT, tkGTE, tkLTE:
-    if node.left.returnType == getIntType() and node.right.returnType == getIntType():
+    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
       node.returnType = getBoolType()
 
-    elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
+    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
       node.returnType = getBoolType()
 
   of tkEQ, tkNEQ:
-    if node.left.returnType == getIntType() and node.right.returnType == getIntType():
+    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
       node.returnType = getBoolType()
 
-    elif node.left.returnType == getUintType() and node.right.returnType == getUintType():
+    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
       node.returnType = getBoolType()
       
     if node.left.returnType == getCharType() and node.right.returnType == getCharType():
@@ -105,13 +106,13 @@ method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpres
 
   case node.token.kind:
   of tkMinus:
-    if node.operand.returnType == getIntType():
-      node.returnType = getIntType()
+    if node.operand.returnType == getInt64Type():
+      node.returnType = getInt64Type()
   of tkPlus:
-    if node.operand.returnType == getUintType():
-      node.returnType = getUintType()
-    elif node.operand.returnType == getIntType():
-      node.returnType = getIntType()
+    if node.operand.returnType == getUint64Type():
+      node.returnType = getUint64Type()
+    elif node.operand.returnType == getInt64Type():
+      node.returnType = getInt64Type()
   of tkNot:
     if node.operand.returnType == getBoolType():
       node.returnType = getBoolType()
@@ -172,7 +173,7 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   visitor.visitExpression(node.operand)
   visitor.visitExpression(node.index)
   
-  if node.index.returnType != getIntType():
+  if node.index.returnType != getInt64Type():
     newError(errTypeMismatch, node.index.token, @{"@0": "int", "@1": $node.index.returnType})
     return
   
@@ -249,7 +250,7 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errTypeMismatch, node.left.token, @{"@0": "array", "@1": $indexExpr.operand.returnType})
       return
     
-    if indexExpr.index.returnType != getIntType():
+    if indexExpr.index.returnType != getInt64Type():
       newError(errTypeMismatch, indexExpr.index.token, @{"@0": "int", "@1": $indexExpr.index.returnType})
       return
     
@@ -284,6 +285,28 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
     visitor.pushScope()
     visitor.visitStatement(node.elseBlock)
     visitor.popScope()
+
+method visitBreakStatement*(visitor: SemanticAnalyzerVisitor, node: BreakStatement): auto =
+  if visitor.loopIndex == 0:
+    newError(errForbiddenLocation, node.token)
+
+method visitContinueStatement*(visitor: SemanticAnalyzerVisitor, node: ContinueStatement): auto =
+  if visitor.loopIndex == 0:
+    newError(errForbiddenLocation, node.token)
+
+method visitWhileStatement*(visitor: SemanticAnalyzerVisitor, node: WhileStatement): auto =
+  visitor.pushScope()
+  visitor.loopIndex.inc
+  defer:
+    visitor.loopIndex.dec
+    visitor.popScope()
+
+  visitor.visitExpression(node.condition)
+  
+  if node.condition.returnType != getBoolType():
+    newError(errTypeMismatch, node.condition.token, @{"@0": "bool", "@1": $node.condition.returnType})
+
+  visitor.visitStatement(node.whileBlock)
 
 # SPECIALS
 
@@ -325,7 +348,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       newError(errTypeMismatch, arrayBaseType.token, @{"@0": "type", "@1": $arrayBaseType.returnType})
       return
 
-    let size = node.getTyped(1, typeUint)
+    let size = node.getTyped(1, typeUint64)
     if size of ErrorExpression: return
 
     node.returnType = getArrayType(arrayBaseType.returnType)
@@ -336,7 +359,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
     let arr = node.getTyped(0, typeArray)
     if arr of ErrorExpression: return
 
-    node.returnType = getUintType()
+    node.returnType = getUint64Type()
   else: 
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled special expression"
 
@@ -401,5 +424,15 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitBranchingStatement(BranchingStatement(node))
   elif node of SpecialStatement:
     visitor.visitSpecialStatement(SpecialStatement(node))
+  elif node of BranchingStatement:
+    visitor.visitBranchingStatement(BranchingStatement(node))
+  elif node of SpecialStatement:
+    visitor.visitSpecialStatement(SpecialStatement(node))
+  elif node of BreakStatement:
+    visitor.visitBreakStatement(BreakStatement(node))
+  elif node of ContinueStatement:
+    visitor.visitContinueStatement(ContinueStatement(node))
+  elif node of WhileStatement:
+    visitor.visitWhileStatement(WhileStatement(node))
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled statement"

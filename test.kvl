@@ -1,9 +1,2 @@
-int i = 0
-
-if true do
-  if i > 10 do ; break ; end
-  if i == 5 do ; continue ; end
-  out:("i = ", i)
-  i = i + 1
-  continue
-end
+int64 x = 10
+out: x

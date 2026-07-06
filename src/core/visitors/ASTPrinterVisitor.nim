@@ -1,5 +1,6 @@
-import ../[astnodes, types, tokens]
+import std/json
 import visitor
+import ../[astnodes, tokens, types]
 
 type
   ASTPrinterVisitor* = ref object of Visitor
@@ -8,194 +9,214 @@ type
 proc newASTPrinterVisitor*(): ASTPrinterVisitor =
   ASTPrinterVisitor(output: "")
 
-method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) {.base.}
+method visitExpression*(visitor: ASTPrinterVisitor, node: Expression): JsonNode {.base.}
 
-method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): auto =
-  visitor.output.add("ErrorExpression(" & node.token.mean & ")")
+method visitErrorExpression*(visitor: ASTPrinterVisitor, node: ErrorExpression): JsonNode {.base.} =
+  %*{"kind": "ErrorExpression", "token": node.token.mean()}
 
-method visitIntExpression*(visitor: ASTPrinterVisitor, node: IntExpression): auto =
-  visitor.output.add("IntExpression(" & $node.token.lexeme & ")")
+method visitIntExpression*(visitor: ASTPrinterVisitor, node: IntExpression): JsonNode {.base.} =
+  %*{"kind": "IntExpression", "value": node.token.lexeme}
 
-method visitBoolExpression*(visitor: ASTPrinterVisitor, node: BoolExpression): auto =
-  visitor.output.add("BoolExpression(" & $node.token.lexeme & ")")
+method visitBoolExpression*(visitor: ASTPrinterVisitor, node: BoolExpression): JsonNode {.base.} =
+  %*{"kind": "BoolExpression", "value": node.token.lexeme}
 
-method visitBinaryExpression*(visitor: ASTPrinterVisitor, node: BinaryExpression): auto =
-  visitor.output.add("BinaryExpression(")
-  visitor.visitExpression(node.left)
-  visitor.output.add(", " & node.token.lexeme & ", ")
-  visitor.visitExpression(node.right)
-  visitor.output.add(")")
+method visitBinaryExpression*(visitor: ASTPrinterVisitor, node: BinaryExpression): JsonNode {.base.} =
+  %*{
+    "kind": "BinaryExpression",
+    "op": node.token.lexeme,
+    "left": visitor.visitExpression(node.left),
+    "right": visitor.visitExpression(node.right)
+  }
 
-method visitUnaryExpression*(visitor: ASTPrinterVisitor, node: UnaryExpression): auto =
-  visitor.output.add("UnaryExpression(" & node.token.lexeme & ", ")
-  visitor.visitExpression(node.operand)
-  visitor.output.add(")")
+method visitUnaryExpression*(visitor: ASTPrinterVisitor, node: UnaryExpression): JsonNode {.base.} =
+  %*{
+    "kind": "UnaryExpression",
+    "op": node.token.lexeme,
+    "operand": visitor.visitExpression(node.operand)
+  }
 
-method visitIdentifierExpression*(visitor: ASTPrinterVisitor, node: IdentifierExpression): auto =
-  visitor.output.add("IdentifierExpression(" & node.token.lexeme & ")")
+method visitIdentifierExpression*(visitor: ASTPrinterVisitor, node: IdentifierExpression): JsonNode {.base.} =
+  %*{"kind": "IdentifierExpression", "name": node.token.lexeme}
 
-method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): auto =
-  visitor.output.add("CastExpression(")
-  visitor.visitExpression(node.value)
-  visitor.output.add(", ")
-  visitor.output.add($node.returnType & ")")
+method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): JsonNode {.base.} =
+  %*{
+    "kind": "CastExpression",
+    "to": $node.returnType,
+    "value": visitor.visitExpression(node.value)
+  }
 
-method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): auto =
-  visitor.output.add("StringExpression(\"" & node.token.lexeme & "\")")
+method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): JsonNode {.base.} =
+  %*{"kind": "StringExpression", "value": node.token.lexeme}
 
-method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression): auto =
-  visitor.output.add("DerefExpression(")
-  visitor.visitExpression(node.operand)
-  visitor.output.add(")")
+method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression): JsonNode {.base.} =
+  %*{
+    "kind": "DerefExpression",
+    "operand": visitor.visitExpression(node.operand)
+  }
 
-method visitCharExpression*(visitor: ASTPrinterVisitor, node: CharExpression): auto =
-  visitor.output.add("CharExpression('" & node.token.lexeme & "')")
+method visitCharExpression*(visitor: ASTPrinterVisitor, node: CharExpression): JsonNode {.base.} =
+  %*{"kind": "CharExpression", "value": node.token.lexeme}
 
-method visitArrayExpression*(visitor: ASTPrinterVisitor, node: ArrayExpression): auto =
+method visitArrayExpression*(visitor: ASTPrinterVisitor, node: ArrayExpression): JsonNode {.base.} =
   if node.returnType.kind == typeArray and node.returnType.arrayBaseType == getCharType():
-    visitor.output.add("\"")
+    var s = ""
     for val in node.values:
-      visitor.output.add(CharExpression(val).token.lexeme)
-    visitor.output.add("\"")
+      s.add(CharExpression(val).token.lexeme)
+    %*{"kind": "ArrayExpression", "value": s, "isString": true}
   else:
-    visitor.output.add("ArrayExpression([")
-    for i, val in node.values:
-      if i > 0: visitor.output.add(", ")
-      visitor.visitExpression(val)
-    visitor.output.add("])")
-    
-method visitIndexExpression*(visitor: ASTPrinterVisitor, node: IndexExpression): auto =
-  visitor.output.add("IndexExpression(")
-  visitor.visitExpression(node.operand)
-  visitor.output.add(", ")
-  visitor.visitExpression(node.index)
-  visitor.output.add(")")
+    var elems = newJArray()
+    for val in node.values:
+      elems.add(visitor.visitExpression(val))
+    %*{"kind": "ArrayExpression", "elements": elems}
 
-method visitNulExpression*(visitor: ASTPrinterVisitor, node: NulExpression): auto =
-  visitor.output.add("NulExpression")
+method visitIndexExpression*(visitor: ASTPrinterVisitor, node: IndexExpression): JsonNode {.base.} =
+  %*{
+    "kind": "IndexExpression",
+    "operand": visitor.visitExpression(node.operand),
+    "index": visitor.visitExpression(node.index)
+  }
 
-method visitTypeExpression*(visitor: ASTPrinterVisitor, node: TypeExpression): auto =
-  visitor.output.add("TypeExpression(" & $node.returnType & ")")
+method visitNulExpression*(visitor: ASTPrinterVisitor, node: NulExpression): JsonNode {.base.} =
+  %*{"kind": "NulExpression"}
+
+method visitTypeExpression*(visitor: ASTPrinterVisitor, node: TypeExpression): JsonNode {.base.} =
+  %*{"kind": "TypeExpression", "type": $node.returnType}
 
 # STATEMENTS
 
-method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): auto =
-  visitor.output.add("DeclarationStatement(" & $node.varType & ", ")
-  visitor.output.add(node.name.lexeme & ", ")
-  visitor.visitExpression(node.value)
-  visitor.output.add(")")
+method visitStatement*(visitor: ASTPrinterVisitor, node: Statement): JsonNode {.base.}
 
-method visitAssignmentStatement*(visitor: ASTPrinterVisitor, node: AssignmentStatement): auto =
-  visitor.output.add("AssignmentStatement(")
-  visitor.visitExpression(node.left)
-  visitor.output.add(", ")
-  visitor.visitExpression(node.value)
-  visitor.output.add(")")
+method visitWhileStatement*(visitor: ASTPrinterVisitor, node: WhileStatement): JsonNode {.base.} =
+  %*{
+    "kind": "WhileStatement",
+    "condition": visitor.visitExpression(node.condition),
+    "body": visitor.visitStatement(node.whileBlock)
+  }
 
-method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) {.base.}
+method visitBreakStatement*(visitor: ASTPrinterVisitor, node: BreakStatement): JsonNode {.base.} =
+  %*{"kind": "BreakStatement"}
 
-method visitBlockStatement*(visitor: ASTPrinterVisitor, node: BlockStatement): auto =
-  visitor.output.add("BlockStatement([")
-  for i, stmt in node.statements:
-    if i > 0:
-      visitor.output.add(", ")
-    visitor.visitStatement(stmt)
-  visitor.output.add("])")
+method visitContinueStatement*(visitor: ASTPrinterVisitor, node: ContinueStatement): JsonNode {.base.} =
+  %*{"kind": "ContinueStatement"}
 
-method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): auto =
-  visitor.output.add("ErrorStatement(" & node.token.mean & ")")
+method visitDeclarationStatement*(visitor: ASTPrinterVisitor, node: DeclarationStatement): JsonNode {.base.} =
+  %*{
+    "kind": "DeclarationStatement",
+    "type": $node.varType,
+    "name": node.name.lexeme,
+    "value": visitor.visitExpression(node.value)
+  }
 
-method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingStatement): auto =
-  visitor.output.add("BranchingStatement(")
-  visitor.visitExpression(node.condition)
-  visitor.output.add(", ")
-  visitor.visitStatement(node.ifBlock)
+method visitAssignmentStatement*(visitor: ASTPrinterVisitor, node: AssignmentStatement): JsonNode {.base.} =
+  %*{
+    "kind": "AssignmentStatement",
+    "left": visitor.visitExpression(node.left),
+    "value": visitor.visitExpression(node.value)
+  }
+
+method visitBlockStatement*(visitor: ASTPrinterVisitor, node: BlockStatement): JsonNode {.base.} =
+  var stmts = newJArray()
+  for stmt in node.statements:
+    stmts.add(visitor.visitStatement(stmt))
+  %*{"kind": "BlockStatement", "statements": stmts}
+
+method visitErrorStatement*(visitor: ASTPrinterVisitor, node: ErrorStatement): JsonNode {.base.} =
+  %*{"kind": "ErrorStatement", "token": node.token.mean()}
+
+method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingStatement): JsonNode {.base.} =
+  result = %*{
+    "kind": "BranchingStatement",
+    "condition": visitor.visitExpression(node.condition),
+    "ifBlock": visitor.visitStatement(node.ifBlock)
+  }
   
+  var elifs = newJArray()
   for el in node.elifBlocks:
-    visitor.output.add(", elif(")
-    visitor.visitExpression(el.cond)
-    visitor.output.add(", ")
-    visitor.visitStatement(el.elifBlock)
-    visitor.output.add(")")
+    elifs.add(%*{
+      "condition": visitor.visitExpression(el.cond),
+      "block": visitor.visitStatement(el.elifBlock)
+    })
+  result["elifBlocks"] = elifs
   
   if node.elseBlock != nil:
-    visitor.output.add(", else(")
-    visitor.visitStatement(node.elseBlock)
-    visitor.output.add(")")
+    result["elseBlock"] = visitor.visitStatement(node.elseBlock)
   
-  visitor.output.add(")")
+  return result
 
 # SPECIALS
 
-method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): auto =
-  visitor.output.add("SpecialExpression(" & $node.kind & ", [")
-  for i, arg in node.args:
-    if i > 0: visitor.output.add(", ")
-    visitor.visitExpression(arg)
-  visitor.output.add("])")
+method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): JsonNode {.base.} =
+  var args = newJArray()
+  for arg in node.args:
+    args.add(visitor.visitExpression(arg))
+  %*{"kind": "SpecialExpression", "special": $node.kind, "args": args}
 
-method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement): auto =
-  visitor.output.add("SpecialStatement(" & $node.kind & ", [")
-  for i, arg in node.args:
-    if i > 0: visitor.output.add(", ")
-    visitor.visitExpression(arg)
-  visitor.output.add("])")
-  
+method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement): JsonNode {.base.} =
+  var args = newJArray()
+  for arg in node.args:
+    args.add(visitor.visitExpression(arg))
+  %*{"kind": "SpecialStatement", "special": $node.kind, "args": args}
+
 # GENERAL
 
-method visitExpression*(visitor: ASTPrinterVisitor, node: Expression) =
+method visitExpression*(visitor: ASTPrinterVisitor, node: Expression): JsonNode {.base.} =
   if node of ErrorExpression:
-    visitor.visitErrorExpression(ErrorExpression(node))
+    return visitor.visitErrorExpression(ErrorExpression(node))
   elif node of IntExpression:
-    visitor.visitIntExpression(IntExpression(node))
+    return visitor.visitIntExpression(IntExpression(node))
   elif node of BoolExpression:
-    visitor.visitBoolExpression(BoolExpression(node))
+    return visitor.visitBoolExpression(BoolExpression(node))
   elif node of BinaryExpression:
-    visitor.visitBinaryExpression(BinaryExpression(node))
+    return visitor.visitBinaryExpression(BinaryExpression(node))
   elif node of UnaryExpression:
-    visitor.visitUnaryExpression(UnaryExpression(node))
+    return visitor.visitUnaryExpression(UnaryExpression(node))
   elif node of IdentifierExpression:
-    visitor.visitIdentifierExpression(IdentifierExpression(node))
+    return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
-    visitor.visitCastExpression(CastExpression(node))
+    return visitor.visitCastExpression(CastExpression(node))
   elif node of StringExpression:
-    visitor.visitStringExpression(StringExpression(node))
+    return visitor.visitStringExpression(StringExpression(node))
   elif node of DerefExpression:
-    visitor.visitDerefExpression(DerefExpression(node))
+    return visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
-    visitor.visitCharExpression(CharExpression(node))
+    return visitor.visitCharExpression(CharExpression(node))
   elif node of ArrayExpression:
-    visitor.visitArrayExpression(ArrayExpression(node))
+    return visitor.visitArrayExpression(ArrayExpression(node))
   elif node of IndexExpression:
-    visitor.visitIndexExpression(IndexExpression(node))
+    return visitor.visitIndexExpression(IndexExpression(node))
   elif node of NulExpression:
-    visitor.visitNulExpression(NulExpression(node))
+    return visitor.visitNulExpression(NulExpression(node))
   elif node of SpecialExpression:
-    visitor.visitSpecialExpression(SpecialExpression(node))
+    return visitor.visitSpecialExpression(SpecialExpression(node))
   elif node of TypeExpression:
-    visitor.visitTypeExpression(TypeExpression(node))
+    return visitor.visitTypeExpression(TypeExpression(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled expression"
-    visitor.output.add("!ASTPrinterVisitor.UNHANDLED_EXPRESSION!")
+    return %*{"kind": "UNHANDLED_EXPRESSION"}
 
-method visitStatement*(visitor: ASTPrinterVisitor, node: Statement) =
+method visitStatement*(visitor: ASTPrinterVisitor, node: Statement): JsonNode {.base.} =
   if node of DeclarationStatement:
-    visitor.visitDeclarationStatement(DeclarationStatement(node))
+    return visitor.visitDeclarationStatement(DeclarationStatement(node))
   elif node of BlockStatement:
-    visitor.visitBlockStatement(BlockStatement(node))
+    return visitor.visitBlockStatement(BlockStatement(node))
   elif node of ErrorStatement:
-    visitor.visitErrorStatement(ErrorStatement(node))
+    return visitor.visitErrorStatement(ErrorStatement(node))
   elif node of AssignmentStatement:
-    visitor.visitAssignmentStatement(AssignmentStatement(node))
+    return visitor.visitAssignmentStatement(AssignmentStatement(node))
   elif node of BranchingStatement:
-    visitor.visitBranchingStatement(BranchingStatement(node))
+    return visitor.visitBranchingStatement(BranchingStatement(node))
   elif node of SpecialStatement:
-    visitor.visitSpecialStatement(SpecialStatement(node))
+    return visitor.visitSpecialStatement(SpecialStatement(node))
+  elif node of BreakStatement:
+    return visitor.visitBreakStatement(BreakStatement(node))
+  elif node of ContinueStatement:
+    return visitor.visitContinueStatement(ContinueStatement(node))
+  elif node of WhileStatement:
+    return visitor.visitWhileStatement(WhileStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
-    visitor.output.add("!ASTPrinterVisitor.UNHANDLED_STATEMENT!")
+    return %*{"kind": "UNHANDLED_STATEMENT"}
 
 proc printStatement*(visitor: ASTPrinterVisitor, node: Statement): string =
   visitor.output = ""
-  visitor.visitStatement(node)
-  return visitor.output
+  return $visitor.visitStatement(node)

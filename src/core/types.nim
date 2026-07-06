@@ -1,8 +1,8 @@
 type
   TypeKind* = enum
     typeUndefined
-    typeInt
-    typeUint
+    typeInt64
+    typeUint64
     typeBool
     typePtr
     typeChar
@@ -18,8 +18,8 @@ type
 
 let
   undefinedType* = Type(kind: typeUndefined)
-  intType* = Type(kind: typeInt)
-  uintType* = Type(kind: typeUint)
+  intType* = Type(kind: typeInt64)
+  uintType* = Type(kind: typeUint64)
   boolType* = Type(kind: typeBool)
   charType* = Type(kind: typeChar)
 
@@ -29,8 +29,8 @@ var ptrTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
-proc getIntType*(): Type {.inline.} = intType
-proc getUintType*(): Type {.inline.} = uintType
+proc getInt64Type*(): Type {.inline.} = intType
+proc getUint64Type*(): Type {.inline.} = uintType
 proc getBoolType*(): Type {.inline.} = boolType
 proc getCharType*(): Type {.inline.} = charType
 
@@ -62,8 +62,8 @@ proc `$`*(t: Type): string =
   if t == nil: return "nilType"
   case t.kind
   of typeUndefined: "undefined"
-  of typeInt: "int"
-  of typeUint: "uint"
+  of typeInt64: "int"
+  of typeUint64: "uint"
   of typeBool: "bool"
   of typePtr: $t.ptrBaseType & "*"
   of typeChar: "char"
@@ -74,8 +74,8 @@ proc `$`*(t: Type): string =
 proc `$`*(k: TypeKind): string =
   case k
   of typeUndefined: "undefined"
-  of typeInt: "int"
-  of typeUint: "uint"
+  of typeInt64: "int"
+  of typeUint64: "uint"
   of typeBool: "bool"
   of typePtr: "ptr"
   of typeChar: "char"

@@ -3,10 +3,18 @@ import tokens
 type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax, errCannotAssign
-    errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, errUnclosedString, errUnclosedChar, errEmptyCharLiteral
-    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, errUnknownType, errCannotCast, errProhibitedType
+    errForbiddenLocation
+
+    errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, 
+    errUnclosedString, errUnclosedChar, errEmptyCharLiteral
+
+    errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, 
+    errUnknownType, errCannotCast, errProhibitedType
+
     errRedeclaration, errUndeclaredSymbol, errSpecial
+
     errUnknownPragma
+
     errArgumentCount
 
   CompileError* = ref object
@@ -28,6 +36,7 @@ proc message(kind: ErrorKind): string =
     of errStatement: "Expected statement, got @0"
     of errExpectedSyntax: "Expected @0, got @1"
     of errCannotAssign: "Cannot assign to this expression"
+    of errForbiddenLocation: "The statement is in the forbidden location"
     of errMismatchedBracket: "Mismatched bracket"
     of errUnexpectedBracket: "Unexpected closing bracket"
     of errUnclosedBracket: "Unclosed bracket"

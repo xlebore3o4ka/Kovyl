@@ -47,6 +47,15 @@ method visitTypeExpression*(visitor: Visitor, node: TypeExpression): auto {.base
 
 # STATEMENTS
 
+method visitWhileStatement*(visitor: Visitor, node: WhileStatement): auto {.base.} =
+  discard
+
+method visitBreakStatement*(visitor: Visitor, node: BreakStatement): auto {.base.} =
+  discard
+
+method visitContinueStatement*(visitor: Visitor, node: ContinueStatement): auto {.base.} =
+  discard
+
 method visitDeclarationStatement*(visitor: Visitor, node: DeclarationStatement): auto {.base.} =
   discard
 

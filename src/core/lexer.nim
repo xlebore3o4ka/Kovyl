@@ -125,8 +125,8 @@ const pairBracketTokens = {
 }.toTable
 
 const keywordsTokens = {
-  "int": tkInt,
-  "uint": tkUint,
+  "int": tkInt64, "int64": tkInt64,
+  "uint": tkUint64, "uint64": tkUint64,
   "bool": tkBool,
   "char": tkChar,
   "nul": tkNul,
@@ -139,6 +139,7 @@ const keywordsTokens = {
   "if": tkIf,
   "elif": tkElif,
   "else": tkElse,
+  "while": tkWhile,
   "break": tkBreak,
   "continue": tkContinue
 }.toTable

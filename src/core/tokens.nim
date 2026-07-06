@@ -22,14 +22,14 @@ type
     tkTrue
     tkFalse
 
-    tkInt
-    tkUint
+    tkInt64
+    tkUint64
     tkBool
     tkChar
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
-    tkBreak, tkContinue
+    tkWhile, tkBreak, tkContinue
 
     tkEOS
     tkEOF
@@ -80,8 +80,8 @@ proc mean*(kind: TokenKind): string =
   of tkRBrace: return "right brace '}'"
   of tkAnd: return "and operator 'and'"
   of tkOr: return "or operator 'or'"
-  of tkInt: return "int type"
-  of tkUint: return "uint type"
+  of tkInt64: return "int64 type"
+  of tkUint64: return "uint64 type"
   of tkBool: return "bool type"
   of tkChar: return "char type"
   of tkTrue: return "true literal"
@@ -94,6 +94,7 @@ proc mean*(kind: TokenKind): string =
   of tkIf: return "keyword if"
   of tkElif: return "keyword elif"
   of tkElse: return "keyword else"
+  of tkWhile: return "keyword while"
   of tkBreak: return "keyword break"
   of tkContinue: return "keyword continue"
 

@@ -70,6 +70,11 @@ type
     elifBlocks*: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
     elseBlock*: BlockStatement
 
+  WhileStatement* = ref object of Statement
+    token*: Token
+    condition*: Expression
+    whileBlock*: BlockStatement
+
   BreakStatement* = ref object of Statement
     token*: Token
 
@@ -148,7 +153,7 @@ proc newErrorExpression*(token: Token): ErrorExpression {.inline.} =
   ErrorExpression(token: token, returnType: getUndefinedType())
 
 proc newIntExpression*(value: Token): IntExpression {.inline.} =
-  IntExpression(token: value, returnType: getIntType())
+  IntExpression(token: value, returnType: getInt64Type())
 
 proc newBoolExpression*(value: Token): BoolExpression {.inline.} =
   BoolExpression(token: value, returnType: getBoolType())
@@ -163,6 +168,9 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newWhileStatement*(token: Token, condition: Expression, whileBlock: BlockStatement): WhileStatement {.inline.} =
+  WhileStatement(token: token, condition: condition, whileBlock: whileBlock)
 
 proc newBreakStatement*(token: Token): BreakStatement {.inline.} =
   BreakStatement(token: token)
