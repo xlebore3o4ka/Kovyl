@@ -1,46 +1,81 @@
 import ../[astnodes, tokens, types, errors]
 import visitor
-import std/tables
+import std/[tables, sequtils, strutils]
 
 type
   Symbol = object
     token: Token
     symbolType: Type
-    index: Natural
+    id: Natural
+    scopeLevel: Natural
+
+  Scope = object
+    startIndex: Natural
+    addedNames: seq[string]
 
   SemanticAnalyzerVisitor* = ref object of Visitor
     symbolTable: Table[string, Natural]
     scopedSymbolPool: seq[Symbol]
-    symbolIndex: Natural = 0
-    scopeStack: seq[Natural]
+    idToIndex: Table[Natural, Natural]
+    scopeStack: seq[Scope]
+    nextId: Natural = 0
+    history: seq[tuple[name: string, oldId: Natural]]
+
     loopIndex: Natural = 0
     expectedLiteralType: Type
 
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
+  let id = visitor.nextId
+  visitor.nextId.inc
+  
   let symbol = Symbol(
     token: token,
     symbolType: symbolType,
-    index: visitor.symbolTable.len
+    id: id,
+    scopeLevel: visitor.scopeStack.len
   )
-  let index = visitor.symbolIndex
-  visitor.symbolTable[token.lexeme] = index
-  visitor.symbolIndex.inc
-  visitor.scopedSymbolPool.setLen(visitor.symbolIndex)
-  visitor.scopedSymbolPool[index] = symbol
+  
+  let poolIndex = visitor.scopedSymbolPool.len
+  visitor.scopedSymbolPool.add(symbol)
+  visitor.idToIndex[id] = poolIndex
+  
+  let oldId = visitor.symbolTable.getOrDefault(token.lexeme, high(Natural))
+  visitor.history.add((token.lexeme, oldId))
+  visitor.symbolTable[token.lexeme] = id
+  
+  visitor.scopeStack[^1].addedNames.add(token.lexeme)
 
-proc getSymbol(visitor: SemanticAnalyzerVisitor, name: string): Symbol {.inline.} =
-  return visitor.scopedSymbolPool[visitor.symbolTable[name]]
+proc getSymbol(visitor: SemanticAnalyzerVisitor, name: string): Symbol =
+  let id = visitor.symbolTable[name]
+  let poolIndex = visitor.idToIndex[id]
+  return visitor.scopedSymbolPool[poolIndex]
 
-proc pushScope(visitor: SemanticAnalyzerVisitor) {.inline.} =
-  visitor.scopeStack.add(visitor.symbolIndex)
+proc pushScope(visitor: SemanticAnalyzerVisitor) =
+  let scope = Scope(startIndex: visitor.scopedSymbolPool.len, addedNames: @[])
+  visitor.scopeStack.add(scope)
 
-proc popScope(visitor: SemanticAnalyzerVisitor) {.inline.} =
-  visitor.symbolIndex = visitor.scopeStack.pop()
-  for symbol in visitor.scopedSymbolPool[visitor.symbolIndex..^1]:
-    visitor.symbolTable.del(symbol.token.lexeme)
+proc popScope(visitor: SemanticAnalyzerVisitor) =
+  let scope = visitor.scopeStack.pop()
+  
+  for name in scope.addedNames:
+    let oldId = visitor.history.pop().oldId
+    if oldId == high(Natural):
+      visitor.symbolTable.del(name)
+    else:
+      visitor.symbolTable[name] = oldId
+  
+  visitor.scopedSymbolPool.setLen(scope.startIndex)
+
+proc symbolExistsInCurrentScope(visitor: SemanticAnalyzerVisitor, name: string): bool =
+  let scope = visitor.scopeStack[^1]
+  for i in scope.startIndex ..< visitor.scopedSymbolPool.len:
+    if visitor.scopedSymbolPool[i].token.lexeme == name:
+      return true
+  return false
 
 proc newSemanticAnalyzerVisitor*(): SemanticAnalyzerVisitor =
-  SemanticAnalyzerVisitor(expectedLiteralType: getUndefinedType())
+  result = SemanticAnalyzerVisitor(expectedLiteralType: getUndefinedType())
+  result.pushScope()
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) {.base.}
 
@@ -59,28 +94,37 @@ method visitNumberExpression*(visitor: SemanticAnalyzerVisitor, node: NumberExpr
 
 method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpression): auto =
   visitor.visitExpression(node.left)
+
+  let temp = visitor.expectedLiteralType
+  visitor.expectedLiteralType = node.left.returnType
+
   visitor.visitExpression(node.right)
 
+  visitor.expectedLiteralType = temp
+
+  if isNumber(node.left.returnType) and isNumber(node.right.returnType) and 
+        node.left.returnType != node.right.returnType:
+    let temp = visitor.expectedLiteralType
+    visitor.expectedLiteralType = node.right.returnType
+
+    visitor.visitExpression(node.left)
+
+    visitor.expectedLiteralType = temp
+
   case node.token.kind:
-  of tkPlus, tkMinus, tkStar, tkSlash:
-    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
-      node.returnType = getInt64Type()
-      
-    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
-      node.returnType = getUint64Type()
+  of tkPlus, tkMinus, tkStar, tkSlash, tkPercent:
+    if isNumber(node.left.returnType) and isNumber(node.right.returnType) and 
+        node.left.returnType == node.right.returnType:
+      node.returnType = node.left.returnType
 
   of tkGT, tkLT, tkGTE, tkLTE:
-    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
-      node.returnType = getBoolType()
-
-    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
+    if isNumber(node.left.returnType) and isNumber(node.right.returnType) and 
+        node.left.returnType == node.right.returnType:
       node.returnType = getBoolType()
 
   of tkEQ, tkNEQ:
-    if node.left.returnType == getInt64Type() and node.right.returnType == getInt64Type():
-      node.returnType = getBoolType()
-
-    elif node.left.returnType == getUint64Type() and node.right.returnType == getUint64Type():
+    if isNumber(node.left.returnType) and isNumber(node.right.returnType) and 
+        node.left.returnType == node.right.returnType:
       node.returnType = getBoolType()
       
     if node.left.returnType == getCharType() and node.right.returnType == getCharType():
@@ -210,7 +254,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
 
   visitor.expectedLiteralType = getUndefinedType()
 
-  if node.name.lexeme in visitor.symbolTable:
+  if visitor.symbolExistsInCurrentScope(node.name.lexeme):
     let name = visitor.getSymbol(node.name.lexeme).token
     newError(errRedeclaration, node.name, 
       @{"@0": node.name.lexeme, "@1": name.file, "@2": $name.line, "@3": $name.column}
@@ -344,6 +388,13 @@ proc expectArgsLen(self: SpecialExpression | SpecialStatement, len: int) {.inlin
   if self.args.len != len:
     newError(errArgumentCount, self.token, @{"@0": $self.token.lexeme, "@1": $len, "@2": $self.args.len})
 
+proc getArgsLenOf(self: SpecialExpression | SpecialStatement, lens: varargs[int]): int {.inline.} =
+  if self.args.len notin lens:
+    let expected = lens.mapIt($it).join(", ")
+    newError(errArgumentCount, self.token, @{"@0": $self.token.lexeme, 
+      "@1": expected, "@2": $self.args.len})
+  return self.args.len
+
 proc get(self: SpecialExpression | SpecialStatement, idx: int): Expression {.inline.} =
   return self.args[idx]
 
@@ -355,11 +406,43 @@ proc getTyped(self: SpecialExpression | SpecialStatement, idx: int,
     result = newErrorExpression(result.token)
 
 proc getTypedAny(self: SpecialExpression | SpecialStatement, idx: int, 
-    expectedTypes: set[TypeKind]): Expression {.inline.} =
+    expectedTypes: varargs[TypeKind]): Expression {.inline.} =
   result = self.args[idx]
   if result.returnType.kind notin expectedTypes:
     newError(errTypeMismatch, result.token, @{"@0": $expectedTypes, "@1": $result.returnType})
     result = newErrorExpression(result.token)
+
+proc getTyped(self: SpecialExpression | SpecialStatement, idx: int, 
+    expectedType: Type): Expression {.inline.} =
+  result = self.args[idx]
+  if result.returnType != expectedType:
+    newError(errTypeMismatch, result.token, @{"@0": $expectedType, "@1": $result.returnType})
+    result = newErrorExpression(result.token)
+#[
+proc getTypedAny(self: SpecialExpression | SpecialStatement, idx: int, 
+    expectedTypes: varargs[Type]): Expression {.inline.} =
+  result = self.args[idx]
+  if result.returnType notin expectedTypes:
+    newError(errTypeMismatch, result.token, @{"@0": $expectedTypes, "@1": $result.returnType})
+    result = newErrorExpression(result.token)
+]#
+proc getNumber(self: SpecialExpression | SpecialStatement, idx: int): Expression {.inline.} =
+  result = self.args[idx]
+  if not isNumber(result.returnType):
+    newError(errTypeMismatch, result.token, @{"@0": "number", "@1": $result.returnType})
+    result = newErrorExpression(result.token)
+
+proc allowedNamedArgs(self: SpecialExpression | SpecialStatement, names: seq[(string, Type)] = @[]) =
+  for name, expr in self.namedArgs.pairs:
+    var found = false
+    for (allowedName, allowedType) in names:
+      if name.lexeme == allowedName:
+        found = true
+        if expr.returnType != allowedType:
+          newError(errTypeMismatch, expr.token, @{"@0": $allowedType, "@1": $expr.returnType})
+        break
+    if not found:
+      newError(errUnexpectedArgument, expr.token, @{"@0": name.lexeme})
 
 method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialExpression): auto =
   for arg in node.args:
@@ -368,23 +451,31 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
   case node.kind:
   of skNew: 
     node.expectArgsLen(1)
+    node.allowedNamedArgs()
+
     node.returnType = getPtrType(node.get(0).returnType)
 
   of skArr: 
     node.expectArgsLen(2)
+    node.allowedNamedArgs()
 
     let arrayBaseType = node.get(0)
-    if not (arrayBaseType of TypeExpression):
-      newError(errTypeMismatch, arrayBaseType.token, @{"@0": "type", "@1": $arrayBaseType.returnType})
+    if arrayBaseType.returnType != visitor.expectedLiteralType:
+      newError(errTypeMismatch, arrayBaseType.token, @{"@0": $visitor.expectedLiteralType, 
+        "@1": $arrayBaseType.returnType})
       return
+    if arrayBaseType of TypeExpression:
+      node.namedArgs[newFrom(node.token, lexeme="@UseDefault")] = 
+        newErrorExpression(newFrom(node.token, kind=tkTrue))
 
-    let size = node.getTyped(1, typeUint64)
+    let size = node.getNumber(1)
     if size of ErrorExpression: return
 
     node.returnType = getArrayType(arrayBaseType.returnType)
 
   of skLen:
     node.expectArgsLen(1)
+    node.allowedNamedArgs()
 
     let arr = node.getTyped(0, typeArray)
     if arr of ErrorExpression: return
@@ -398,7 +489,9 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
     visitor.visitExpression(arg)
   
   case node.kind:
-  of skOut:
+  of skPrint:
+    node.allowedNamedArgs(@{"term": getCharType()})
+
     for arg in node.args:
       if arg.returnType == getArrayType(getCharType()):
         continue
@@ -407,9 +500,18 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
   
   of skFree:
     node.expectArgsLen(1)
-    let arg = node.getTypedAny(0, {typePtr, typeArray})
+    node.allowedNamedArgs()
+
+    let arg = node.getTypedAny(0, typePtr, typeArray)
     if arg of ErrorExpression: return
-  
+
+  of skAssert:
+    node.allowedNamedArgs()
+    discard node.getTyped(0, typeBool)
+
+    if node.getArgsLenOf(1, 2) == 2:
+      discard node.getTyped(1, getArrayType(getCharType()))
+      
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled special statement"
 
@@ -455,8 +557,6 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitBranchingStatement(BranchingStatement(node))
   elif node of SpecialStatement:
     visitor.visitSpecialStatement(SpecialStatement(node))
-  elif node of BranchingStatement:
-    visitor.visitBranchingStatement(BranchingStatement(node))
   elif node of SpecialStatement:
     visitor.visitSpecialStatement(SpecialStatement(node))
   elif node of BreakStatement:

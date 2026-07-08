@@ -64,21 +64,36 @@ proc parseSpecialExpr(self: var Parser, name: Token): Expression =
   discard self.lexer.nextToken()
 
   var args: seq[Expression] = @[]
+  var namedArgs: Table[Token, Expression] = initTable[Token, Expression]()
 
   if self.lexer.peekToken().kind == tkLParen:
     discard self.lexer.nextToken()
-    args.add(self.parseExpr())
+    
+    while true:
+      let rd = self.lexer.getRollbackData()
+      let token = self.lexer.peekToken()
 
-    while self.lexer.peekToken().kind == tkComma:
-      discard self.lexer.nextToken()
-
+      if token.kind == tkIdentifier:
+        discard self.lexer.nextToken()
+        let next = self.lexer.nextToken()
+        if next.kind == tkEqual:
+          let value = self.parseExpr()
+          namedArgs[token] = value
+        else:
+          self.lexer.rollback(rd)
+          args.add(self.parseExpr())
+      else:
+        args.add(self.parseExpr())
+      
+      if self.lexer.peekToken().kind in {tkRParen, tkEOF}:
+        break
+      
+      discard self.expectToken(tkComma)
+      
       if self.lexer.peekToken().kind == tkEOS:
         discard self.lexer.nextToken()
-
-      args.add(self.parseExpr())
-
+    
     discard self.expectToken(tkRParen)
-
   else:
     args.add(self.parseExpr())
 
@@ -87,7 +102,7 @@ proc parseSpecialExpr(self: var Parser, name: Token): Expression =
   if specialKind == skExprError:
     return newErrorExpression(name)
 
-  return newSpecialExpression(name, specialKind, args)
+  return newSpecialExpression(name, specialKind, args, namedArgs)
 
 proc parsePrimary(self: var Parser): Expression =
   let token = self.lexer.nextToken()
@@ -152,9 +167,14 @@ proc parsePrimary(self: var Parser): Expression =
   return newErrorExpression(token)
 
 proc parsePrefix(self: var Parser): Expression =
-  if self.lexer.peekToken().kind in {tkPlus, tkMinus, tkNot}:
+  let token = self.lexer.peekToken()
+  if token.kind in {tkPlus, tkMinus, tkNot}:
     let token = self.lexer.nextToken()
     return newUnaryExpression(self.parsePrefix(), token)
+
+  elif token.kind == tkDollar:
+    discard self.lexer.nextToken()
+    result = newDerefExpression(token, self.parsePrefix())
 
   return self.parsePrimary()
 
@@ -169,19 +189,14 @@ proc parsePostfix(self: var Parser): Expression =
       result = newCastExpression(token, castType, result)
 
     elif token.kind == tkLBracket:
-      if self.lexer.peekToken().kind == tkRBracket:
-        discard self.lexer.nextToken()
-        result = newDerefExpression(token, result)
-
-      else:
-        let index = self.parseExpr()
-        discard self.expectToken(tkRBracket)
-        result = newIndexExpression(token, result, index)
+      let index = self.parseExpr()
+      discard self.expectToken(tkRBracket)
+      result = newIndexExpression(token, result, index)
 
 proc parseMulDiv(self: var Parser): Expression =
   result = self.parsePostfix()
 
-  while self.lexer.peekToken().kind in {tkStar, tkSlash}:
+  while self.lexer.peekToken().kind in {tkStar, tkSlash, tkPercent}:
     let op = self.lexer.nextToken()
     let right = self.parsePostfix()
     result = newBinaryExpression(result, op, right)
@@ -326,14 +341,28 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
   
   let name = IdentifierExpression(left).token
   var args: seq[Expression] = @[]
+  var namedArgs: Table[Token, Expression] = initTable[Token, Expression]()
   
   if self.lexer.peekToken().kind == tkLParen:
     discard self.lexer.nextToken()
     
     while true:
-      args.add(self.parseExpr())
+      let rd = self.lexer.getRollbackData()
+      let token = self.lexer.peekToken()
+
+      if token.kind == tkIdentifier:
+        discard self.lexer.nextToken()
+        let next = self.lexer.nextToken()
+        if next.kind == tkEqual:
+          let value = self.parseExpr()
+          namedArgs[token] = value
+        else:
+          self.lexer.rollback(rd)
+          args.add(self.parseExpr())
+      else:
+        args.add(self.parseExpr())
       
-      if self.lexer.peekToken().kind == tkRParen:
+      if self.lexer.peekToken().kind in {tkRParen, tkEOF}:
         break
       
       discard self.expectToken(tkComma)
@@ -350,7 +379,7 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
   if specialKind == skStmtError:
     return newErrorStatement(name)
   
-  return newSpecialStatement(name, specialKind, args)
+  return newSpecialStatement(name, specialKind, args, namedArgs)
 
 proc parseWhile(self: var Parser): Statement =
   let token = self.lexer.nextToken()

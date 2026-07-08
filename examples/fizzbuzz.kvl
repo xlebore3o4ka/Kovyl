@@ -1,0 +1,21 @@
+int n = 10  # INPUT
+
+int i = 0
+while i <= n do
+  char[] buf = arr:(char, 32)
+  int len = 0
+
+  if i % 3 == 0 do
+  	buf[len] = 'F' ; len = len + 1
+  	buf[len] = 'i' ; len = len + 1
+  	buf[len] = 'z' ; len = len + 1
+  	buf[len] = 'z' ; len = len + 1
+  if i % 5 == 0 do
+  	buf[len] = 'b' ; len = len + 1
+  	buf[len] = 'u' ; len = len + 1
+  	buf[len] = 'z' ; len = len + 1
+  	buf[len] = 'z' ; len = len + 1
+  else
+    char c = '\0'
+  end
+end

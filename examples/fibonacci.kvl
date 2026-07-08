@@ -1,0 +1,21 @@
+int n = 10  # INPUT
+
+int first = 0
+int second = 1
+int result = 0
+
+if n < 2 do 
+  result = n
+else
+  int i = 2
+  while i <= n do
+    int next = first + second
+    first = second
+    second = next
+    result = next
+    i = i + 1
+  end
+end
+
+print: result  # OUTPUT
+assert: result == 55

@@ -15,7 +15,7 @@ type
 
     errUnknownPragma
 
-    errArgumentCount
+    errArgumentCount, errUnexpectedArgument
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -55,6 +55,7 @@ proc message(kind: ErrorKind): string =
     of errSpecial: "Unknown special"
     of errUnknownPragma: "Unknown pragma"
     of errArgumentCount: "Invalid number of arguments for '@0' (expected @1, got @2)"
+    of errUnexpectedArgument: "Unexpected named argument '@0'"
 
 proc newError*(
               kind: ErrorKind, token: Token, 

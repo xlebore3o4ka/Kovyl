@@ -6,10 +6,10 @@ type
     tkIdentifier
     tkNul
 
-    tkPlus, tkMinus, tkStar, tkSlash
+    tkPlus, tkMinus, tkStar, tkSlash, tkPercent
     tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
     tkEqual, tkNot
-    tkColon, tkComma, tkArrow
+    tkColon, tkComma, tkArrow, tkDollar
     tkHash, tkPragma
 
     tkLParen, tkRParen
@@ -48,6 +48,17 @@ func newToken*(
               line: Positive, column: Positive, offset: Natural): Token =
   Token(kind: kind, lexeme: lexeme, file: file, line: line, column: column, offset: offset)
 
+func newFrom*(
+    token: Token,
+    kind: TokenKind = token.kind,
+    lexeme: string = token.lexeme,
+    file: string = token.file,
+    line: Positive = token.line,
+    column: Positive = token.column,
+    offset: Natural = token.offset
+): Token =
+  Token(kind: kind, lexeme: lexeme, file: file, line: line, column: column, offset: offset)
+
 proc mean*(kind: TokenKind): string =
   case kind:
   of tkIntLiteral: return "int literal"
@@ -59,6 +70,7 @@ proc mean*(kind: TokenKind): string =
   of tkMinus: return "minus operator '-'"
   of tkStar: return "star operator '*'"
   of tkSlash: return "slash operator '/'"
+  of tkPercent: return "percent operator '%'"
   of tkEQ: return "equals operator '=='"
   of tkNEQ: return "not equals operator '!='"
   of tkGT: return "greater operator '>'"
@@ -70,6 +82,7 @@ proc mean*(kind: TokenKind): string =
   of tkColon: return "colon operator ':'"
   of tkComma: return "comma operator ','"
   of tkArrow: return "arrow operator '->'"
+  of tkDollar: return "dollar operator '$'"
   of tkHash: return "hash operator '#'"
   of tkPragma: return "pragma operator '#!'"
   of tkLParen: return "left parenthesis '('"

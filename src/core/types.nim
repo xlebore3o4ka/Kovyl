@@ -108,9 +108,9 @@ proc `$`*(k: TypeKind): string =
   of typeUint16: "uint16"
   of typeUint8: "uint8"
   of typeBool: "bool"
-  of typePtr: "ptr"
+  of typePtr: "type*"
   of typeChar: "char"
-  of typeArray: "array"
+  of typeArray: "type[]"
   of typeNul: "nul"
 
 proc getPrimitiveType*(t: Type): Type =

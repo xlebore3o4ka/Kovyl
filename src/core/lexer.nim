@@ -88,10 +88,12 @@ const operatorTokens = {
   "-": tkMinus,
   "*": tkStar,
   "/": tkSlash,
+  "%": tkPercent,
   "=": tkEqual,
   ":": tkColon,
   ",": tkComma,
   "->": tkArrow,
+  "$": tkDollar,
   "!": tkNot,
   ">": tkGT,
   "<": tkLT,
@@ -259,9 +261,17 @@ proc nextToken*(self: var Lexer): Token =
       self.advance()
       return result
     
-    let ch = $self.peek
+    var ch = $self.peek
     self.advance()
-    
+    if ch == "\\":
+      case self.peek:
+      of 'n'.Rune: ch = "\n"
+      of '0'.Rune: ch = "\0"
+      of 'r'.Rune: ch = "\r"
+      of 't'.Rune: ch = "\t"
+      else: discard
+      self.advance()
+
     if self.peek != '\''.Rune:
       self.newError(errUnclosedChar, self.file, self.line, self.column, self.pos, 1)
       result = tkInvalid.newToken(ch, self.file, self.line, column, start)

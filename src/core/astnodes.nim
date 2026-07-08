@@ -1,4 +1,5 @@
 import types, tokens, errors
+import std/tables
 
 type
   # EXPRESSIONS
@@ -90,23 +91,25 @@ type
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
     args*: seq[Expression]
+    namedArgs*: Table[Token, Expression]
 
   SpecialStmtKind* = enum
     skStmtError
-    skOut, skFree
+    skPrint, skFree, skAssert
 
   SpecialStatement* = ref object of Statement
     token*: Token
     kind*: SpecialStmtKind
     args*: seq[Expression]
+    namedArgs*: Table[Token, Expression]
 
-# SPECIALS
+proc newSpecialExpression*(token: Token, kind: SpecialExprKind, args: seq[Expression],
+    namedArgs: Table[Token, Expression]): SpecialExpression =
+  SpecialExpression(token: token, kind: kind, args: args, namedArgs: namedArgs, returnType: getUndefinedType())
 
-proc newSpecialExpression*(token: Token, kind: SpecialExprKind, args: seq[Expression]): SpecialExpression =
-  SpecialExpression(token: token, kind: kind, args: args, returnType: getUndefinedType())
-
-proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, args: seq[Expression]): SpecialStatement =
-  SpecialStatement(token: token, kind: kind, args: args)
+proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, args: seq[Expression],
+    namedArgs: Table[Token, Expression]): SpecialStatement =
+  SpecialStatement(token: token, kind: kind, args: args, namedArgs: namedArgs)
 
 proc getSpecialExprKind*(token: Token): SpecialExprKind =
   case token.lexeme
@@ -119,8 +122,9 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
 
 proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
   case token.lexeme
-  of "out": skOut
+  of "print": skPrint
   of "free": skFree
+  of "assert": skAssert
   else:
     newError(errSpecial, token)
     return skStmtError
