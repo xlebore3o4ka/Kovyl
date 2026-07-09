@@ -11,7 +11,7 @@ type
     errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, 
     errUnknownType, errCannotCast, errProhibitedType
 
-    errRedeclaration, errUndeclaredSymbol, errSpecial
+    errRedeclaration, errUndeclaredSymbol, errStmtSpecial, errExprSpecial
 
     errUnknownPragma
 
@@ -52,7 +52,8 @@ proc message(kind: ErrorKind): string =
     of errProhibitedType: "@0 is a prohibited type in this construction"
     of errRedeclaration: "Redeclaration of symbol '@0', originally declared at @1(@2:@3)"
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
-    of errSpecial: "Unknown special"
+    of errStmtSpecial: "Unknown special statement"
+    of errExprSpecial: "Unknown special expression"
     of errUnknownPragma: "Unknown pragma"
     of errUnexpectedNamedArgument: "Unexpected named argument '@0'"
     of errUnexpectedArgument: "Unexpected argument at position @0"

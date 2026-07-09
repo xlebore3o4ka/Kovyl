@@ -1,1 +1,1 @@
-print:fmt:("string", 10, true, 'c')
+print:(fmt:("Count: ", 10), term=" ")  # Будет работать?

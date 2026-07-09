@@ -114,7 +114,7 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
   of "len": skLen
   of "fmt": skFmt
   else:
-    newError(errSpecial, token)
+    newError(errExprSpecial, token)
     return skExprError
 
 proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
@@ -123,7 +123,7 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
   of "free": skFree
   of "assert": skAssert
   else:
-    newError(errSpecial, token)
+    newError(errStmtSpecial, token)
     return skStmtError
 
 # EXPRESSIONS

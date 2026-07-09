@@ -353,7 +353,7 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
   let token = self.lexer.nextToken()
   
   if not (left of IdentifierExpression):
-    self.newError(errSpecial, token)
+    self.newError(errStmtSpecial, token)
     return newErrorStatement(token)
   
   let name = IdentifierExpression(left).token

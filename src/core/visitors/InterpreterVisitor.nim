@@ -443,7 +443,7 @@ proc format(values: varargs[Value], sep="", repr=false, escape=false): string =
       if escape:
         c = strutils.escape(c)
       if repr:
-        c = c.repr
+        c = "'" & c & "'"
       result &= c
     elif val.valueType == getArrayType(getCharType()):
       var s = ""

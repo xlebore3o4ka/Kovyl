@@ -1,0 +1,24 @@
+char[] s = "(()()("  # INPUT
+
+bool result = true
+int counter = 0
+int i = 0
+while i < len:s do
+  char c = s[i]
+  if c == '(' do
+    counter = counter + 1
+  elif c == ')' do
+    counter = counter - 1
+    if counter < 0 do
+      result = false
+      break
+    end
+  end
+  i = i + 1
+end
+if result do
+  result = counter == 0
+end
+
+print: result  # OUTPUT
+assert: !result
