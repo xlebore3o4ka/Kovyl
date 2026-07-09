@@ -90,8 +90,7 @@ type
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
-    args*: seq[Expression]
-    namedArgs*: Table[Token, Expression]
+    namedArgs*: OrderedTable[Token, Expression]
 
   SpecialStmtKind* = enum
     skStmtError
@@ -100,16 +99,13 @@ type
   SpecialStatement* = ref object of Statement
     token*: Token
     kind*: SpecialStmtKind
-    args*: seq[Expression]
-    namedArgs*: Table[Token, Expression]
+    namedArgs*: OrderedTable[Token, Expression]
 
-proc newSpecialExpression*(token: Token, kind: SpecialExprKind, args: seq[Expression],
-    namedArgs: Table[Token, Expression]): SpecialExpression =
-  SpecialExpression(token: token, kind: kind, args: args, namedArgs: namedArgs, returnType: getUndefinedType())
+proc newSpecialExpression*(token: Token, kind: SpecialExprKind, namedArgs: OrderedTable[Token, Expression]): SpecialExpression =
+  SpecialExpression(token: token, kind: kind, namedArgs: namedArgs, returnType: getUndefinedType())
 
-proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, args: seq[Expression],
-    namedArgs: Table[Token, Expression]): SpecialStatement =
-  SpecialStatement(token: token, kind: kind, args: args, namedArgs: namedArgs)
+proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, namedArgs: OrderedTable[Token, Expression]): SpecialStatement =
+  SpecialStatement(token: token, kind: kind, namedArgs: namedArgs)
 
 proc getSpecialExprKind*(token: Token): SpecialExprKind =
   case token.lexeme

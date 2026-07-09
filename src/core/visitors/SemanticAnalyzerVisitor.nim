@@ -1,6 +1,6 @@
 import ../[astnodes, tokens, types, errors]
 import visitor
-import std/[tables, sequtils, strutils]
+import std/[tables, strutils]
 
 type
   Symbol = object
@@ -384,133 +384,103 @@ method visitWhileStatement*(visitor: SemanticAnalyzerVisitor, node: WhileStateme
 
 # SPECIALS
 
-proc expectArgsLen(self: SpecialExpression | SpecialStatement, len: int) {.inline.} =
-  if self.args.len != len:
-    newError(errArgumentCount, self.token, @{"@0": $self.token.lexeme, "@1": $len, "@2": $self.args.len})
+proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
+  for token, _ in self.namedArgs.pairs:
+    let key = token.lexeme
+    if key notin expected:
+      if token.kind == tkIdentifier:
+        newError(errUnexpectedNamedArgument, token, @{"@0": key})
+      else:
+        newError(errUnexpectedArgument, token, @{"@0": key})
 
-proc getArgsLenOf(self: SpecialExpression | SpecialStatement, lens: varargs[int]): int {.inline.} =
-  if self.args.len notin lens:
-    let expected = lens.mapIt($it).join(", ")
-    newError(errArgumentCount, self.token, @{"@0": $self.token.lexeme, 
-      "@1": expected, "@2": $self.args.len})
-  return self.args.len
+proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
+  for token, expr in self.namedArgs.pairs:
+    let k = if token.kind == tkIntLiteral: token.lexeme else: token.lexeme
+    if k == key:
+      return expr
+  newError(errMissingArgument, self.token, @{"@0": key})
+  return newErrorExpression(self.token)
 
-proc get(self: SpecialExpression | SpecialStatement, idx: int): Expression {.inline.} =
-  return self.args[idx]
+proc expectNumber(self: SpecialExpression | SpecialStatement, key: string): bool =
+  let expr = self.get(key)
+  if expr of ErrorExpression: return false
+  if not isNumber(expr.returnType):
+    newError(errTypeMismatch, expr.token, @{"@0": "number", "@1": $expr.returnType})
+    return false
+  return true
 
-proc getTyped(self: SpecialExpression | SpecialStatement, idx: int, 
-    expectedType: TypeKind): Expression {.inline.} =
-  result = self.args[idx]
-  if result.returnType.kind != expectedType:
-    newError(errTypeMismatch, result.token, @{"@0": $expectedType, "@1": $result.returnType})
-    result = newErrorExpression(result.token)
+proc add(self: SpecialExpression | SpecialStatement, key: string, expr: Expression) =
+  let token = tkIdentifier.newToken(key, self.token.file, self.token.line, self.token.column, self.token.offset)
+  self.namedArgs[token] = expr
 
-proc getTypedAny(self: SpecialExpression | SpecialStatement, idx: int, 
-    expectedTypes: varargs[TypeKind]): Expression {.inline.} =
-  result = self.args[idx]
-  if result.returnType.kind notin expectedTypes:
-    newError(errTypeMismatch, result.token, @{"@0": $expectedTypes, "@1": $result.returnType})
-    result = newErrorExpression(result.token)
+proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
+  for token, _ in self.namedArgs.pairs:
+    let k = token.lexeme
+    if k == key:
+      return true
+  return false
 
-proc getTyped(self: SpecialExpression | SpecialStatement, idx: int, 
-    expectedType: Type): Expression {.inline.} =
-  result = self.args[idx]
-  if result.returnType != expectedType:
-    newError(errTypeMismatch, result.token, @{"@0": $expectedType, "@1": $result.returnType})
-    result = newErrorExpression(result.token)
-#[
-proc getTypedAny(self: SpecialExpression | SpecialStatement, idx: int, 
-    expectedTypes: varargs[Type]): Expression {.inline.} =
-  result = self.args[idx]
-  if result.returnType notin expectedTypes:
-    newError(errTypeMismatch, result.token, @{"@0": $expectedTypes, "@1": $result.returnType})
-    result = newErrorExpression(result.token)
-]#
-proc getNumber(self: SpecialExpression | SpecialStatement, idx: int): Expression {.inline.} =
-  result = self.args[idx]
-  if not isNumber(result.returnType):
-    newError(errTypeMismatch, result.token, @{"@0": "number", "@1": $result.returnType})
-    result = newErrorExpression(result.token)
+proc allow(self: SpecialExpression | SpecialStatement, key: string, typ: Type) =
+  if self.has(key):
+    let expr = self.get(key)
+    if expr.returnType != typ:
+      newError(errTypeMismatch, expr.token, @{"@0": $typ, "@1": $expr.returnType})
 
-proc allowedNamedArgs(self: SpecialExpression | SpecialStatement, names: seq[(string, Type)] = @[]) =
-  for name, expr in self.namedArgs.pairs:
-    var found = false
-    for (allowedName, allowedType) in names:
-      if name.lexeme == allowedName:
-        found = true
-        if expr.returnType != allowedType:
-          newError(errTypeMismatch, expr.token, @{"@0": $allowedType, "@1": $expr.returnType})
-        break
-    if not found:
-      newError(errUnexpectedArgument, expr.token, @{"@0": name.lexeme})
+proc expect(self: SpecialExpression | SpecialStatement, key: string, typ: Type): bool =
+  let expr = self.get(key)
+  if expr of ErrorExpression: return false
+  if expr.returnType != typ:
+    newError(errTypeMismatch, expr.token, @{"@0": $typ, "@1": $expr.returnType})
+    return false
+  return true
 
 method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialExpression): auto =
-  for arg in node.args:
-    visitor.visitExpression(arg)
+  for _, expr in node.namedArgs.pairs:
+    visitor.visitExpression(expr)
 
   case node.kind:
   of skNew: 
-    node.expectArgsLen(1)
-    node.allowedNamedArgs()
-
-    node.returnType = getPtrType(node.get(0).returnType)
+    node.checkUnexpected(expected = @["0"])
+    node.returnType = getPtrType(node.get("0").returnType)
 
   of skArr: 
-    node.expectArgsLen(2)
-    node.allowedNamedArgs()
-
-    let arrayBaseType = node.get(0)
-    if arrayBaseType.returnType != visitor.expectedLiteralType:
-      newError(errTypeMismatch, arrayBaseType.token, @{"@0": $visitor.expectedLiteralType, 
-        "@1": $arrayBaseType.returnType})
-      return
-    if arrayBaseType of TypeExpression:
-      node.namedArgs[newFrom(node.token, lexeme="@UseDefault")] = 
-        newErrorExpression(newFrom(node.token, kind=tkTrue))
-
-    let size = node.getNumber(1)
-    if size of ErrorExpression: return
-
-    node.returnType = getArrayType(arrayBaseType.returnType)
+    node.checkUnexpected(expected = @["0", "1"])
+    if not node.expectNumber("1"): return
+    let expr = node.get("0")
+    if expr of TypeExpression:
+      node.add("@", newBoolExpression(expr.token.newFrom(tkTrue)))
+    node.returnType = getArrayType(expr.returnType)
 
   of skLen:
-    node.expectArgsLen(1)
-    node.allowedNamedArgs()
+    node.checkUnexpected(expected = @["0"])
+    if (let returnType = node.get("0").returnType; returnType).kind != typeArray:
+      newError(errTypeMismatch, node.token, @{"@0": $typeArray, "@1": $returnType})
+    node.returnType = getInt64Type()
 
-    let arr = node.getTyped(0, typeArray)
-    if arr of ErrorExpression: return
-
-    node.returnType = getUint64Type()
   else: 
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled special expression"
 
 method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialStatement): auto =
-  for arg in node.args:
-    visitor.visitExpression(arg)
+  for _, expr in node.namedArgs.pairs:
+    visitor.visitExpression(expr)
   
   case node.kind:
   of skPrint:
-    node.allowedNamedArgs(@{"term": getCharType()})
+    node.allow("term", getArrayType(getCharType()))
+    for token, _ in node.namedArgs.pairs:
+      if token.kind != tkIntLiteral and token.lexeme != "term":
+        let err = if token.kind == tkIdentifier: errUnexpectedNamedArgument
+          else: errUnexpectedArgument
+        newError(err, token, @{"@0": token.lexeme})
 
-    for arg in node.args:
-      if arg.returnType == getArrayType(getCharType()):
-        continue
-      elif arg.returnType.kind in {typePtr, typeArray, typeNul}:
-        newError(errProhibitedType, arg.token, @{"@0": $arg.returnType})
-  
   of skFree:
-    node.expectArgsLen(1)
-    node.allowedNamedArgs()
-
-    let arg = node.getTypedAny(0, typePtr, typeArray)
-    if arg of ErrorExpression: return
+    if (let returnType = node.get("0").returnType; returnType).kind notin {typeArray, typePtr}:
+      newError(errProhibitedType, node.token, @{"@0": $returnType})
 
   of skAssert:
-    node.allowedNamedArgs()
-    discard node.getTyped(0, typeBool)
-
-    if node.getArgsLenOf(1, 2) == 2:
-      discard node.getTyped(1, getArrayType(getCharType()))
+    node.checkUnexpected(expected = @["0", "1"])
+    discard node.expect("0", getBoolType())
+    node.allow("1", getArrayType(getCharType()))
       
   else:
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled special statement"

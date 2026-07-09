@@ -415,95 +415,105 @@ method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): 
 
 # SPECIALS
 
+proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
+  for token, expr in self.namedArgs.pairs:
+    let k = if token.kind == tkIntLiteral: token.lexeme else: token.lexeme
+    if k == key:
+      return expr
+  return newErrorExpression(self.token)
+
+proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
+  for token, _ in self.namedArgs.pairs:
+    let k = token.lexeme
+    if k == key:
+      return true
+  return false
+
 method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpression): Value {.base.} =
   case node.kind:
-  of skNew: 
-    let val = visitor.visitExpression(node.args[0])
+  of skNew:
+    let val = visitor.visitExpression(node.get("0"))
     let ptrValue = new(Value)
     ptrValue[] = val
     return newPtrValue(ptrValue, val.valueType)
 
-  of skArr:     
-    let sizeVal = visitor.visitExpression(node.args[1])
-
-    let size = sizeVal.intValue
+  of skArr:
+    let sizeExpr = node.get("1")
+    let sizeVal = visitor.visitExpression(sizeExpr)
+    let size = int(uintValue(sizeVal))
+    
+    let baseType = node.get("0").returnType
     var elements: seq[Value]
-    var useDefault = false
 
-    for name, expr in node.namedArgs.pairs:
-      if name.lexeme == "@UseDefault": useDefault = true
-
-    if useDefault:
+    if node.has("@"):
       for i in 0..<size:
-        let baseType = node.args[0].returnType
         elements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
     else:
+      let initExpr = node.get("0")
       for i in 0..<size:
-        elements.add(visitor.visitExpression(node.args[0]))
+        elements.add(visitor.visitExpression(initExpr))
+    return newArrayValue(elements, baseType)
 
-    return newArrayValue(elements, node.args[0].returnType)
+  of skLen:
+    let arr = visitor.visitExpression(node.get("0"))
+    if arr.valueTypeKind != typeArray:
+      raise newException(RuntimeError, "len expects array")
+    return newInt64Value(int64(arr.arrayValue.elements.len))
 
-  of skLen: 
-    let arr = visitor.visitExpression(node.args[0])
-    return arr.arrayValue.length
-
-  else: 
+  else:
     echo "[InterpreterVisitor] WARNING: unhandled special expression"
-
-proc specialPrint(visitor: InterpreterVisitor, node: SpecialStatement) =
-  for arg in node.args:
-      let val = visitor.visitExpression(arg)
-      case val.valueTypeKind:
-      of typeInt64: stdout.write($val.int64Value)
-      of typeUint64: stdout.write($val.uint64Value)
-      of typeBool: stdout.write($val.boolValue)
-      of typeChar: stdout.write(val.charValue)
-      of typeArray:
-        if val.valueType.arrayBaseType == getCharType():
-          var s = ""
-          for ch in val.arrayValue.elements:
-            if ch.charValue == '\0': break
-            s.add(ch.charValue)
-          stdout.write(s)
-        else:
-          raise newException(RuntimeError, "Cannot output " & $val.valueType)
-      else: raise newException(RuntimeError, "Cannot output " & $val.valueType)
 
 method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatement): auto =
   case node.kind:
   of skPrint:
-    var terminator = '\n'
-
-    for name, expr in node.namedArgs.pairs:
-      if name.lexeme == "term": terminator = visitor.visitExpression(expr).charValue
-
-    visitor.specialPrint(node)
-    stdout.write(terminator)
-  
-  of skFree:
-    let val = visitor.visitExpression(node.args[0])
+    var term = "\n"
+    if node.has("term"):
+      let termVal = visitor.visitExpression(node.get("term"))
+      var s = ""
+      for ch in termVal.arrayValue.elements:
+        s.add(ch.charValue)
+      term = s
     
+    for token, expr in node.namedArgs.pairs:
+      if token.kind == tkIntLiteral:
+        let val = visitor.visitExpression(expr)
+        case val.valueTypeKind:
+        of typeInt64: stdout.write($val.int64Value)
+        of typeUint64: stdout.write($val.uint64Value)
+        of typeBool: stdout.write($val.boolValue)
+        of typeChar: stdout.write(val.charValue)
+        of typeArray:
+          var s = ""
+          for ch in val.arrayValue.elements:
+            s.add(ch.charValue)
+          stdout.write(s)
+        else: discard
+    stdout.write(term)
+
+  of skFree:
+    let val = visitor.visitExpression(node.get("0"))
     case val.valueTypeKind:
     of typePtr:
-      if val.ptrValue[].valueTypeKind != typeNul:
-        val.ptrValue[] = Value(valueTypeKind: typeNul, valueType: getNulType())
-
+      val.ptrValue[] = Value(valueTypeKind: typeNul, valueType: getNulType())
     of typeArray:
-      if val.arrayValue.length.uint64Value != 0u:
-        val.arrayValue.elements = @[]
-        val.arrayValue.length = newUint64Value(0)
-    else:
-      raise newException(RuntimeError, "free expects ptr or array")
+      val.arrayValue.elements = @[]
+      val.arrayValue.length = newUint64Value(0)
+    else: discard
 
   of skAssert:
-    if not visitor.visitExpression(node.args[0]).boolValue:
-      if node.args.len == 2:
+    let cond = visitor.visitExpression(node.get("0"))
+    if not cond.boolValue:
+      let msg = if node.has("1"):
+        let msgVal = visitor.visitExpression(node.get("1"))
         var s = ""
-        for ch in visitor.visitExpression(node.args[1]).arrayValue.elements:
+        for ch in msgVal.arrayValue.elements:
           s.add(ch.charValue)
-        raise newException(RuntimeError, s & " [assertion error]")
-      raise newException(RuntimeError, "assertion error")
-  else: 
+        s
+      else:
+        "assertion failed"
+      raise newException(RuntimeError, msg & " [AssertionError]")
+
+  else:
     echo "[InterpreterVisitor] WARNING: unhandled special statement"
 
 # GENERAL

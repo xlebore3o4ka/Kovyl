@@ -1,4 +1,4 @@
-import std/json
+import std/[json, tables, strutils]
 import visitor
 import ../[astnodes, tokens, types]
 
@@ -146,15 +146,23 @@ method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingState
 # SPECIALS
 
 method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): JsonNode {.base.} =
-  var args = newJArray()
-  for arg in node.args:
-    args.add(visitor.visitExpression(arg))
+  var args = newJObject()
+  for token, expr in node.namedArgs:
+    if token.kind == tkIntLiteral:
+      let pos = parseInt(token.lexeme)
+      args[$pos] = visitor.visitExpression(expr)
+    else:
+      args[token.lexeme] = visitor.visitExpression(expr)
   %*{"kind": "SpecialExpression", "special": $node.kind, "args": args}
 
 method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement): JsonNode {.base.} =
-  var args = newJArray()
-  for arg in node.args:
-    args.add(visitor.visitExpression(arg))
+  var args = newJObject()
+  for token, expr in node.namedArgs:
+    if token.kind == tkIntLiteral:
+      let pos = parseInt(token.lexeme)
+      args[$pos] = visitor.visitExpression(expr)
+    else:
+      args[token.lexeme] = visitor.visitExpression(expr)
   %*{"kind": "SpecialStatement", "special": $node.kind, "args": args}
 
 # GENERAL
