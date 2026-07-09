@@ -124,8 +124,14 @@ proc getPrimitiveType*(t: Type): Type =
     else:
       return current
 
-proc isNumber*(t: Type): bool =
+proc isNumber*(t: Type): bool {.inline.} =
   t.kind in {typeInt64, typeInt32, typeInt16, typeInt8, typeUint64, typeUint32, typeUint16, typeUint8}
+
+proc isInt*(t: Type): bool {.inline.} =
+  t.kind in {typeInt64, typeInt32, typeInt16, typeInt8}
+
+proc isUint*(t: Type): bool {.inline.} =
+  t.kind in {typeUint64, typeUint32, typeUint16, typeUint8}
 
 proc isValidInt8*(s: string): bool =
   try:

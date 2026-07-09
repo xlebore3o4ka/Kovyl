@@ -397,7 +397,7 @@ proc parseStmt(self: var Parser): Statement =
   if token.kind in TOKEN_TYPE_KINDS:
     return self.parseSymbolDecl()
 
-  elif token.kind == tkIdentifier:
+  elif token.kind in {tkIdentifier, tkDollar}:
     let rd = self.lexer.getRollbackData()
     var left: Expression = newIdentifierExpression(self.lexer.nextToken())
 
@@ -406,7 +406,7 @@ proc parseStmt(self: var Parser): Statement =
     else:
       self.lexer.rollback(rd)
 
-    left = self.parsePostfix()
+    left = self.parsePrefix()
     let token = self.lexer.peekToken()
 
     if token.kind == tkEqual:

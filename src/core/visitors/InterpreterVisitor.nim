@@ -429,6 +429,37 @@ proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
       return true
   return false
 
+proc format(values: varargs[Value], sep="", repr=false, escape=false): string =
+  result = ""
+  for val in values:
+    if isInt(val.valueType): 
+      result &= $val.intValue
+    elif isUint(val.valueType): 
+      result &= $val.uintValue
+    elif val.valueType == getBoolType():
+      result &= $val.boolValue
+    elif val.valueType == getCharType():
+      var c = $val.charValue
+      if escape:
+        c = strutils.escape(c)
+      if repr:
+        c = c.repr
+      result &= c
+    elif val.valueType == getArrayType(getCharType()):
+      var s = ""
+      for ch in val.arrayValue.elements:
+        s &= $ch.charValue
+      if escape:
+        s = strutils.escape(s)
+      if repr:
+        s = s.repr
+      result &= s
+    elif val.valueType == getNulType():
+      result &= "nul"
+    else:
+      raise newException(RuntimeError, "unknown type to format")
+    result &= sep
+
 method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpression): Value {.base.} =
   case node.kind:
   of skNew:
@@ -460,6 +491,31 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
       raise newException(RuntimeError, "len expects array")
     return newInt64Value(int64(arr.arrayValue.elements.len))
 
+  of skFmt:
+    var sep = ""
+    if node.has("sep"):
+      let sepVal = visitor.visitExpression(node.get("sep"))
+      for ch in sepVal.arrayValue.elements:
+        sep.add(ch.charValue)
+    
+    var repr = false
+    if node.has("repr"):
+      repr = visitor.visitExpression(node.get("repr")).boolValue
+    
+    var escape = false
+    if node.has("escape"):
+      escape = visitor.visitExpression(node.get("escape")).boolValue
+    
+    var values: seq[Value]
+    for token, expr in node.namedArgs.pairs:
+      if token.kind == tkIntLiteral:
+        values.add(visitor.visitExpression(expr))
+    
+    var chars: seq[Value]
+    for ch in format(values, sep, repr, escape):
+      chars.add(newCharValue(ch))
+    return newArrayValue(chars, getCharType())
+
   else:
     echo "[InterpreterVisitor] WARNING: unhandled special expression"
 
@@ -474,21 +530,12 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
         s.add(ch.charValue)
       term = s
     
+    var values: seq[Value] = @[]
     for token, expr in node.namedArgs.pairs:
       if token.kind == tkIntLiteral:
         let val = visitor.visitExpression(expr)
-        case val.valueTypeKind:
-        of typeInt64: stdout.write($val.int64Value)
-        of typeUint64: stdout.write($val.uint64Value)
-        of typeBool: stdout.write($val.boolValue)
-        of typeChar: stdout.write(val.charValue)
-        of typeArray:
-          var s = ""
-          for ch in val.arrayValue.elements:
-            s.add(ch.charValue)
-          stdout.write(s)
-        else: discard
-    stdout.write(term)
+        values.add(val)
+    stdout.write(format(values) & term)
 
   of skFree:
     let val = visitor.visitExpression(node.get("0"))

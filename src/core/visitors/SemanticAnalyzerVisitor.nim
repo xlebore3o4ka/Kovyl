@@ -457,6 +457,21 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       newError(errTypeMismatch, node.token, @{"@0": $typeArray, "@1": $returnType})
     node.returnType = getInt64Type()
 
+  of skFmt:
+    node.allow("sep", getArrayType(getCharType()))
+    node.allow("repr", getBoolType())
+    node.allow("escape", getBoolType())
+
+    for token, expr in node.namedArgs.pairs:
+      if token.kind != tkIntLiteral and token.lexeme != "sep" and token.lexeme != "repr" and token.lexeme != "strip":
+        let err = if token.kind == tkIdentifier: errUnexpectedNamedArgument
+          else: errUnexpectedArgument
+        newError(err, token, @{"@0": token.lexeme})
+      if expr.returnType.kind in {typePtr, typeArray} and expr.returnType != getArrayType(getCharType()):
+        newError(errProhibitedType, expr.token, @{"@0": $expr.returnType})
+
+    node.returnType = getArrayType(getCharType())
+
   else: 
     echo "[SemanticAnalyzerVisitor] WARNING: unhandled special expression"
 
@@ -467,11 +482,13 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
   case node.kind:
   of skPrint:
     node.allow("term", getArrayType(getCharType()))
-    for token, _ in node.namedArgs.pairs:
+    for token, expr in node.namedArgs.pairs:
       if token.kind != tkIntLiteral and token.lexeme != "term":
         let err = if token.kind == tkIdentifier: errUnexpectedNamedArgument
           else: errUnexpectedArgument
         newError(err, token, @{"@0": token.lexeme})
+      if expr.returnType.kind in {typePtr, typeArray} and expr.returnType != getArrayType(getCharType()):
+        newError(errProhibitedType, expr.token, @{"@0": $expr.returnType})
 
   of skFree:
     if (let returnType = node.get("0").returnType; returnType).kind notin {typeArray, typePtr}:
