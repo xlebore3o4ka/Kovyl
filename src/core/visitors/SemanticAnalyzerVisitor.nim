@@ -22,7 +22,7 @@ type
     history: seq[tuple[name: string, oldId: Natural]]
 
     loopIndex: Natural = 0
-    expectedLiteralType: Type
+    expectedContextType: Type
 
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
   let id = visitor.nextId
@@ -74,42 +74,42 @@ proc symbolExistsInCurrentScope(visitor: SemanticAnalyzerVisitor, name: string):
   return false
 
 proc newSemanticAnalyzerVisitor*(): SemanticAnalyzerVisitor =
-  result = SemanticAnalyzerVisitor(expectedLiteralType: getUndefinedType())
+  result = SemanticAnalyzerVisitor(expectedContextType: getUndefinedType())
   result.pushScope()
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) {.base.}
 
 method visitNumberExpression*(visitor: SemanticAnalyzerVisitor, node: NumberExpression): auto =
-  if (visitor.expectedLiteralType.kind == typeInt64 and isValidInt64(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeInt32 and isValidInt32(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeInt16 and isValidInt16(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeInt8 and isValidInt8(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeUInt64 and isValidUint64(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeUInt32 and isValidUint32(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeUInt16 and isValidUint16(node.token.lexeme) or
-      visitor.expectedLiteralType.kind == typeUInt8 and isValidUint8(node.token.lexeme)):
-    node.returnType = visitor.expectedLiteralType
-  elif isNumber(visitor.expectedLiteralType):
-    newError(errNumberLiteral, node.token, @{"@0": node.token.lexeme, "@1": $visitor.expectedLiteralType.kind})
+  if (visitor.expectedContextType.kind == typeInt64 and isValidInt64(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeInt32 and isValidInt32(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeInt16 and isValidInt16(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeInt8 and isValidInt8(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeUInt64 and isValidUint64(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeUInt32 and isValidUint32(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeUInt16 and isValidUint16(node.token.lexeme) or
+      visitor.expectedContextType.kind == typeUInt8 and isValidUint8(node.token.lexeme)):
+    node.returnType = visitor.expectedContextType
+  elif isNumber(visitor.expectedContextType):
+    newError(errNumberLiteral, node.token, @{"@0": node.token.lexeme, "@1": $visitor.expectedContextType.kind})
 
 method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpression): auto =
   visitor.visitExpression(node.left)
 
-  let temp = visitor.expectedLiteralType
-  visitor.expectedLiteralType = node.left.returnType
+  let temp = visitor.expectedContextType
+  visitor.expectedContextType = node.left.returnType
 
   visitor.visitExpression(node.right)
 
-  visitor.expectedLiteralType = temp
+  visitor.expectedContextType = temp
 
   if isNumber(node.left.returnType) and isNumber(node.right.returnType) and 
         node.left.returnType != node.right.returnType:
-    let temp = visitor.expectedLiteralType
-    visitor.expectedLiteralType = node.right.returnType
+    let temp = visitor.expectedContextType
+    visitor.expectedContextType = node.right.returnType
 
     visitor.visitExpression(node.left)
 
-    visitor.expectedLiteralType = temp
+    visitor.expectedContextType = temp
 
   case node.token.kind:
   of tkPlus, tkMinus, tkStar, tkSlash, tkPercent:
@@ -207,7 +207,7 @@ method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpres
 
 method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpression): auto =
   if node.values.len == 0:
-    node.returnType = getArrayType(getUndefinedType())
+    node.returnType = getStaticArrayType(visitor.expectedContextType, 0)
     return
 
   for val in node.values:
@@ -225,7 +225,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
     if val.returnType != firstType:
       newError(errTypeMismatch, val.token, @{"@0": $firstType, "@1": $val.returnType})
   
-  node.returnType = getArrayType(firstType)
+  node.returnType = getStaticArrayType(firstType, node.values.len)
 
 method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpression): auto =
   visitor.visitExpression(node.operand)
@@ -248,11 +248,11 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
   var varType = node.varType
 
-  visitor.expectedLiteralType = getPrimitiveType(varType)
+  visitor.expectedContextType = getPrimitiveType(varType)
 
   visitor.visitExpression(node.value)
 
-  visitor.expectedLiteralType = getUndefinedType()
+  visitor.expectedContextType = getUndefinedType()
 
   if visitor.symbolExistsInCurrentScope(node.name.lexeme):
     let name = visitor.getSymbol(node.name.lexeme).token
@@ -282,9 +282,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     
     let varType = visitor.getSymbol(name.lexeme).symbolType
 
-    visitor.expectedLiteralType = getPrimitiveType(varType)
+    visitor.expectedContextType = getPrimitiveType(varType)
     visitor.visitExpression(node.value)
-    visitor.expectedLiteralType = getUndefinedType()
+    visitor.expectedContextType = getUndefinedType()
 
     if varType != node.value.returnType and not (
         varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
@@ -300,9 +300,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errTypeMismatch, node.left.token, @{"@0": "ptr", "@1": $ptrType})
       return
 
-    visitor.expectedLiteralType = getPrimitiveType(ptrType.ptrBaseType)
+    visitor.expectedContextType = getPrimitiveType(ptrType.ptrBaseType)
     visitor.visitExpression(node.value)
-    visitor.expectedLiteralType = getUndefinedType()
+    visitor.expectedContextType = getUndefinedType()
       
     if ptrType.ptrBaseType != node.value.returnType and not (
         ptrType.ptrBaseType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
@@ -325,9 +325,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     
     let elemType = indexExpr.operand.returnType.arrayBaseType
 
-    visitor.expectedLiteralType = getPrimitiveType(elemType)
+    visitor.expectedContextType = getPrimitiveType(elemType)
     visitor.visitExpression(node.value)
-    visitor.expectedLiteralType = getUndefinedType()
+    visitor.expectedContextType = getUndefinedType()
 
     if elemType != node.value.returnType and not (
         elemType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
@@ -395,7 +395,7 @@ proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[s
 
 proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
   for token, expr in self.namedArgs.pairs:
-    let k = if token.kind == tkIntLiteral: token.lexeme else: token.lexeme
+    let k = if token.kind == tkNumber: token.lexeme else: token.lexeme
     if k == key:
       return expr
   newError(errMissingArgument, self.token, @{"@0": key})
@@ -463,7 +463,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
     node.allow("escape", getBoolType())
 
     for token, expr in node.namedArgs.pairs:
-      if token.kind != tkIntLiteral and token.lexeme != "sep" and token.lexeme != "repr" and token.lexeme != "strip":
+      if token.kind != tkNumber and token.lexeme != "sep" and token.lexeme != "repr" and token.lexeme != "strip":
         let err = if token.kind == tkIdentifier: errUnexpectedNamedArgument
           else: errUnexpectedArgument
         newError(err, token, @{"@0": token.lexeme})
@@ -483,7 +483,7 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
   of skPrint:
     node.allow("term", getArrayType(getCharType()))
     for token, expr in node.namedArgs.pairs:
-      if token.kind != tkIntLiteral and token.lexeme != "term":
+      if token.kind != tkNumber and token.lexeme != "term":
         let err = if token.kind == tkIdentifier: errUnexpectedNamedArgument
           else: errUnexpectedArgument
         newError(err, token, @{"@0": token.lexeme})

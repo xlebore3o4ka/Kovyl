@@ -25,6 +25,7 @@ type
     of typePtr, typeNul: ptrValue*: ref Value
     of typeChar: charValue*: char
     of typeArray: arrayValue*: ArrayValue
+    else: discard
 
   InterpreterVisitor* = ref object of Visitor
     valueScopes*: seq[Table[string, Value]] = @[]
@@ -417,7 +418,7 @@ method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): 
 
 proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
   for token, expr in self.namedArgs.pairs:
-    let k = if token.kind == tkIntLiteral: token.lexeme else: token.lexeme
+    let k = if token.kind == tkNumber: token.lexeme else: token.lexeme
     if k == key:
       return expr
   return newErrorExpression(self.token)
@@ -452,7 +453,7 @@ proc format(values: varargs[Value], sep="", repr=false, escape=false): string =
       if escape:
         s = strutils.escape(s)
       if repr:
-        s = s.repr
+        s = '"' & s & '"'
       result &= s
     elif val.valueType == getNulType():
       result &= "nul"
@@ -508,7 +509,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
     
     var values: seq[Value]
     for token, expr in node.namedArgs.pairs:
-      if token.kind == tkIntLiteral:
+      if token.kind == tkNumber:
         values.add(visitor.visitExpression(expr))
     
     var chars: seq[Value]
@@ -532,7 +533,7 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
     
     var values: seq[Value] = @[]
     for token, expr in node.namedArgs.pairs:
-      if token.kind == tkIntLiteral:
+      if token.kind == tkNumber:
         let val = visitor.visitExpression(expr)
         values.add(val)
     stdout.write(format(values) & term)

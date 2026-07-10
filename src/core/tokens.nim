@@ -1,6 +1,6 @@
 type
   TokenKind* = enum
-    tkIntLiteral
+    tkNumber
     tkStringLiteral
     tkCharLiteral
     tkIdentifier
@@ -61,7 +61,7 @@ func newFrom*(
 
 proc mean*(kind: TokenKind): string =
   case kind:
-  of tkIntLiteral: return "int literal"
+  of tkNumber: return "number"
   of tkStringLiteral: return "string literal"
   of tkCharLiteral: return "character literal"
   of tkIdentifier: return "identifier"

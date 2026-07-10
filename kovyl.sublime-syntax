@@ -1,0 +1,59 @@
+%YAML 1.2
+---
+name: Kovyl
+file_extensions:
+  - kvl
+scope: source.kvl
+
+contexts:
+  main:
+    - include: numbers
+    - include: keywords
+    - include: types
+    - include: constants
+    - include: operators
+    - include: special
+    - include: strings
+    - include: char
+    - include: comments
+    - include: eos
+
+  numbers:
+    - match: "\\b[0-9]+\\b"
+      scope: constant.numeric.kovyl
+
+  keywords:
+    - match: "\\b(do|end|if|elif|else|while|break|continue)\\b"
+      scope: keyword.control.kovyl
+
+  types:
+    - match: "\\b(int|int64|int32|int16|int8|uint|uint64|uint32|uint16|uint8|bool|char)\\b"
+      scope: storage.type.kovyl
+
+  constants:
+    - match: "\\b(nul|true|false)\\b"
+      scope: constant.language.kovyl
+
+  operators:
+    - match: "(\\+|-|\\*|/|%|=|:|,|->|\\$|!|>|<|==|!=|>=|<=|\\band\\b|\\bor\\b)"
+      scope: keyword.operator.kovyl
+
+  special:
+    - match: "\\b[a-zA-Z_][a-zA-Z0-9_]*:"
+      scope: meta.special.kovyl entity.name.function.kovyl
+
+  strings:
+    - match: "\"([^\"\\\\]|\\\\.)*\""
+      scope: string.quoted.double.kovyl
+
+  char:
+    - match: "'([^'\\\\]|\\\\.)'"
+      scope: constant.character.kovyl
+
+  eos:
+    - match: ";"
+      scope: punctuation.terminator.statement.kovyl
+
+  comments:
+    - match: "#.*$"
+      scope: comment.line.number-sign.kovyl

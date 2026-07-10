@@ -1,5 +1,5 @@
 import lexer, astnodes, tokens, errors, types
-import std/tables
+import std/[tables, strutils]
 
 type Parser* = object
   file: string
@@ -53,8 +53,19 @@ proc parseType(self: var Parser, token: Token): Type =
     if token.kind == tkStar:
       result = getPtrType(result)
     elif token.kind == tkLBracket:
-      discard self.expectToken(tkRBracket)
-      result = getArrayType(result)
+      let token = self.lexer.nextToken()
+
+      if token.kind == tkNumber:
+        result = getStaticArrayType(result, parseInt(token.lexeme))
+        discard self.expectToken(tkRBracket)
+      elif token.kind == tkStar:
+        result = getArrayType(result)
+        discard self.expectToken(tkRBracket)
+      elif token.kind == tkRBracket:
+        result = getStaticArrayType(result, 0)
+      else:
+        self.newError(errSyntax, token)
+        result = getUndefinedType()
 
 proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()
@@ -80,12 +91,12 @@ proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
         else:
           self.lexer.rollback(rd)
           let expr = self.parseExpr()
-          let posToken = token.newFrom(tkIntLiteral, lexeme = $pos)
+          let posToken = token.newFrom(tkNumber, lexeme = $pos)
           result[posToken] = expr
           pos.inc
       else:
         let expr = self.parseExpr()
-        let posToken = expr.token.newFrom(tkIntLiteral, lexeme = $pos)
+        let posToken = expr.token.newFrom(tkNumber, lexeme = $pos)
         result[posToken] = expr
         pos.inc
       
@@ -100,7 +111,7 @@ proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
     discard self.expectToken(tkRParen)
   else:
     let expr = self.parseExpr()
-    let posToken = expr.token.newFrom(tkIntLiteral, lexeme = $pos)
+    let posToken = expr.token.newFrom(tkNumber, lexeme = $pos)
     result[posToken] = expr
 
 proc parseSpecialExpr(self: var Parser, name: Token): Expression =
@@ -112,7 +123,7 @@ proc parseSpecialExpr(self: var Parser, name: Token): Expression =
     namedArgs = self.parseArguments()
   else:
     let expr = self.parseExpr()
-    namedArgs[expr.token.newFrom(tkIntLiteral, lexeme = "0")] = expr
+    namedArgs[expr.token.newFrom(tkNumber, lexeme = "0")] = expr
 
   let specialKind = getSpecialExprKind(name)
 
@@ -129,7 +140,7 @@ proc parsePrimary(self: var Parser): Expression =
     discard self.expectToken(tkRParen)
     return result
 
-  elif token.kind == tkIntLiteral:
+  elif token.kind == tkNumber:
     return newNumberExpression(token)
 
   elif token.kind == tkCharLiteral:
@@ -174,6 +185,8 @@ proc parsePrimary(self: var Parser): Expression =
     for ch in str:
       let charToken = tkCharLiteral.newToken($ch, token.file, token.line, token.column, token.offset)
       arrayExpr.addExpr(newCharExpression(charToken))
+    let charToken = tkCharLiteral.newToken("\0", token.file, token.line, token.column, token.offset)
+    arrayExpr.addExpr(newCharExpression(charToken))
     
     return arrayExpr
 
@@ -363,7 +376,7 @@ proc parseSpecialStmt(self: var Parser, left: Expression): Statement =
     namedArgs = self.parseArguments()
   else:
     let expr = self.parseExpr()
-    namedArgs[expr.token.newFrom(tkIntLiteral, lexeme = "0")] = expr
+    namedArgs[expr.token.newFrom(tkNumber, lexeme = "0")] = expr
   
   let specialKind = getSpecialStmtKind(name)
   

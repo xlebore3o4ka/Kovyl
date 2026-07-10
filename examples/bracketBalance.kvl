@@ -3,7 +3,7 @@ char[] s = "(()()("  # INPUT
 bool result = true
 int counter = 0
 int i = 0
-while i < len:s do
+while i < len: s do
   char c = s[i]
   if c == '(' do
     counter = counter + 1

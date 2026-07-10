@@ -148,7 +148,7 @@ method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingState
 method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): JsonNode {.base.} =
   var args = newJObject()
   for token, expr in node.namedArgs:
-    if token.kind == tkIntLiteral:
+    if token.kind == tkNumber:
       let pos = parseInt(token.lexeme)
       args[$pos] = visitor.visitExpression(expr)
     else:
@@ -158,7 +158,7 @@ method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpressi
 method visitSpecialStatement*(visitor: ASTPrinterVisitor, node: SpecialStatement): JsonNode {.base.} =
   var args = newJObject()
   for token, expr in node.namedArgs:
-    if token.kind == tkIntLiteral:
+    if token.kind == tkNumber:
       let pos = parseInt(token.lexeme)
       args[$pos] = visitor.visitExpression(expr)
     else:

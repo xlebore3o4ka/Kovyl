@@ -15,6 +15,7 @@ type
     typePtr
     typeChar
     typeArray
+    typeStaticArray
 
     typeNul
 
@@ -22,6 +23,9 @@ type
     case kind*: TypeKind
     of typePtr: ptrBaseType*: Type
     of typeArray: arrayBaseType*: Type
+    of typeStaticArray:
+      staticArrayBaseType*: Type
+      staticArrayLength*: Natural
     else: discard
 
 let
@@ -41,6 +45,7 @@ let
 
 var ptrTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
+var staticArrayTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -78,6 +83,17 @@ proc getArrayType*(baseType: Type): Type =
   result = Type(kind: typeArray, arrayBaseType: baseType)
   arrayTypes.add(result)
 
+proc getStaticArrayType*(baseType: Type, length: Natural): Type =
+  if baseType.kind == typeUndefined:
+    return baseType
+
+  for t in staticArrayTypes:
+    if t.kind == typeStaticArray and t.staticArrayBaseType == baseType and t.staticArrayLength == length:
+      return t
+  
+  result = Type(kind: typeStaticArray, staticArrayBaseType: baseType, staticArrayLength: length)
+  staticArrayTypes.add(result)
+
 proc `$`*(t: Type): string =
   if t == nil: return "nilType"
   case t.kind
@@ -93,7 +109,9 @@ proc `$`*(t: Type): string =
   of typeBool: "bool"
   of typePtr: $t.ptrBaseType & "*"
   of typeChar: "char"
-  of typeArray: $t.arrayBaseType & "[]"
+  of typeArray: $t.arrayBaseType & "[*]"
+  of typeStaticArray: $t.staticArrayBaseType & "[" & (if t.staticArrayLength == 0: "" 
+    else: $t.staticArrayLength) & "]" 
   of typeNul: "nul"
 
 proc `$`*(k: TypeKind): string =
@@ -110,7 +128,8 @@ proc `$`*(k: TypeKind): string =
   of typeBool: "bool"
   of typePtr: "type*"
   of typeChar: "char"
-  of typeArray: "type[]"
+  of typeArray: "type[*]"
+  of typeStaticArray: "type[]"
   of typeNul: "nul"
 
 proc getPrimitiveType*(t: Type): Type =

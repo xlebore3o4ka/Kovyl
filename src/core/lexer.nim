@@ -183,7 +183,7 @@ proc nextToken*(self: var Lexer): Token =
     while self.peek.isDigit:
       num &= $self.peek
       self.advance()
-    result = tkIntLiteral.newToken(num, self.file, self.line, column, start)
+    result = tkNumber.newToken(num, self.file, self.line, column, start)
   elif $c in operatorTokens:
     let column = self.column
     let pos = self.pos
@@ -241,8 +241,20 @@ proc nextToken*(self: var Lexer): Token =
     var strbuffer = ""
 
     while self.peek != '"'.Rune and self.peek != '\0'.Rune and self.peek != '\n'.Rune:
-      strbuffer &= $self.peek
-      self.advance()
+      if self.peek == '\\'.Rune:
+        self.advance()
+        case self.peek
+        of 'n'.Rune: strbuffer.add('\n')
+        of '0'.Rune: strbuffer.add('\0')
+        of 'r'.Rune: strbuffer.add('\r')
+        of 't'.Rune: strbuffer.add('\t')
+        of '"'.Rune: strbuffer.add('"')
+        of '\\'.Rune: strbuffer.add('\\')
+        else: strbuffer.add('\\'); strbuffer.add($self.peek)
+        self.advance()
+      else:
+        strbuffer.add($self.peek)
+        self.advance()
 
     if self.peek == '\0'.Rune or self.peek == '\n'.Rune:
       result = tkInvalid.newToken(strbuffer, self.file, self.line, column, start)
@@ -269,6 +281,8 @@ proc nextToken*(self: var Lexer): Token =
       of '0'.Rune: ch = "\0"
       of 'r'.Rune: ch = "\r"
       of 't'.Rune: ch = "\t"
+      of '\''.Rune: ch = "'"
+      of '\\'.Rune: ch = "\\"
       else: discard
       self.advance()
 
