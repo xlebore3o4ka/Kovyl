@@ -9,7 +9,7 @@ while i < len: s do
     counter = counter + 1
   elif c == ')' do
     counter = counter - 1
-    if counter < 0 do
+    if counter < 0 do`1
       result = false
       break
     end

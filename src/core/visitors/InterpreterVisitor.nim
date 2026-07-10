@@ -9,6 +9,10 @@ type
     elements*: seq[Value]
     length*: Value
 
+  StaticArrayValue* = ref object
+    elements*: seq[Value]
+    length*: Natural
+
   Value* = object
     valueType*: Type
     case valueTypeKind*: TypeKind
@@ -25,7 +29,7 @@ type
     of typePtr, typeNul: ptrValue*: ref Value
     of typeChar: charValue*: char
     of typeArray: arrayValue*: ArrayValue
-    else: discard
+    of typeStaticArray: staticArrayValue*: StaticArrayValue
 
   InterpreterVisitor* = ref object of Visitor
     valueScopes*: seq[Table[string, Value]] = @[]
@@ -121,9 +125,12 @@ proc newPtrValue*(v: ref Value, baseType: Type): Value =
   Value(valueTypeKind: typePtr, valueType: getPtrType(baseType), ptrValue: v)
 proc newArrayValue*(elements: seq[Value], baseType: Type): Value =
   Value(valueTypeKind: typeArray, valueType: getArrayType(baseType), 
-    arrayValue: ArrayValue(elements: elements, length: newUint64Value(uint64(elements.len))))
+    arrayValue: ArrayValue(elements: elements, length: newInt64Value(int64(elements.len))))
 proc newNulValue*(): Value = 
   Value(valueTypeKind: typeNul, valueType: getNulType())
+proc newStaticArrayValue*(elements: var seq[Value], valType: Type): Value =
+  Value(valueTypeKind: typeStaticArray, valueType: valType, 
+    staticArrayValue: StaticArrayValue(elements: elements, length: valType.staticArrayLength))
 
 proc intValue*(v: Value): int =
   case v.valueTypeKind:
@@ -311,26 +318,34 @@ method visitArrayExpression*(visitor: InterpreterVisitor, node: ArrayExpression)
   for val in node.values:
     elements.add(visitor.visitExpression(val))
   
-  let baseType = if elements.len > 0: elements[0].valueType else: getUndefinedType()
-  return newArrayValue(elements, baseType)
+  return newStaticArrayValue(elements, node.returnType)
 
 method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression): Value {.base.} =
-  let arr = visitor.visitExpression(node.operand)
-  if arr.valueTypeKind != typeArray:
-    raise newException(RuntimeError, "Cannot index non-array")
+  var arr = visitor.visitExpression(node.operand)
   
   let idx = visitor.visitExpression(node.index)
-  if not isNumber(idx.valueType):
-    raise newException(RuntimeError, "Index must be number")
-
-  let len = int(arr.arrayValue.length.uint64Value)
-
-  if idx.intValue >= len or (idx.intValue) < -len:
-    raise newException(RuntimeError, "Index out of bounds")
   
-  let index = ((idx.intValue mod len) + len) mod len
+  case arr.valueTypeKind:
+  of typeArray:
+    let len = int(arr.arrayValue.length.uint64Value)
+
+    if idx.intValue >= len or idx.intValue < -len:
+      raise newException(RuntimeError, "Index out of bounds")
+    let index = ((idx.intValue mod len) + len) mod len
+
+    return arr.arrayValue.elements[index]
   
-  return arr.arrayValue.elements[index]
+  of typeStaticArray:
+    let len = arr.staticArrayValue.length
+
+    if idx.intValue >= len or idx.intValue < -len:
+      raise newException(RuntimeError, "Index out of bounds")
+    let index = ((idx.intValue mod len) + len) mod len
+
+    return arr.staticArrayValue.elements[index]
+  
+  else:
+    raise newException(RuntimeError, "Cannot index non-array")
 
 method visitNulExpression*(visitor: InterpreterVisitor, node: NulExpression): Value {.base.} =
   return newNulValue()
@@ -359,23 +374,27 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
 
   elif node.left of IndexExpression:
     let indexExpr = IndexExpression(node.left)
-    let arr = visitor.visitExpression(indexExpr.operand)
-    if arr.valueTypeKind != typeArray:
-      raise newException(RuntimeError, "Cannot index non-array")
+    var arr = visitor.visitExpression(indexExpr.operand)
     
     let idx = visitor.visitExpression(indexExpr.index)
-    if not isNumber(idx.valueType):
-      raise newException(RuntimeError, "Index must be number")
-
-    let len = int(arr.arrayValue.length.uint64Value)
     
-    if idx.intValue >= len or (idx.intValue) < -len:
-      raise newException(RuntimeError, "Index out of bounds")
+    case arr.valueTypeKind:
+    of typeArray:
+      let len = int(arr.arrayValue.length.int64Value)
+      if idx.intValue >= len or idx.intValue < -len:
+        raise newException(RuntimeError, "Index out of bounds")
+      let actualIdx = ((idx.intValue mod len) + len) mod len
+      arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
     
-    let index = idx.intValue
-    let actualIdx = ((index mod len) + len) mod len
+    of typeStaticArray:
+      let len = arr.valueType.staticArrayLength
+      if idx.intValue >= len or idx.intValue < -len:
+        raise newException(RuntimeError, "Index out of bounds")
+      let actualIdx = ((idx.intValue mod len) + len) mod len
+      arr.staticArrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
     
-    arr.arrayValue.elements[actualIdx] = visitor.visitExpression(node.value)
+    else:
+      raise newException(RuntimeError, "Cannot index non-array")
 
 method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
   if visitor.visitExpression(node.condition).boolValue:
@@ -470,27 +489,34 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
     return newPtrValue(ptrValue, val.valueType)
 
   of skArr:
-    let sizeExpr = node.get("1")
-    let sizeVal = visitor.visitExpression(sizeExpr)
-    let size = int(uintValue(sizeVal))
-    
-    let baseType = node.get("0").returnType
     var elements: seq[Value]
-
-    if node.has("@"):
-      for i in 0..<size:
-        elements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
+    
+    if node.has("1"):
+      let sizeExpr = node.get("1")
+      let sizeVal = visitor.visitExpression(sizeExpr)
+      let size = int(uintValue(sizeVal))
+      let baseType = node.get("0").returnType
+      
+      if node.has("@"):
+        for i in 0..<size:
+          elements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
+      else:
+        let initExpr = node.get("0")
+        for i in 0..<size:
+          elements.add(visitor.visitExpression(initExpr))
+      
+      return newArrayValue(elements, baseType)
+    
     else:
-      let initExpr = node.get("0")
-      for i in 0..<size:
-        elements.add(visitor.visitExpression(initExpr))
-    return newArrayValue(elements, baseType)
+      let expr = node.get("0")
+      let val = visitor.visitExpression(expr)
+      return val
 
   of skLen:
     let arr = visitor.visitExpression(node.get("0"))
-    if arr.valueTypeKind != typeArray:
-      raise newException(RuntimeError, "len expects array")
-    return newInt64Value(int64(arr.arrayValue.elements.len))
+    if arr.valueTypeKind == typeArray:
+      return arr.arrayValue.length
+    return newInt64Value(arr.staticArrayValue.length)
 
   of skFmt:
     var sep = ""

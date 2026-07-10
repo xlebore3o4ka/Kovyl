@@ -140,6 +140,8 @@ proc getPrimitiveType*(t: Type): Type =
       current = current.ptrBaseType
     of typeArray:
       current = current.arrayBaseType
+    of typeStaticArray:
+      current = current.staticArrayBaseType
     else:
       return current
 

@@ -11,6 +11,7 @@ contexts:
     - include: keywords
     - include: types
     - include: constants
+    - include: brackets
     - include: operators
     - include: special
     - include: strings
@@ -33,6 +34,32 @@ contexts:
   constants:
     - match: "\\b(nul|true|false)\\b"
       scope: constant.language.kovyl
+
+  brackets:
+    - match: "\\["
+      scope: punctuation.section.brackets.begin.kovyl
+      push:
+        - meta_scope: meta.brackets.kovyl
+        - include: main
+        - match: "\\]"
+          scope: punctuation.section.brackets.end.kovyl
+          pop: true
+    - match: "\\{"
+      scope: punctuation.section.braces.begin.kovyl
+      push:
+        - meta_scope: meta.braces.kovyl
+        - include: main
+        - match: "\\}"
+          scope: punctuation.section.braces.end.kovyl
+          pop: true
+    - match: "\\("
+      scope: punctuation.section.parens.begin.kovyl
+      push:
+        - meta_scope: meta.parens.kovyl
+        - include: main
+        - match: "\\)"
+          scope: punctuation.section.parens.end.kovyl
+          pop: true
 
   operators:
     - match: "(\\+|-|\\*|/|%|=|:|,|->|\\$|!|>|<|==|!=|>=|<=|\\band\\b|\\bor\\b)"

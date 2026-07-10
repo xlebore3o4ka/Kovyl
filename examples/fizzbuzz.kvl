@@ -1,7 +1,7 @@
 int n = 20  # INPUT
 
 while n > 0 do
-  char[] buf = arr:(char, 32)
+  char[*] buf = arr:(char, 32)
   int len = 0
 
   if n % 3 == 0 do
@@ -17,7 +17,7 @@ while n > 0 do
   	buf[len] = 'z' ; len = len + 1
   end
   if len == 0 do
-    char[] number = fmt: n
+    char[*] number = fmt: n
     free: buf
     buf = number
   end

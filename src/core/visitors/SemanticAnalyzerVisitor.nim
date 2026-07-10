@@ -232,14 +232,17 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   visitor.visitExpression(node.index)
   
   if not isNumber(node.index.returnType):
-    newError(errTypeMismatch, node.index.token, @{"@0": "int", "@1": $node.index.returnType})
+    newError(errTypeMismatch, node.index.token, @{"@0": "number", "@1": $node.index.returnType})
     return
   
-  if node.operand.returnType.kind != typeArray:
-    newError(errTypeMismatch, node.operand.token, @{"@0": "array", "@1": $node.operand.returnType})
+  if node.operand.returnType.kind == typeArray:
+    node.returnType = node.operand.returnType.arrayBaseType
+  elif node.operand.returnType.kind == typeStaticArray:
+    node.returnType = node.operand.returnType.staticArrayBaseType
+  else:
+    newError(errTypeMismatch, node.operand.token, @{"@0": $typeArray & " or " & $typeStaticArray, 
+      "@1": $node.operand.returnType})
     return
-  
-  node.returnType = node.operand.returnType.arrayBaseType
 
 # STATEMENTS
 
@@ -261,7 +264,19 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
     )
     varType = getUndefinedType()
 
-  if node.varType != node.value.returnType and not (
+  if node.varType.kind == typeStaticArray and node.varType.staticArrayLength == 0:
+    if node.value.returnType.kind == typeStaticArray:
+      node.varType = node.value.returnType
+
+  if node.varType.kind == typeStaticArray and node.value.returnType.kind == typeStaticArray:
+    if node.varType.staticArrayBaseType != node.value.returnType.staticArrayBaseType:
+      newError(errTypeMismatch, node.name, @{"@0": $node.varType, "@1": $node.value.returnType})
+      varType = getUndefinedType()
+    elif node.value.returnType.staticArrayLength > node.varType.staticArrayLength:
+      newError(errTypeMismatch, node.name, @{"@0": $node.varType, "@1": $node.value.returnType})
+      varType = getUndefinedType()
+
+  elif node.varType != node.value.returnType and not (
       node.varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
     ):
     newError(errTypeMismatch, node.name, @{"@0": $node.varType, "@1": $node.value.returnType})
@@ -311,19 +326,9 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       return
 
   elif node.left of IndexExpression:
-    let indexExpr = IndexExpression(node.left)
-    visitor.visitExpression(indexExpr.operand)
-    visitor.visitExpression(indexExpr.index)
+    visitor.visitExpression(IndexExpression(node.left))
     
-    if indexExpr.operand.returnType.kind != typeArray:
-      newError(errTypeMismatch, node.left.token, @{"@0": "array", "@1": $indexExpr.operand.returnType})
-      return
-    
-    if not isNumber(indexExpr.index.returnType):
-      newError(errTypeMismatch, indexExpr.index.token, @{"@0": "int", "@1": $indexExpr.index.returnType})
-      return
-    
-    let elemType = indexExpr.operand.returnType.arrayBaseType
+    let elemType = node.left.returnType
 
     visitor.expectedContextType = getPrimitiveType(elemType)
     visitor.visitExpression(node.value)
@@ -340,7 +345,7 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
   visitor.visitExpression(node.condition)
   
   if node.condition.returnType != getBoolType():
-    newError(errTypeMismatch, node.condition.token, @{"@0": "bool", "@1": $node.condition.returnType})
+    newError(errTypeMismatch, node.condition.token, @{"@0": $typeBool, "@1": $node.condition.returnType})
   
   visitor.visitStatement(node.ifBlock)
   visitor.popScope()
@@ -350,7 +355,7 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
     visitor.visitExpression(el.cond)
     
     if el.cond.returnType != getBoolType():
-      newError(errTypeMismatch, el.cond.token, @{"@0": "bool", "@1": $el.cond.returnType})
+      newError(errTypeMismatch, el.cond.token, @{"@0": $typeBool, "@1": $el.cond.returnType})
     
     visitor.visitStatement(el.elifBlock)
     visitor.popScope()
@@ -378,7 +383,7 @@ method visitWhileStatement*(visitor: SemanticAnalyzerVisitor, node: WhileStateme
   visitor.visitExpression(node.condition)
   
   if node.condition.returnType != getBoolType():
-    newError(errTypeMismatch, node.condition.token, @{"@0": "bool", "@1": $node.condition.returnType})
+    newError(errTypeMismatch, node.condition.token, @{"@0": $typeBool, "@1": $node.condition.returnType})
 
   visitor.visitStatement(node.whileBlock)
 
@@ -445,16 +450,24 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
   of skArr: 
     node.checkUnexpected(expected = @["0", "1"])
-    if not node.expectNumber("1"): return
-    let expr = node.get("0")
-    if expr of TypeExpression:
-      node.add("@", newBoolExpression(expr.token.newFrom(tkTrue)))
-    node.returnType = getArrayType(expr.returnType)
+    
+    if node.has("1"):
+      if not node.expectNumber("1"): return
+      let expr = node.get("0")
+      if expr of TypeExpression:
+        node.add("@", newBoolExpression(expr.token.newFrom(tkTrue)))
+      node.returnType = getArrayType(expr.returnType)
+    else:
+      let expr = node.get("0")
+      if expr of ArrayExpression:
+        node.returnType = getArrayType(expr.returnType.staticArrayBaseType)
+      else:
+        newError(errTypeMismatch, expr.token, @{"@0": $typeArray, "@1": $expr.returnType})
 
   of skLen:
     node.checkUnexpected(expected = @["0"])
-    if (let returnType = node.get("0").returnType; returnType).kind != typeArray:
-      newError(errTypeMismatch, node.token, @{"@0": $typeArray, "@1": $returnType})
+    if (let returnType = node.get("0").returnType; returnType).kind notin {typeArray, typeStaticArray}:
+      newError(errTypeMismatch, node.token, @{"@0": $typeArray & "or" & $typeStaticArray, "@1": $returnType})
     node.returnType = getInt64Type()
 
   of skFmt:
