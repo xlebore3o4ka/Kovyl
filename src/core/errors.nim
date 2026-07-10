@@ -46,7 +46,7 @@ proc message(kind: ErrorKind): string =
     of errEmptyCharLiteral: "Empty character literal"
     of errBinaryTypeMismatch: "Type mismatch for binary operator '@0' (@1 @0 @2)"
     of errUnaryTypeMismatch: "Type mismatch for unary operator '@0' (@1)"
-    of errTypeMismatch: "Type mismatch for @0 (expected @0, got @1)"
+    of errTypeMismatch: "Type mismatch (expected @0, got @1)"
     of errUnknownType: "Unknown type"
     of errCannotCast: "Cannot cast from @0 to @1"
     of errProhibitedType: "@0 is a prohibited type in this construction"

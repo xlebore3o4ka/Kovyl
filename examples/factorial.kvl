@@ -1,3 +1,4 @@
+# factorial.kvl
 int n = 10  # INPUT
 
 int result = 1

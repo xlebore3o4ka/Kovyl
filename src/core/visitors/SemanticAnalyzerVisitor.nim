@@ -27,7 +27,7 @@ type
 proc newSymbol(visitor: SemanticAnalyzerVisitor, token: Token, symbolType: Type) =
   let id = visitor.nextId
   visitor.nextId.inc
-  
+
   let symbol = Symbol(
     token: token,
     symbolType: symbolType,
@@ -267,6 +267,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
   if node.varType.kind == typeStaticArray and node.varType.staticArrayLength == 0:
     if node.value.returnType.kind == typeStaticArray:
       node.varType = node.value.returnType
+      varType = node.varType
 
   if node.varType.kind == typeStaticArray and node.value.returnType.kind == typeStaticArray:
     if node.varType.staticArrayBaseType != node.value.returnType.staticArrayBaseType:
@@ -301,7 +302,14 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     visitor.visitExpression(node.value)
     visitor.expectedContextType = getUndefinedType()
 
-    if varType != node.value.returnType and not (
+    if varType.kind == typeStaticArray and node.value.returnType.kind == typeStaticArray:
+      if varType.staticArrayBaseType != node.value.returnType.staticArrayBaseType:
+        newError(errTypeMismatch, name, @{"@0": $varType, "@1": $node.value.returnType})
+        return
+      if node.value.returnType.staticArrayLength > varType.staticArrayLength:
+        newError(errTypeMismatch, name, @{"@0": $varType, "@1": $node.value.returnType})
+        return
+    elif varType != node.value.returnType and not (
         varType.kind in {typePtr, typeArray} and node.value.returnType == getNulType()
       ):
       newError(errTypeMismatch, name, @{"@0": $varType, "@1": $node.value.returnType})

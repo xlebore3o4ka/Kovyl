@@ -49,14 +49,6 @@ proc getValue(visitor: InterpreterVisitor, name: string): Value =
       return visitor.valueScopes[i][name]
   raise newException(RuntimeError, "Undefined variable: " & name)
 
-proc setValue(visitor: InterpreterVisitor, name: string, value: Value) =
-  for i in countdown(visitor.valueScopes.len - 1, 0):
-    if visitor.valueScopes[i].hasKey(name):
-      visitor.valueScopes[i][name] = value
-      return
-      
-  visitor.valueScopes[^1][name] = value
-
 proc newInterpreterVisitor*(): InterpreterVisitor =
   result = InterpreterVisitor()
   result.pushScope()
@@ -131,6 +123,42 @@ proc newNulValue*(): Value =
 proc newStaticArrayValue*(elements: var seq[Value], valType: Type): Value =
   Value(valueTypeKind: typeStaticArray, valueType: valType, 
     staticArrayValue: StaticArrayValue(elements: elements, length: valType.staticArrayLength))
+
+proc setValue(visitor: InterpreterVisitor, name: string, value: Value) =
+  var finalValue = value
+  
+  if value.valueType.kind == typeStaticArray:
+    let targetLen = value.valueType.staticArrayLength
+    var newElements: seq[Value]
+    let baseType = value.valueType.staticArrayBaseType
+    
+    case value.valueTypeKind:
+    of typeStaticArray:
+      let srcLen = value.staticArrayValue.elements.len
+      for i in 0..<min(srcLen, targetLen):
+        newElements.add(value.staticArrayValue.elements[i])
+      for i in newElements.len..<targetLen:
+        newElements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
+    
+    of typeArray:
+      let srcLen = value.arrayValue.elements.len
+      for i in 0..<min(srcLen, targetLen):
+        newElements.add(value.arrayValue.elements[i])
+      for i in newElements.len..<targetLen:
+        newElements.add(Value(valueTypeKind: baseType.kind, valueType: baseType))
+    
+    else:
+      for i in 0..<targetLen:
+        newElements.add(value)
+    
+    finalValue = newStaticArrayValue(newElements, getStaticArrayType(baseType, targetLen))
+  
+  for i in countdown(visitor.valueScopes.len - 1, 0):
+    if visitor.valueScopes[i].hasKey(name):
+      visitor.valueScopes[i][name] = finalValue
+      return
+      
+  visitor.valueScopes[^1][name] = finalValue
 
 proc intValue*(v: Value): int =
   case v.valueTypeKind:
@@ -324,10 +352,10 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   var arr = visitor.visitExpression(node.operand)
   
   let idx = visitor.visitExpression(node.index)
-  
+
   case arr.valueTypeKind:
   of typeArray:
-    let len = int(arr.arrayValue.length.uint64Value)
+    let len = int(arr.arrayValue.length.int64Value)
 
     if idx.intValue >= len or idx.intValue < -len:
       raise newException(RuntimeError, "Index out of bounds")
@@ -352,12 +380,12 @@ method visitNulExpression*(visitor: InterpreterVisitor, node: NulExpression): Va
 
 # STATEMENTS
 
-method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
-  visitor.setValue(node.name.lexeme, visitor.visitExpression(node.value))
-
 method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): auto =
   for stmt in node.statements:
     visitor.visitStatement(stmt)
+
+method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
+  visitor.setValue(node.name.lexeme, visitor.visitExpression(node.value))
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
   if node.left of IdentifierExpression:
@@ -465,9 +493,9 @@ proc format(values: varargs[Value], sep="", repr=false, escape=false): string =
       if repr:
         c = "'" & c & "'"
       result &= c
-    elif val.valueType == getArrayType(getCharType()):
+    elif val.valueType.kind == typeStaticArray and val.valueType.staticArrayBaseType == getCharType():
       var s = ""
-      for ch in val.arrayValue.elements:
+      for ch in val.staticArrayValue.elements:
         s &= $ch.charValue
       if escape:
         s = strutils.escape(s)
@@ -510,7 +538,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
     else:
       let expr = node.get("0")
       let val = visitor.visitExpression(expr)
-      return val
+      return newArrayValue(val.staticArrayValue.elements, val.valueType.staticArrayBaseType)
 
   of skLen:
     let arr = visitor.visitExpression(node.get("0"))

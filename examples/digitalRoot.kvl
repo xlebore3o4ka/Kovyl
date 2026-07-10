@@ -1,3 +1,4 @@
+# digitalRoot.kvl
 int n = 1234  # INPUT
 
 int total = 0
