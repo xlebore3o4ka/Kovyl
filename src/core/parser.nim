@@ -10,7 +10,7 @@ const TOKEN_TYPE_KINDS = {
   tkUint64, tkUint32, tkUint16, tkUint8, 
   tkBool, 
   tkChar
-  }
+}
   
 proc newParser*(text, file: string): Parser =
   Parser(file: file, lexer: newLexer(text, file))
@@ -267,10 +267,12 @@ proc parseExpr(self: var Parser): Expression =
   return self.parseOr()
 
 proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
-  var varType = self.parseType()
+  var symbolType = self.parseType()
   let name = self.expectToken(tkIdentifier)
-  discard self.expectToken(tkEqual)
-  return newDeclarationStatement(varType, name, self.parseExpr)
+  if self.lexer.peekToken().kind == tkEqual:
+    discard self.expectToken(tkEqual)
+    return newDeclarationStatement(symbolType, name, self.parseExpr)
+  return newDefaultStatement(symbolType, name)
 
 proc parseAssignment(self: var Parser, left: Expression): Statement {.inline.} =
   discard self.expectToken(tkEqual)

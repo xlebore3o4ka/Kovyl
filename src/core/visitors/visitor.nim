@@ -24,9 +24,6 @@ method visitIdentifierExpression*(visitor: Visitor, node: IdentifierExpression):
 method visitCastExpression*(visitor: Visitor, node: CastExpression): auto {.base.} =
   discard
 
-method visitStringExpression*(visitor: Visitor, node: StringExpression): auto {.base.} =
-  discard
-
 method visitDerefExpression*(visitor: Visitor, node: DerefExpression): auto {.base.} =
   discard
 
@@ -69,6 +66,9 @@ method visitAssignmentStatement*(visitor: Visitor, node: AssignmentStatement): a
   discard
 
 method visitBranchingStatement*(visitor: Visitor, node: BranchingStatement): auto {.base.} =
+  discard
+
+method visitDefaultStatement*(visitor: Visitor, node: DefaultStatement): auto {.base.} =
   discard
 
 # SPECIALS

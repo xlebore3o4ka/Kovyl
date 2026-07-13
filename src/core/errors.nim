@@ -1,9 +1,10 @@
 import tokens
+import std/[logging]
 
 type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax, errCannotAssign
-    errForbiddenLocation, errNumberLiteral
+    errForbiddenLocation, errSize, errEmptyStaticArray
 
     errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, 
     errUnclosedString, errUnclosedChar, errEmptyCharLiteral
@@ -36,8 +37,9 @@ proc message(kind: ErrorKind): string =
     of errStatement: "Expected statement, got @0"
     of errExpectedSyntax: "Expected @0, got @1"
     of errCannotAssign: "Cannot assign to this expression"
-    of errForbiddenLocation: "The statement is in the forbidden location"
-    of errNumberLiteral: "Number literal '@0' does not fit in type @1"
+    of errForbiddenLocation: "This node is located in a forbidden place"
+    of errSize: "@0 does not fit in type @1"
+    of errEmptyStaticArray: "Static array cannot be empty"
     of errMismatchedBracket: "Mismatched bracket"
     of errUnexpectedBracket: "Unexpected closing bracket"
     of errUnclosedBracket: "Unclosed bracket"
@@ -60,22 +62,28 @@ proc message(kind: ErrorKind): string =
     of errMissingArgument: "Missing required argument '@0'"
 
 proc newError*(
-              kind: ErrorKind, token: Token, 
-              args: seq[(string, string)] = @[]) =
-  let msg = kind.message()
-  
-  errors.add(CompileError(
-    kind: kind, file: token.file, line: token.line, col: token.column,
-    pos: token.offset, len: token.lexeme.len, args: args, message: msg
-  ))
-
-proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 
               pos: Natural, len: Positive, 
               args: seq[(string, string)] = @[]) =
-  let msg = kind.message()
+  var msg = kind.message()
   
   errors.add(CompileError(
     kind: kind, file: file, line: line, col: col,
     pos: pos, len: len, args: args, message: msg
   ))
+
+  var logMsg = $kind & " at " & file & ":" & $line & ":" & $col
+  
+  if args.len > 0:
+    logMsg.add(" [")
+    for i, (key, value) in args:
+      if i > 0: logMsg.add(", ")
+      logMsg.add(key & " = \"" & value & '"')
+    logMsg.add("]")
+
+  error(logMsg)
+
+proc newError*(
+              kind: ErrorKind, token: Token, 
+              args: seq[(string, string)] = @[]) {.inline.} =
+  newError(kind, token.file, token.line, token.column, token.offset, token.lexeme.len, args)

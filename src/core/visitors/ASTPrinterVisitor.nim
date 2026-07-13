@@ -45,9 +45,6 @@ method visitCastExpression*(visitor: ASTPrinterVisitor, node: CastExpression): J
     "value": visitor.visitExpression(node.value)
   }
 
-method visitStringExpression*(visitor: ASTPrinterVisitor, node: StringExpression): JsonNode {.base.} =
-  %*{"kind": "StringExpression", "value": node.token.lexeme}
-
 method visitDerefExpression*(visitor: ASTPrinterVisitor, node: DerefExpression): JsonNode {.base.} =
   %*{
     "kind": "DerefExpression",
@@ -143,6 +140,13 @@ method visitBranchingStatement*(visitor: ASTPrinterVisitor, node: BranchingState
   
   return result
 
+method visitDefaultStatement*(visitor: ASTPrinterVisitor, node: DefaultStatement): JsonNode {.base.} =
+  %*{
+    "kind": "DefaultStatement",
+    "type": $node.varType,
+    "name": node.name.lexeme
+  }
+
 # SPECIALS
 
 method visitSpecialExpression*(visitor: ASTPrinterVisitor, node: SpecialExpression): JsonNode {.base.} =
@@ -182,8 +186,6 @@ method visitExpression*(visitor: ASTPrinterVisitor, node: Expression): JsonNode 
     return visitor.visitIdentifierExpression(IdentifierExpression(node))
   elif node of CastExpression:
     return visitor.visitCastExpression(CastExpression(node))
-  elif node of StringExpression:
-    return visitor.visitStringExpression(StringExpression(node))
   elif node of DerefExpression:
     return visitor.visitDerefExpression(DerefExpression(node))
   elif node of CharExpression:
@@ -221,6 +223,8 @@ method visitStatement*(visitor: ASTPrinterVisitor, node: Statement): JsonNode {.
     return visitor.visitContinueStatement(ContinueStatement(node))
   elif node of WhileStatement:
     return visitor.visitWhileStatement(WhileStatement(node))
+  elif node of DefaultStatement:
+    return visitor.visitDefaultStatement(DefaultStatement(node))
   else:
     echo "[ASTPrinterVisitor] WARNING: unhandled statement"
     return %*{"kind": "UNHANDLED_STATEMENT"}

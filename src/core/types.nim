@@ -1,31 +1,24 @@
-import std/strutils
-
 type
   TypeKind* = enum
     typeUndefined
-    typeInt64
-    typeInt32
-    typeInt16
-    typeInt8
-    typeUint64
-    typeUint32
-    typeUint16
-    typeUint8
+    typeInt64, typeInt32, typeInt16, typeInt8
+    typeUint64, typeUint32, typeUint16, typeUint8
+
     typeBool
-    typePtr
     typeChar
-    typeArray
     typeStaticArray
 
+    typePtr
+    typeArray
     typeNul
 
   Type* = ref object
     case kind*: TypeKind
-    of typePtr: ptrBaseType*: Type
-    of typeArray: arrayBaseType*: Type
+    of typePtr: ptrBase*: Type
+    of typeArray: arrBase*: Type
     of typeStaticArray:
-      staticArrayBaseType*: Type
-      staticArrayLength*: Natural
+      staticArrBase*: Type
+      length*: Natural
     else: discard
 
 let
@@ -61,15 +54,35 @@ proc getCharType*(): Type {.inline.} = charType
 
 proc getNulType*(): Type {.inline.} = nulType
 
+proc eq*(a: TypeKind, b: TypeKind): bool {.inline.} =
+  return a == b
+
+proc eq*(a: TypeKind, b: Type): bool {.inline.} =
+  return a == b.kind
+
+proc eq*(a: Type, b: TypeKind): bool {.inline.} =
+  return a.kind == b
+
+proc eq*(a: Type, b: Type): bool =
+  if a.eq(typeStaticArray) and a.length == 0:
+    return b.eq(typeStaticArray)
+  if b.eq(typeStaticArray) and b.length == 0:
+    return a.eq(typeStaticArray)
+
+  return a == b
+
+proc neq*(a: Type | TypeKind, b: Type | TypeKind): bool {.inline.} =
+  return not (a.eq b)
+
 proc getPtrType*(baseType: Type): Type =
   if baseType.kind == typeUndefined:
     return baseType
 
   for t in ptrTypes:
-    if t.kind == typePtr and t.ptrBaseType == baseType:
+    if t.kind == typePtr and t.ptrBase.eq baseType:
       return t
   
-  result = Type(kind: typePtr, ptrBaseType: baseType)
+  result = Type(kind: typePtr, ptrBase: baseType)
   ptrTypes.add(result)
 
 proc getArrayType*(baseType: Type): Type =
@@ -77,10 +90,10 @@ proc getArrayType*(baseType: Type): Type =
     return baseType
 
   for t in arrayTypes:
-    if t.kind == typeArray and t.arrayBaseType == baseType:
+    if t.kind == typeArray and t.arrBase.eq baseType:
       return t
   
-  result = Type(kind: typeArray, arrayBaseType: baseType)
+  result = Type(kind: typeArray, arrBase: baseType)
   arrayTypes.add(result)
 
 proc getStaticArrayType*(baseType: Type, length: Natural): Type =
@@ -88,31 +101,11 @@ proc getStaticArrayType*(baseType: Type, length: Natural): Type =
     return baseType
 
   for t in staticArrayTypes:
-    if t.kind == typeStaticArray and t.staticArrayBaseType == baseType and t.staticArrayLength == length:
+    if t.kind == typeStaticArray and t.staticArrBase.eq(baseType) and t.length == length:
       return t
   
-  result = Type(kind: typeStaticArray, staticArrayBaseType: baseType, staticArrayLength: length)
+  result = Type(kind: typeStaticArray, staticArrBase: baseType, length: length)
   staticArrayTypes.add(result)
-
-proc `$`*(t: Type): string =
-  if t == nil: return "nilType"
-  case t.kind
-  of typeUndefined: "undefined"
-  of typeInt64: "int64"
-  of typeInt32: "int32"
-  of typeInt16: "int16"
-  of typeInt8: "int8"
-  of typeUint64: "uint64"
-  of typeUint32: "uint32"
-  of typeUint16: "uint16"
-  of typeUint8: "uint8"
-  of typeBool: "bool"
-  of typePtr: $t.ptrBaseType & "*"
-  of typeChar: "char"
-  of typeArray: $t.arrayBaseType & "[*]"
-  of typeStaticArray: $t.staticArrayBaseType & "[" & (if t.staticArrayLength == 0: "" 
-    else: $t.staticArrayLength) & "]" 
-  of typeNul: "nul"
 
 proc `$`*(k: TypeKind): string =
   case k
@@ -126,86 +119,17 @@ proc `$`*(k: TypeKind): string =
   of typeUint16: "uint16"
   of typeUint8: "uint8"
   of typeBool: "bool"
-  of typePtr: "type*"
+  of typePtr: "Any*"
   of typeChar: "char"
-  of typeArray: "type[*]"
-  of typeStaticArray: "type[]"
+  of typeArray: "Any[*]"
+  of typeStaticArray: "Any[]"
   of typeNul: "nul"
 
-proc getPrimitiveType*(t: Type): Type =
-  var current = t
-  while true:
-    case current.kind
-    of typePtr:
-      current = current.ptrBaseType
-    of typeArray:
-      current = current.arrayBaseType
-    of typeStaticArray:
-      current = current.staticArrayBaseType
-    else:
-      return current
-
-proc isNumber*(t: Type): bool {.inline.} =
-  t.kind in {typeInt64, typeInt32, typeInt16, typeInt8, typeUint64, typeUint32, typeUint16, typeUint8}
-
-proc isInt*(t: Type): bool {.inline.} =
-  t.kind in {typeInt64, typeInt32, typeInt16, typeInt8}
-
-proc isUint*(t: Type): bool {.inline.} =
-  t.kind in {typeUint64, typeUint32, typeUint16, typeUint8}
-
-proc isValidInt8*(s: string): bool =
-  try:
-    let v = parseInt(s)
-    return v >= -128 and v <= 127
-  except ValueError:
-    return false
-
-proc isValidInt16*(s: string): bool =
-  try:
-    let v = parseInt(s)
-    return v >= -32768 and v <= 32767
-  except ValueError:
-    return false
-
-proc isValidInt32*(s: string): bool =
-  try:
-    let v = parseInt(s)
-    return v >= -2147483648 and v <= 2147483647
-  except ValueError:
-    return false
-
-proc isValidInt64*(s: string): bool =
-  try:
-    discard parseInt(s)
-    return true
-  except ValueError:
-    return false
-
-proc isValidUint8*(s: string): bool =
-  try:
-    let v = parseUInt(s)
-    return v <= 255
-  except ValueError:
-    return false
-
-proc isValidUint16*(s: string): bool =
-  try:
-    let v = parseUInt(s)
-    return v <= 65535
-  except ValueError:
-    return false
-
-proc isValidUint32*(s: string): bool =
-  try:
-    let v = parseUInt(s)
-    return v <= 4294967295'u64
-  except ValueError:
-    return false
-
-proc isValidUint64*(s: string): bool =
-  try:
-    discard parseUInt(s)
-    return true
-  except ValueError:
-    return false
+proc `$`*(t: Type): string =
+  if t == nil: return "nilType"
+  case t.kind
+  of typePtr: $t.ptrBase & "*"
+  of typeArray: $t.arrBase & "[*]"
+  of typeStaticArray: $t.staticArrBase & "[" & (if t.length == 0: "" 
+    else: $t.length) & "]" 
+  else: return $t.kind

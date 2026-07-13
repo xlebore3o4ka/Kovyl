@@ -19,17 +19,15 @@ type
     right*: Expression
 
   UnaryExpression* = ref object of Expression
-    operand*: Expression
+    value*: Expression
 
   IdentifierExpression* = ref object of Expression
 
   CastExpression* = ref object of Expression
     value*: Expression
 
-  StringExpression* = ref object of Expression
-
   DerefExpression* = ref object of Expression
-    operand*: Expression
+    value*: Expression
 
   CharExpression* = ref object of Expression
 
@@ -37,7 +35,7 @@ type
     values*: seq[Expression]
 
   IndexExpression* = ref object of Expression
-    operand*: Expression
+    value*: Expression
     index*: Expression
 
   NulExpression* = ref object of Expression
@@ -49,7 +47,7 @@ type
   Statement* = ref object of RootObj
 
   DeclarationStatement* = ref object of Statement
-    varType*: Type
+    symbolType*: Type
     name*: Token
     value*: Expression
 
@@ -82,11 +80,15 @@ type
   ContinueStatement* = ref object of Statement
     token*: Token
 
+  DefaultStatement* = ref object of Statement
+    symbolType*: Type
+    name*: Token
+
   # SPECIALS
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skArr, skLen, skFmt
+    skNew, skArr, skLen
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
@@ -112,7 +114,6 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
   of "new": skNew
   of "arr": skArr
   of "len": skLen
-  of "fmt": skFmt
   else:
     newError(errExprSpecial, token)
     return skExprError
@@ -134,8 +135,8 @@ proc newTypeExpression*(token: Token, returnType: Type): TypeExpression =
 proc newNulExpression*(token: Token): NulExpression {.inline.} =
   NulExpression(token: token, returnType: getNulType())
 
-proc newIndexExpression*(token: Token, operand: Expression, index: Expression): IndexExpression {.inline.} =
-  IndexExpression(token: token, operand: operand, index: index, returnType: getUndefinedType())
+proc newIndexExpression*(token: Token, value: Expression, index: Expression): IndexExpression {.inline.} =
+  IndexExpression(token: token, value: value, index: index, returnType: getUndefinedType())
 
 proc newArrayExpression*(token: Token): ArrayExpression {.inline.} =
   ArrayExpression(token: token, returnType: getUndefinedType())
@@ -146,8 +147,8 @@ proc addExpr*(self: var ArrayExpression, expr: Expression) {.inline.} =
 proc newCharExpression*(token: Token): CharExpression {.inline.} =
   CharExpression(token: token, returnType: getCharType())
 
-proc newDerefExpression*(token: Token, operand: Expression): DerefExpression {.inline.} =
-  DerefExpression(token: token, operand: operand, returnType: getUndefinedType())
+proc newDerefExpression*(token: Token, value: Expression): DerefExpression {.inline.} =
+  DerefExpression(token: token, value: value, returnType: getUndefinedType())
 
 proc newCastExpression*(castToken: Token, castType: Type, value: Expression): CastExpression {.inline.} =
   CastExpression(token: castToken, returnType: castType, value: value)
@@ -164,14 +165,11 @@ proc newBoolExpression*(value: Token): BoolExpression {.inline.} =
 proc newBinaryExpression*(left: Expression, op: Token, right: Expression): BinaryExpression {.inline.} =
   BinaryExpression(left: left, token: op, right: right, returnType: getUndefinedType())
 
-proc newUnaryExpression*(operand: Expression, op: Token): UnaryExpression {.inline.} =
-  UnaryExpression(operand: operand, token: op, returnType: getUndefinedType())
+proc newUnaryExpression*(value: Expression, op: Token): UnaryExpression {.inline.} =
+  UnaryExpression(value: value, token: op, returnType: getUndefinedType())
 
 proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
-
-proc newStringExpression*(token: Token): StringExpression {.inline.} =
-  StringExpression(token: token, returnType: getArrayType(getCharType()))
 
 # STATEMENTS
 
@@ -210,6 +208,9 @@ proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
   blockStmt.statements.add(stmt)
 
 proc newDeclarationStatement*(
-    varType: Type, name: Token, value: Expression
+    symbolType: Type, name: Token, value: Expression
   ): DeclarationStatement {.inline.} =
-  DeclarationStatement(name: name, value: value, varType: varType)
+  DeclarationStatement(name: name, value: value, symbolType: symbolType)
+
+proc newDefaultStatement*(symbolType: Type, name: Token): DefaultStatement {.inline.} =
+  DefaultStatement(name: name, symbolType: symbolType)
