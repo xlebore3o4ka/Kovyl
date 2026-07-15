@@ -422,7 +422,7 @@ proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
     if k == key:
       info("argument exists with key: ", key)
       return true
-  warn("argument does not exist with key: ", key)
+  info("argument does not exist with key: ", key)
   return false
 
 proc expect(self: SpecialExpression | SpecialStatement, key: string, types: varargs[Type]): bool =
@@ -513,6 +513,29 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       if node.expect("0", typeArray, typeStaticArray): break analysis
 
       node.setType(getInt64Type())
+
+    of skFmt:
+      info("Semantic analysis of skFmt special")
+      for key, expr in node.namedArgs.pairs:
+        if key.kind == tkIdentifier and key.lexeme != "sep" and key.lexeme != "repr":
+          warn("unexpected named argument found: ", key.lexeme)
+          newError(errUnexpectedNamedArgument, key, @{"@0": key.lexeme})
+          continue
+        visitor.visitExpecting(expr, getStaticArrayType(getCharType(), 0))
+        if expr.returnType.eq getStaticArrayType(getCharType(), 0):
+          continue
+        if expr.returnType.kind in {typeStaticArray, typeArray, typePtr, typeNul, typeUndefined}:
+          newError(errTypeMismatch, expr.token, @{"@0": "formatted type", "@1": $expr.returnType})
+
+      if node.has("sep"):
+        visitor.visitExpecting(node.get("sep"), getStaticArrayType(getCharType(), 0))
+        if not node.expect("sep", getStaticArrayType(getCharType(), 0)): break analysis
+
+      if node.has("repr"):
+        visitor.visitExpecting(node.get("repr"), getBoolType())
+        if not node.expect("repr", getBoolType()): break analysis
+
+      node.setType(getArrayType(getCharType()))
 
     else:
       warn("Unhandled special expression: ", node.kind)

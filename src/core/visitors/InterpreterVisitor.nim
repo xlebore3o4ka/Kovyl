@@ -137,6 +137,7 @@ proc arrayValues*(v: Value): var seq[Value] =
 proc stringValue*(v: Value): string =
   result = ""
   for ch in v.arrayValues:
+    if ch.charValue == '\0': break
     result.add(ch.charValue)
 
 proc newInterpreterVisitor*(): InterpreterVisitor =
@@ -211,6 +212,45 @@ proc validIndex(index: int, arrayLength: int): int =
   if result < -arrayLength or result > arrayLength - 1:
     raise newError(errIndex, "index " & $result & " outside the range " & 
       $(-arrayLength) & ".." & $(arrayLength - 1))
+
+proc `$`*(value: Value): string =
+  case value.kind:
+  of typeInt64:  return $value.int64Value
+  of typeInt32:  return $value.int32Value
+  of typeInt16:  return $value.int16Value
+  of typeInt8:   return $value.int8Value
+  of typeUint64: return $value.uint64Value
+  of typeUint32: return $value.uint32Value
+  of typeUint16: return $value.uint16Value
+  of typeUint8:  return $value.uint8Value
+  of typeBool:   return $value.boolValue
+  of typeChar:   return $value.charValue
+  of typeStaticArray:
+    if value.arrayValue.values.len > 0 and 
+       value.valueType.eq getStaticArrayType(getCharType(), 0):
+      return value.stringValue
+    else:
+      raise newException(ValueError, "Cannot convert static array (non-char) to string")
+  of typeArray:
+    raise newException(ValueError, "Cannot convert array to string")
+  of typePtr:
+    raise newException(ValueError, "Cannot convert pointer to string")
+  of typeNul:
+    raise newException(ValueError, "Cannot convert nul to string")
+  of typeUndefined:
+    raise newException(ValueError, "Cannot convert undefined to string")
+
+proc escapeString(s: string): string =
+  for c in s:
+    case c
+    of '\0'..'\8', '\11'..'\12', '\14'..'\31':
+      result.add("\\x" & c.byte.toHex(2))
+    of '\n': result.add("\\n")
+    of '\r': result.add("\\r")
+    of '\t': result.add("\\t")
+    of '\\': result.add("\\\\")
+    of '\"': result.add("\\\"")
+    else: result.add(c)
 
 # EXPRESSIONS
 
@@ -522,6 +562,33 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
     let expr = node.get("0")
     let arrValue = visitor.visitExpression(expr)
     return newInt64Value(int64(arrValue.arrayLength))
+
+  of skFmt:
+    var buffer: seq[Value] = @[]
+    var sep = ""
+    var repr = false
+
+    if node.has("sep"):
+      sep = visitor.visitExpression(node.get("sep")).stringValue
+
+    if node.has("repr"):
+      repr = visitor.visitExpression(node.get("repr")).boolValue
+
+    for key, expr in node.namedArgs.pairs:
+      if key.kind == tkNumber:
+        if key.lexeme != "0":
+          for ch in sep:
+            buffer.add newCharValue(ch)
+
+        var formatted = $visitor.visitExpression(expr)
+
+        if repr:
+          formatted = escapeString(formatted)
+
+        for ch in formatted:
+          buffer.add newCharValue(ch)
+
+    return newArrayValue(buffer, getCharType())
     
   else:
     warn("Unhandled special expression: ", node.kind)

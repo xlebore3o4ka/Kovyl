@@ -1,1 +1,1 @@
-print:(arr:"", term="1")
+print:fmt:("Hello\n", 10, true, sep=", ", repr=true)
