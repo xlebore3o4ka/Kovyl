@@ -50,7 +50,7 @@ proc main() =
     interpreterVisitorLogging(true)
     let interpreter = newInterpreterVisitor()
     interpreter.visitStatement(blockStatement)
-    echo "[KOVYL] INFO: Running successful!"
+    echo "\n[KOVYL] INFO: Running successful!"
     interpreterVisitorLogging(false)
 
   for error in errors.errors:

@@ -1,5 +1,5 @@
 import lexer, astnodes, tokens, errors, types
-import std/[tables, strutils]
+import std/[tables, strutils, sets]
 
 type Parser* = object
   file: string
@@ -74,6 +74,7 @@ proc parseType(self: var Parser): Type {.inline.} =
 proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
   result = initOrderedTable[Token, Expression]()
   var pos = 0
+  var usedNames: HashSet[string]
 
   if self.lexer.peekToken().kind == tkLParen:
     discard self.lexer.nextToken()
@@ -87,17 +88,23 @@ proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
         let next = self.lexer.nextToken()
         if next.kind == tkEqual:
           let value = self.parseExpr()
-          result[token] = value
+          if token.lexeme in usedNames:
+            self.newError(errDuplicateArgument, token, @{"@0": token.lexeme})
+          else:
+            result[token] = value
+            usedNames.incl(token.lexeme)
         else:
           self.lexer.rollback(rd)
           let expr = self.parseExpr()
           let posToken = token.newFrom(tkNumber, lexeme = $pos)
           result[posToken] = expr
+          usedNames.incl(posToken.lexeme)
           pos.inc
       else:
         let expr = self.parseExpr()
         let posToken = expr.token.newFrom(tkNumber, lexeme = $pos)
         result[posToken] = expr
+        usedNames.incl(posToken.lexeme)
         pos.inc
       
       if self.lexer.peekToken().kind in {tkRParen, tkEOF}:

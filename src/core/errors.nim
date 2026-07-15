@@ -16,7 +16,7 @@ type
 
     errUnknownPragma
 
-    errUnexpectedArgument, errUnexpectedNamedArgument, errMissingArgument
+    errUnexpectedArgument, errUnexpectedNamedArgument, errMissingArgument, errDuplicateArgument
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -60,6 +60,7 @@ proc message(kind: ErrorKind): string =
     of errUnexpectedNamedArgument: "Unexpected named argument '@0'"
     of errUnexpectedArgument: "Unexpected argument at position @0"
     of errMissingArgument: "Missing required argument '@0'"
+    of errDuplicateArgument: "Duplicate argument: @0"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

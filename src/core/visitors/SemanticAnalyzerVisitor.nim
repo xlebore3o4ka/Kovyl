@@ -1,7 +1,7 @@
 import ../[astnodes, tokens, types, errors]
 import ../../utils/semanticAnalyzerUtils
 import visitor
-import std/[logging, tables]
+import std/[logging, tables, strutils, sequtils]
 
 type
   Symbol = object
@@ -178,7 +178,7 @@ method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpres
   visitor.visitExpecting(node.value, getPtrType(visitor.expectedContextType))
   if node.value.returnType.kind.neq typePtr:
     newError(errTypeMismatch, node.token, @{"@0": $typePtr, "@1": $node.value.returnType})
-    error = false
+    error = true
 
   if not error:
     node.setType(node.value.returnType.ptrBase)
@@ -194,15 +194,15 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   if visitor.expectedContextType.kind.eq typeStaticArray:
     expected = visitor.expectedContextType.staticArrBase
   else:
-    newError(errForbiddenLocation, node.token)
-    error = true
+    warn("Non-static-array context")
 
   info("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
     if expr.returnType.neq expected:
-      newError(errTypeMismatch, node.token, @{"@0": $expected, "@1": $expr.returnType})
+      newError(errTypeMismatch, expr.token, @{"@0": $expected, "@1": $expr.returnType})
       error = true
+      break
 
   if not error:
     node.setType(getStaticArrayType(expected, node.values.len))
@@ -386,12 +386,179 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
 
 # SPECIALS
 
+proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
+  info("checking for unexpected arguments in special")
+
+  for token, _ in self.namedArgs.pairs:
+    let key = token.lexeme
+    if key notin expected:
+      if token.kind == tkIdentifier:
+        warn("unexpected named argument found: ", key)
+        newError(errUnexpectedNamedArgument, token, @{"@0": key})
+      else:
+        warn("unexpected argument found: ", key)
+        newError(errUnexpectedArgument, token, @{"@0": key})
+
+proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
+  info("getting argument with key: ", key, "...")
+  for token, expr in self.namedArgs.pairs:
+    let k = if token.kind == tkNumber: token.lexeme else: token.lexeme
+    if k == key:
+      info("argument found for key: ", key)
+      return expr
+  warn("argument not found for key: ", key)
+  newError(errMissingArgument, self.token, @{"@0": key})
+  return newErrorExpression(self.token)
+
+proc add(self: SpecialExpression | SpecialStatement, key: string, expr: Expression) =
+  info("adding argument with key: ", key, " and expression type: ", $expr.returnType)
+  let token = tkIdentifier.newToken(key, self.token.file, self.token.line, self.token.column, self.token.offset)
+  self.namedArgs[token] = expr
+
+proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
+  info("checking if argument exists with key: ", key, "...")
+  for token, _ in self.namedArgs.pairs:
+    let k = token.lexeme
+    if k == key:
+      info("argument exists with key: ", key)
+      return true
+  warn("argument does not exist with key: ", key)
+  return false
+
+proc expect(self: SpecialExpression | SpecialStatement, key: string, types: varargs[Type]): bool =
+  info("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
+  let expr = self.get(key)
+  if expr of ErrorExpression:
+    warn("argument is error expression")
+    return false
+  
+  var matched = false
+  for typ in types:
+    if expr.returnType.neq typ:
+      continue
+    matched = true
+    break
+  
+  if not matched:
+    let expectedTypes = types.mapIt($it).join(" | ")
+    warn("type mismatch for argument '", key, "': expected ", expectedTypes, ", got ", $expr.returnType)
+    newError(errTypeMismatch, expr.token, @{"@0": expectedTypes, "@1": $expr.returnType})
+    return false
+  
+  info("argument '", key, "' has correct type: ", $expr.returnType)
+  return true
+
+proc expect(self: SpecialExpression | SpecialStatement, key: string, types: varargs[TypeKind]): bool =
+  info("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
+  let expr = self.get(key)
+  if expr of ErrorExpression:
+    warn("argument is error expression")
+    return false
+  
+  var matched = false
+  for typ in types:
+    if expr.returnType.kind.neq typ:
+      continue
+    matched = true
+    break
+  
+  if not matched:
+    let expectedTypes = types.mapIt($it).join(" | ")
+    warn("type mismatch for argument '", key, "': expected ", expectedTypes, ", got ", $expr.returnType)
+    newError(errTypeMismatch, expr.token, @{"@0": expectedTypes, "@1": $expr.returnType})
+    return false
+  
+  info("argument '", key, "' has correct type: ", $expr.returnType)
+  return true
+
 method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialExpression): auto =
   info("visiting SpecialExpression")
+
+  block analysis:
+    case node.kind:
+    of skNew: 
+      info("Semantic analysis of skNew special")
+      node.checkUnexpected(expected = @["0"])
+      let expr = node.get("0")
+
+      visitor.visitExpression(expr)
+
+      node.setType(getPtrType(expr.returnType))
+
+    of skArr: 
+      info("Semantic analysis of skArr special")
+      node.checkUnexpected(expected = @["0"])
+      let expr = node.get("0")
+
+      var expected = getUndefinedType()
+      if visitor.expectedContextType.kind.eq typeArray:
+        expected = getStaticArrayType(visitor.expectedContextType.arrBase, 0)
+      else:
+        warn("non-array context")
+
+      visitor.visitExpecting(expr, expected)
+      if not node.expect("0", typeStaticArray): break analysis
+
+      if expr of TypeExpression:
+        node.add("@", newBoolExpression(expr.token.newFrom(kind = tkTrue)))
+
+      node.setType(getArrayType(expr.returnType.staticArrBase))
+
+    of skLen:
+      info("Semantic analysis of skLen special")
+      node.checkUnexpected(expected = @["0"])
+      let expr = node.get("0")
+
+      visitor.visitExpression(expr)
+      if node.expect("0", typeArray, typeStaticArray): break analysis
+
+      node.setType(getInt64Type())
+
+    else:
+      warn("Unhandled special expression: ", node.kind)
+
   info("exiting SpecialExpression")
 
 method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialStatement): auto =
   info("visiting SpecialStatement")
+
+  block analysis:
+    case node.kind:
+    of skPrint:
+      info("Semantic analysis of skPrint special")
+      node.checkUnexpected(expected = @["0", "term"])
+      let expr = node.get("0")
+
+      visitor.visitExpecting(expr, getArrayType(getCharType()))
+      if not node.expect("0", getArrayType(getCharType())): break analysis
+
+      if node.has("term"):
+        visitor.visitExpecting(node.get("term"), getStaticArrayType(getCharType(), 0))
+        if not node.expect("term", getStaticArrayType(getCharType(), 0)): break analysis
+
+    of skFree:
+      info("Semantic analysis of skPrint special")
+      node.checkUnexpected(expected = @["0"])
+      let expr = node.get("0")
+
+      visitor.visitExpression(expr)
+      if not node.expect("0", typeArray, typePtr): break analysis
+
+    of skAssert:
+      info("Semantic analysis of skPrint special")
+      node.checkUnexpected(expected = @["0", "1"])
+      let cond = node.get("0")
+      visitor.visitExpecting(cond, getBoolType())
+
+      if not node.expect("0", getBoolType()): break analysis
+
+      if node.has("1"):
+        visitor.visitExpecting(node.get("1"), getStaticArrayType(getCharType(), 0))
+        if not node.expect("1", getStaticArrayType(getCharType(), 0)): break analysis
+
+    else:
+      warn("Unhandled special statement: ", node.kind)
+
   info("exiting SpecialStatement")
 
 # GENERAL

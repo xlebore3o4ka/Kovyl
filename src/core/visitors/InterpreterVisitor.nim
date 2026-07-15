@@ -7,6 +7,7 @@ type
     errSIGSEGV
     errArithmeticOverflow, errSign
     errIndex
+    errAssert
 
   RuntimeError* = object of CatchableError
     kind: ErrorKind
@@ -132,6 +133,11 @@ proc arrayLength*(v: Value): Natural =
 
 proc arrayValues*(v: Value): var seq[Value] =
   return v.arrayValue.values
+
+proc stringValue*(v: Value): string =
+  result = ""
+  for ch in v.arrayValues:
+    result.add(ch.charValue)
 
 proc newInterpreterVisitor*(): InterpreterVisitor =
   result = InterpreterVisitor()
@@ -389,7 +395,7 @@ method visitArrayExpression*(visitor: InterpreterVisitor, node: ArrayExpression)
     for _ in node.values.len..node.returnType.length:
       values.add(newDefaultValue(node.returnType.staticArrBase))
 
-  return newStaticArrayValue(values, node.returnType.staticArrBase, node.returnType.length)
+  return newStaticArrayValue(values, node.returnType, node.returnType.length)
 
 method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression): Value {.base.} =
   var index = visitor.visitExpression(node.index).numberValue
@@ -468,11 +474,97 @@ method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): 
 
 # SPECIALS
 
+proc get*(self: SpecialExpression | SpecialStatement, key: string): Expression =
+  for token, expr in self.namedArgs.pairs:
+    if token.lexeme == key:
+      return expr
+  return newErrorExpression(self.token)
+
+proc has*(self: SpecialExpression | SpecialStatement, key: string): bool =
+  for token, _ in self.namedArgs.pairs:
+    if token.lexeme == key:
+      return true
+  return false
+
+# SPECIALS
+
 method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpression): Value {.base.} =
-  discard
+  case node.kind:
+  of skNew:
+    let expr = node.get("0")
+    let value = visitor.visitExpression(expr)
+    var ptrValue = new(Value)
+    ptrValue[] = value
+    return newPtrValue(ptrValue, value.valueType)
+    
+  of skArr:
+    if node.has("@"):
+      let typeExpr = node.get("0")
+      let baseType = typeExpr.returnType.staticArrBase
+      let length = typeExpr.returnType.length
+      
+      var values: seq[Value] = @[]
+      for i in 0..<length:
+        values.add(newDefaultValue(baseType))
+      
+      return newArrayValue(values, baseType)
+    else:
+      let expr = node.get("0")
+      let arrValue = visitor.visitExpression(expr)
+      
+      var values: seq[Value] = @[]
+      for val in arrValue.arrayValues:
+        values.add(val)
+      
+      return newArrayValue(values, arrValue.valueType.staticArrBase)
+    
+  of skLen:
+    let expr = node.get("0")
+    let arrValue = visitor.visitExpression(expr)
+    return newInt64Value(int64(arrValue.arrayLength))
+    
+  else:
+    warn("Unhandled special expression: ", node.kind)
+    return newDefaultValue(getUndefinedType())
 
 method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatement): auto =
-  discard
+  case node.kind:
+  of skPrint:
+    
+    var str = visitor.visitExpression(node.get("0")).stringValue
+
+    var term = "\n"
+    if node.has("term"): 
+      term = visitor.visitExpression(node.get("term")).stringValue
+
+    stdout.write(str & term)
+      
+  of skFree:
+    let expr = node.get("0")
+    var value = visitor.visitExpression(expr)
+    
+    if value.kind == typePtr:
+      value.ptrValue = nil
+    elif value.kind == typeArray:
+      value.arrayValue = nil
+      
+  of skAssert:
+    let cond = node.get("0")
+    let condValue = visitor.visitExpression(cond)
+    
+    if not condValue.boolValue:
+      if node.has("1"):
+        let msg = node.get("1")
+        let msgValue = visitor.visitExpression(msg)
+        var str = ""
+        for ch in msgValue.arrayValues:
+          str.add(ch.charValue)
+        raise newError(errAssert, str)
+      else:
+        raise newError(errAssert, "Assertion failed")
+      
+  else:
+    warn("Unhandled special statement: ", node.kind)
 
 # GENERAL
 
