@@ -65,9 +65,9 @@ proc eq*(a: Type, b: TypeKind): bool {.inline.} =
 
 proc eq*(a: Type, b: Type): bool =
   if a.eq(typeStaticArray) and a.length == 0:
-    return b.eq(typeStaticArray)
+    return b.eq(typeStaticArray) and a.staticArrBase == b.staticArrBase
   if b.eq(typeStaticArray) and b.length == 0:
-    return a.eq(typeStaticArray)
+    return a.eq(typeStaticArray) and a.staticArrBase == b.staticArrBase
 
   return a == b
 

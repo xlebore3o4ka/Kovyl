@@ -21,22 +21,26 @@ type
     case kind: TypeKind
     of typeUndefined: discard
 
-    of typeInt64:  int64Value:  int64
-    of typeInt32:  int32Value:  int32
-    of typeInt16:  int16Value:  int16
-    of typeInt8:   int8Value:   int8
-    of typeUint64: uint64Value: uint64
-    of typeUint32: uint32Value: uint32
-    of typeUint16: uint16Value: uint16
-    of typeUint8:  uint8Value:  uint8
+    of typeInt64:        int64Value:       int64
+    of typeInt32:        int32Value:       int32
+    of typeInt16:        int16Value:       int16
+    of typeInt8:         int8Value:        int8
+    of typeUint64:       uint64Value:      uint64
+    of typeUint32:       uint32Value:      uint32
+    of typeUint16:       uint16Value:      uint16
+    of typeUint8:        uint8Value:       uint8
 
-    of typeBool:   boolValue:   bool
-    of typeChar:   charValue:   char
-    of typeStaticArray, typeArray:
-      arrayValue:  ArrayValue
+    of typeBool:         boolValue:        bool
+    of typeChar:         charValue:        char
 
-    of typePtr:    ptrValue:    ref Value
-    of typeNul:    discard
+    of typeStaticArray:
+                         staticArrayData:   ref seq[Value]
+                         staticArrayLength: Natural
+        
+    of typeArray:        arrayValue:       ArrayValue
+
+    of typePtr:          ptrValue:         ref Value
+    of typeNul:          discard
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -115,11 +119,23 @@ proc newArrayValue*(values: seq[Value], baseType: Type): Value =
     arrayValue: ArrayValue(values: values, length: values.len)
   )
 
+proc copyValueDeep(v: Value): Value =
+  result = v
+  if v.kind == typeStaticArray:
+    var newData = new seq[Value]
+    for val in v.staticArrayData[]:
+      newData[].add(copyValueDeep(val))
+    result.staticArrayData = newData
+
 proc newStaticArrayValue*(values: seq[Value], valType: Type, length: Natural): Value =
+  var data = new seq[Value]
+  for val in values:
+    data[].add(copyValueDeep(val))
   Value(
     kind: typeStaticArray,
     valueType: valType,
-    arrayValue: ArrayValue(values: values, length: length)
+    staticArrayData: data,
+    staticArrayLength: length
   )
 
 proc newPtrValue*(v: ref Value, baseType: Type): Value = 
@@ -129,16 +145,36 @@ proc newNulValue*(dataType: Type): Value =
   Value(kind: typeNul, valueType: dataType)
 
 proc arrayLength*(v: Value): Natural =
-  return v.arrayValue.length
+  case v.kind:
+  of typeStaticArray:
+    return v.staticArrayLength
+  of typeArray:
+    return v.arrayValue.length
+  else:
+    raise newException(ValueError, "not an array")
 
-proc arrayValues*(v: Value): var seq[Value] =
-  return v.arrayValue.values
+proc arrayValues*(v: Value): seq[Value] =
+  case v.kind:
+  of typeStaticArray:
+    return v.staticArrayData[]
+  of typeArray:
+    return v.arrayValue.values
+  else:
+    raise newException(ValueError, "not an array")
 
 proc stringValue*(v: Value): string =
   result = ""
-  for ch in v.arrayValues:
-    if ch.charValue == '\0': break
-    result.add(ch.charValue)
+  case v.kind:
+  of typeStaticArray:
+    for ch in v.staticArrayData[]:
+      if ch.charValue == '\0': break
+      result.add(ch.charValue)
+  of typeArray:
+    for ch in v.arrayValue.values:
+      if ch.charValue == '\0': break
+      result.add(ch.charValue)
+  else:
+    raise newException(ValueError, "not an array")
 
 proc newInterpreterVisitor*(): InterpreterVisitor =
   result = InterpreterVisitor()
@@ -193,7 +229,14 @@ proc `==`*(a, b: Value): bool =
   of typeUint8:  return a.uint8Value == b.uint8Value
   of typeBool:   return a.boolValue == b.boolValue
   of typeChar:   return a.charValue == b.charValue
-  of typeArray, typeStaticArray:
+  of typeStaticArray:
+    if a.staticArrayData[].len != b.staticArrayData[].len:
+      return false
+    for i in 0..<a.staticArrayData[].len:
+      if a.staticArrayData[][i] != b.staticArrayData[][i]:
+        return false
+    return true
+  of typeArray:
     return a.arrayValue == b.arrayValue
   of typePtr:
     return a.ptrValue == b.ptrValue
@@ -226,7 +269,7 @@ proc `$`*(value: Value): string =
   of typeBool:   return $value.boolValue
   of typeChar:   return $value.charValue
   of typeStaticArray:
-    if value.arrayValue.values.len > 0 and 
+    if value.staticArrayData[].len > 0 and 
        value.valueType.eq getStaticArrayType(getCharType(), 0):
       return value.stringValue
     else:
@@ -441,7 +484,13 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   var index = visitor.visitExpression(node.index).numberValue
   let arr = visitor.visitExpression(node.value)
   
-  return arr.arrayValues[validIndex(index, arr.arrayLength)]
+  case arr.kind:
+  of typeStaticArray:
+    return arr.staticArrayData[][validIndex(index, arr.staticArrayLength)]
+  of typeArray:
+    return arr.arrayValue.values[validIndex(index, arr.arrayValue.length)]
+  else:
+    raise newException(ValueError, "not an array")
 
 method visitNulExpression*(visitor: InterpreterVisitor, node: NulExpression): Value {.base.} =
   return newNulValue(node.returnType)
@@ -453,19 +502,34 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
     visitor.visitStatement(stmt)
 
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
-  visitor.newSlot(node.name.lexeme, visitor.visitExpression(node.value))
+  var value = visitor.visitExpression(node.value)
+  if value.kind == typeStaticArray:
+    value = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+  visitor.newSlot(node.name.lexeme, value)
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
   let left = node.left
   let value = visitor.visitExpression(node.value)
 
   if left of IdentifierExpression:
-    visitor.setSlot(left.token.lexeme, value)
+    if value.kind == typeStaticArray:
+      var newValue = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+      visitor.setSlot(left.token.lexeme, newValue)
+    else:
+      visitor.setSlot(left.token.lexeme, value)
 
   elif left of IndexExpression:
-    let arr = visitor.visitExpression(IndexExpression(left).value)
-    let index = visitor.visitExpression(IndexExpression(left).index).numberValue
-    arr.arrayValues[validIndex(index, arr.arrayLength)] = value
+    let indexExpr = IndexExpression(left)
+    let index = visitor.visitExpression(indexExpr.index).numberValue
+    let arr = visitor.visitExpression(indexExpr.value)
+    
+    case arr.kind:
+    of typeStaticArray:
+      arr.staticArrayData[][validIndex(index, arr.staticArrayLength)] = value
+    of typeArray:
+      arr.arrayValue.values[validIndex(index, arr.arrayValue.length)] = value
+    else:
+      raise newException(ValueError, "not an array")
 
   elif left of DerefExpression:
     let ptrValue = visitor.visitExpression(DerefExpression(left).value)

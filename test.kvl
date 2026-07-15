@@ -1,1 +1,4 @@
-print:fmt:("Hello\n", 10, true, sep=", ", repr=true)
+int[3] x = {1, 2, 3}
+int[] y = x
+y[0] = 10
+print:fmt:(x[0], y[0], sep=" ")
