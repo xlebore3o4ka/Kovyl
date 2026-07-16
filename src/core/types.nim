@@ -1,3 +1,5 @@
+import std/[strutils, tables, sequtils]
+
 type
   TypeKind* = enum
     typeUndefined
@@ -12,6 +14,8 @@ type
     typeArray
     typeNul
 
+    typeTuple
+
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBase*: Type
@@ -19,6 +23,8 @@ type
     of typeStaticArray:
       staticArrBase*: Type
       length*: Natural
+    of typeTuple:
+      elements*: OrderedTable[string, Type]
     else: discard
 
 let
@@ -39,6 +45,7 @@ let
 var ptrTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
 var staticArrayTypes*: seq[Type] = @[]
+var tupleTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -65,9 +72,11 @@ proc eq*(a: Type, b: TypeKind): bool {.inline.} =
 
 proc eq*(a: Type, b: Type): bool =
   if a.eq(typeStaticArray) and a.length == 0:
-    return b.eq(typeStaticArray) and a.staticArrBase == b.staticArrBase
+    return b.eq(typeStaticArray) and a.staticArrBase.eq b.staticArrBase
   if b.eq(typeStaticArray) and b.length == 0:
-    return a.eq(typeStaticArray) and a.staticArrBase == b.staticArrBase
+    return a.eq(typeStaticArray) and a.staticArrBase.eq b.staticArrBase
+  if a.eq(typeTuple):
+    return b.eq(typeTuple) and a.elements == b.elements
 
   return a == b
 
@@ -79,7 +88,7 @@ proc getPtrType*(baseType: Type): Type =
     return baseType
 
   for t in ptrTypes:
-    if t.kind == typePtr and t.ptrBase.eq baseType:
+    if t.ptrBase.eq baseType:
       return t
   
   result = Type(kind: typePtr, ptrBase: baseType)
@@ -90,7 +99,7 @@ proc getArrayType*(baseType: Type): Type =
     return baseType
 
   for t in arrayTypes:
-    if t.kind == typeArray and t.arrBase.eq baseType:
+    if t.arrBase.eq baseType:
       return t
   
   result = Type(kind: typeArray, arrBase: baseType)
@@ -101,11 +110,20 @@ proc getStaticArrayType*(baseType: Type, length: Natural): Type =
     return baseType
 
   for t in staticArrayTypes:
-    if t.kind == typeStaticArray and t.staticArrBase.eq(baseType) and t.length == length:
+    if t.staticArrBase.eq(baseType) and t.length == length:
       return t
   
   result = Type(kind: typeStaticArray, staticArrBase: baseType, length: length)
   staticArrayTypes.add(result)
+
+proc getTupleType*(elements: OrderedTable[string, Type]): Type =
+
+  for t in tupleTypes:
+    if t.elements == elements:
+      return t
+
+  result = Type(kind: typeTuple, elements: elements)
+  tupleTypes.add(result)
 
 proc `$`*(k: TypeKind): string =
   case k
@@ -119,11 +137,12 @@ proc `$`*(k: TypeKind): string =
   of typeUint16: "uint16"
   of typeUint8: "uint8"
   of typeBool: "bool"
-  of typePtr: "Any*"
+  of typePtr: "T*"
   of typeChar: "char"
-  of typeArray: "Any[*]"
-  of typeStaticArray: "Any[]"
+  of typeArray: "T[*]"
+  of typeStaticArray: "T[]"
   of typeNul: "nul"
+  of typeTuple: "(T, ...)"
 
 proc `$`*(t: Type): string =
   if t == nil: return "nilType"
@@ -132,4 +151,5 @@ proc `$`*(t: Type): string =
   of typeArray: $t.arrBase & "[*]"
   of typeStaticArray: $t.staticArrBase & "[" & (if t.length == 0: "" 
     else: $t.length) & "]" 
+  of typeTuple: "(" & t.elements.pairs.toSeq.mapIt(it[0] & ": " & $it[1]).join(", ") & ")"
   else: return $t.kind

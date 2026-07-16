@@ -9,7 +9,7 @@ const TOKEN_TYPE_KINDS = {
   tkInt64, tkInt32, tkInt16, tkInt8, 
   tkUint64, tkUint32, tkUint16, tkUint8, 
   tkBool, 
-  tkChar
+  tkChar, tkLParen
 }
   
 proc newParser*(text, file: string): Parser =
@@ -34,16 +34,34 @@ proc parseExpr(self: var Parser): Expression
 
 proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
-  of tkInt64: result = getInt64Type()
-  of tkInt32: result = getInt32Type()
-  of tkInt16: result = getInt16Type()
-  of tkInt8: result = getInt8Type()
+  of tkInt64:  result = getInt64Type()
+  of tkInt32:  result = getInt32Type()
+  of tkInt16:  result = getInt16Type()
+  of tkInt8:   result = getInt8Type()
   of tkUint64: result = getUint64Type()
   of tkUint32: result = getUint32Type()
   of tkUint16: result = getUint16Type()
-  of tkUint8: result = getUint8Type()
-  of tkBool: result = getBoolType()
-  of tkChar: result = getCharType()
+  of tkUint8:  result = getUint8Type()
+  of tkBool:   result = getBoolType()
+  of tkChar:   result = getCharType()
+  of tkLParen:
+    var elements = initOrderedTable[string, Type]()
+    var index = 0
+    while (let tok = self.lexer.nextToken(); tok).kind != tkRParen:
+      if tok.kind notin TOKEN_TYPE_KINDS:
+        result = getUndefinedType()
+        break
+      var typ = self.parseType(tok)
+      var name = $index
+      if self.lexer.peekToken().kind == tkIdentifier:
+        name = self.expectToken(tkIdentifier).lexeme
+      else:
+        index += 1
+      elements[name] = typ
+      if self.lexer.peekToken().kind == tkRParen: break
+      discard self.expectToken(tkComma)
+    discard self.expectToken(tkRParen)
+    result = getTupleType(elements)
   else: 
     self.newError(errProhibitedType, token, @{"@0": token.lexeme})
     return getUndefinedType()
@@ -66,6 +84,7 @@ proc parseType(self: var Parser, token: Token): Type =
       else:
         self.newError(errSyntax, token)
         result = getUndefinedType()
+  echo result
 
 proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()
@@ -350,7 +369,8 @@ proc parseBranching(self: var Parser): Statement =
     elif tok.kind == tkElse:
       discard self.lexer.nextToken()
 
-      let elseBlock = self.parseBranchBlock(tok)
+      let doToken = self.expectToken(tkDo)
+      let elseBlock = self.parseBranchBlock(doToken)
       branchingStatement.setElse(elseBlock)
 
       break

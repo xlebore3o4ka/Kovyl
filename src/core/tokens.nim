@@ -30,6 +30,7 @@ type
     tkDo, tkEnd
     tkIf, tkElif, tkElse
     tkWhile, tkBreak, tkContinue
+    tkFunc, tkReturn
 
     tkEOS
     tkEOF
@@ -116,6 +117,8 @@ proc mean*(kind: TokenKind): string =
   of tkWhile: return "keyword while"
   of tkBreak: return "keyword break"
   of tkContinue: return "keyword continue"
+  of tkFunc: return "keyword func"
+  of tkReturn: return "keyword return"
 
 proc mean*(token: Token): string =
   mean(token.kind)

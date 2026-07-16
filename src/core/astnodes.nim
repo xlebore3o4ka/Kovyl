@@ -88,7 +88,7 @@ type
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skArr, skLen, skFmt, skTake, skTakeof
+    skNew, skArr, skLen, skFmt, skTake, skTakeof, skJoin
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
@@ -117,6 +117,7 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
   of "fmt": skFmt
   of "take": skTake
   of "takeof": skTakeof
+  of "join": skJoin
   else:
     newError(errExprSpecial, token)
     return skExprError

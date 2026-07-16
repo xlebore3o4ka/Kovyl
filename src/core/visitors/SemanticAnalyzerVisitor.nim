@@ -530,7 +530,9 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
           newError(errUnexpectedNamedArgument, key, @{"@0": key.lexeme})
           continue
         visitor.visitExpecting(expr, getStaticArrayType(getCharType(), 0))
-        if expr.returnType.eq getStaticArrayType(getCharType(), 0):
+        if expr.returnType.eq(getStaticArrayType(getCharType(), 0)):
+          continue
+        if expr.returnType.eq getArrayType(getCharType()): 
           continue
         if expr.returnType.kind in {typeStaticArray, typeArray, typePtr, typeNul, typeUndefined}:
           newError(errTypeMismatch, expr.token, @{"@0": "formatted type", "@1": $expr.returnType})
@@ -590,6 +592,19 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         lexeme = $typ.returnType.length)))
 
       node.setType(getStaticArrayType(typ.returnType.staticArrBase, typ.returnType.length))
+
+    of skJoin:
+      info("Semantic analysis of skJoin special")
+      node.checkUnexpected(expected = @["0", "1"])
+      let expr = node.get("0")
+
+      visitor.visitExpecting(expr, getStaticArrayType(getStaticArrayType(getCharType(), 0), 0))
+      if not node.expect("0", getStaticArrayType(getStaticArrayType(getCharType(), 0), 0)): break analysis
+
+      let sep = node.get("1")
+      visitor.visitExpecting(sep, getStaticArrayType(getCharType(), 0))
+
+      node.setType(getArrayType(getCharType()))
 
     else:
       warn("Unhandled special expression: ", node.kind)

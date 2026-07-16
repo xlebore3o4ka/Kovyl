@@ -42,6 +42,7 @@ type
 
     of typePtr:          ptrValue:         ref Value
     of typeNul:          discard
+    of typeTuple:        discard  # TODO
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -242,6 +243,7 @@ proc `==`*(a, b: Value): bool =
   of typePtr:
     return a.ptrValue == b.ptrValue
   of typeNul: return true
+  of typeTuple: discard  # TODO
 
 proc `==`*(a, b: ArrayValue): bool =
   if a.values.len != b.values.len:
@@ -276,13 +278,18 @@ proc `$`*(value: Value): string =
     else:
       raise newException(ValueError, "Cannot convert static array (non-char) to string")
   of typeArray:
-    raise newException(ValueError, "Cannot convert array to string")
+    if value.arrayLength > 0 and 
+       value.valueType.eq getArrayType(getCharType()):
+      return value.stringValue
+    else:
+      raise newException(ValueError, "Cannot convert array (non-char) to string")
   of typePtr:
     raise newException(ValueError, "Cannot convert pointer to string")
   of typeNul:
     raise newException(ValueError, "Cannot convert nul to string")
   of typeUndefined:
     raise newException(ValueError, "Cannot convert undefined to string")
+  of typeTuple: discard  # TODO
 
 proc escapeString(s: string): string =
   for c in s:
@@ -577,6 +584,9 @@ method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): 
       continue
   visitor.popScope()
 
+method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatement): auto =
+  visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))
+
 # SPECIALS
 
 proc get*(self: SpecialExpression | SpecialStatement, key: string): Expression =
@@ -651,6 +661,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
           formatted = escapeString(formatted)
 
         for ch in formatted:
+          if ch == '\0': break
           buffer.add newCharValue(ch)
 
     return newArrayValue(buffer, getCharType())
@@ -695,6 +706,26 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
         values.add(newDefaultValue(typ.returnType.staticArrBase))
     
     return newStaticArrayValue(values, node.returnType, length)
+
+  of skJoin:
+    let arr = visitor.visitExpression(node.get("0")).arrayValues
+    let sep = visitor.visitExpression(node.get("1")).stringValue
+
+    var buffer: seq[Value] = @[]
+
+    var first = true
+    for el in arr:
+      if not first:
+        for ch in sep:
+          buffer.add newCharValue(ch)
+      else:
+        first = false
+
+      for ch in $el:
+        if ch == '\0': break
+        buffer.add newCharValue(ch)
+
+    return newArrayValue(buffer, getCharType())
     
   else:
     warn("Unhandled special expression: ", node.kind)
@@ -789,5 +820,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitContinueStatement(ContinueStatement(node))
   elif node of WhileStatement:
     visitor.visitWhileStatement(WhileStatement(node))
+  elif node of DefaultStatement:
+    visitor.visitDefaultStatement(DefaultStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"
