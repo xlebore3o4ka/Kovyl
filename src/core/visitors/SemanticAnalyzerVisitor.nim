@@ -199,8 +199,16 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   info("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
-    if expr.returnType.neq expected:
-      newError(errTypeMismatch, expr.token, @{"@0": $expected, "@1": $expr.returnType})
+    if expr.returnType.eq(typeStaticArray) and expected.eq(typeStaticArray):
+      if expr.returnType.length > expected.length:
+        newError(errTypeMismatch, expr.token, @{"@0": $expr.returnType, "@1": $expected})
+        error = true
+        break
+      expr.returnType.length = expected.length
+      info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
+
+    elif expr.returnType.neq expected:
+      newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $expected})
       error = true
       break
 
@@ -510,7 +518,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       let expr = node.get("0")
 
       visitor.visitExpression(expr)
-      if node.expect("0", typeArray, typeStaticArray): break analysis
+      if not node.expect("0", typeArray, typeStaticArray): break analysis
 
       node.setType(getInt64Type())
 
@@ -536,6 +544,52 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         if not node.expect("repr", getBoolType()): break analysis
 
       node.setType(getArrayType(getCharType()))
+
+    of skTake:
+      info("Semantic analysis of skTake special")
+      if visitor.expectedContextType.kind.neq(typeStaticArray):
+        newError(errUnknownSize, node.token)
+        break analysis
+      elif visitor.expectedContextType.length == 0:
+        newError(errEmptyStaticArray, node.token)
+        break analysis
+
+      node.checkUnexpected(expected = @["0"])
+      let expr = node.get("0")
+
+      visitor.visitExpecting(expr, getArrayType(visitor.expectedContextType.staticArrBase))
+      if not node.expect("0", typeArray): break analysis
+
+      node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
+        lexeme = $visitor.expectedContextType.length)))
+
+      node.setType(getStaticArrayType(expr.returnType.arrBase, visitor.expectedContextType.length))
+
+    of skTakeof:
+      info("Semantic analysis of skTakeof special")
+      node.checkUnexpected(expected = @["0", "1"])
+      let typ = node.get("0")
+
+      visitor.visitExpression(typ)
+      if not node.expect("0", typeStaticArray): break analysis
+
+      elif not (typ of TypeExpression):
+        newError(errTypeMismatch, typ.token, @{"@0": "type annotation", "@1": "Expression"})
+        break analysis
+
+      elif typ.returnType.length == 0:
+        newError(errEmptyStaticArray, node.token)
+        break analysis
+
+      let expr = node.get("1")
+
+      visitor.visitExpecting(expr, getArrayType(typ.returnType.staticArrBase))
+      if not node.expect("1", typeArray): break analysis
+
+      node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
+        lexeme = $typ.returnType.length)))
+
+      node.setType(getStaticArrayType(typ.returnType.staticArrBase, typ.returnType.length))
 
     else:
       warn("Unhandled special expression: ", node.kind)

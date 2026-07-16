@@ -4,7 +4,7 @@ import std/[logging]
 type
   ErrorKind* = enum
     errSyntax, errExpression, errStatement, errExpectedSyntax, errCannotAssign
-    errForbiddenLocation, errSize, errEmptyStaticArray
+    errForbiddenLocation, errSize, errEmptyStaticArray, errUnknownSize
 
     errMismatchedBracket, errUnexpectedBracket, errUnclosedBracket, 
     errUnclosedString, errUnclosedChar, errEmptyCharLiteral
@@ -39,6 +39,7 @@ proc message(kind: ErrorKind): string =
     of errCannotAssign: "Cannot assign to this expression"
     of errForbiddenLocation: "This node is located in a forbidden place"
     of errSize: "@0 does not fit in type @1"
+    of errUnknownSize: "Cannot deduce the size from the context"
     of errEmptyStaticArray: "Static array cannot be empty"
     of errMismatchedBracket: "Mismatched bracket"
     of errUnexpectedBracket: "Unexpected closing bracket"

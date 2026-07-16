@@ -8,6 +8,7 @@ type
     errArithmeticOverflow, errSign
     errIndex
     errAssert
+    errArrayLengthMismatch
 
   RuntimeError* = object of CatchableError
     kind: ErrorKind
@@ -653,6 +654,47 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
           buffer.add newCharValue(ch)
 
     return newArrayValue(buffer, getCharType())
+
+  of skTake:
+    let expr = node.get("0")
+    let lengthNode = node.get("length")
+    let length = visitor.visitExpression(lengthNode).numberValue
+    
+    let arrValue = visitor.visitExpression(expr)
+    
+    if arrValue.arrayValue.length > length:
+      raise newError(errArrayLengthMismatch, "dynamic array length " & $arrValue.arrayValue.length & 
+        " does not fit in static array length " & $length)
+    
+    var values: seq[Value] = @[]
+    for i in 0..<length:
+      if i < arrValue.arrayValue.length:
+        values.add(arrValue.arrayValue.values[i])
+      else:
+        values.add(newDefaultValue(node.returnType.staticArrBase))
+    
+    return newStaticArrayValue(values, node.returnType, length)
+
+  of skTakeof:
+    let typ = node.get("0")
+    let expr = node.get("1")
+    let lengthNode = node.get("length")
+    let length = visitor.visitExpression(lengthNode).numberValue
+    
+    let arrValue = visitor.visitExpression(expr)
+    
+    if arrValue.arrayValue.length > length:
+      raise newError(errArrayLengthMismatch, "dynamic array length " & $arrValue.arrayValue.length & 
+        " does not fit in static array length " & $length)
+    
+    var values: seq[Value] = @[]
+    for i in 0..<length:
+      if i < arrValue.arrayValue.length:
+        values.add(arrValue.arrayValue.values[i])
+      else:
+        values.add(newDefaultValue(typ.returnType.staticArrBase))
+    
+    return newStaticArrayValue(values, node.returnType, length)
     
   else:
     warn("Unhandled special expression: ", node.kind)
