@@ -27,7 +27,7 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
   let token = self.lexer.nextToken()
   if token.kind != expected:
     self.newError(errExpectedSyntax, token, @{"@0": expected.mean(), "@1": token.mean()})
-    return tkInvalid.newToken(token.lexeme, self.file, token.line, token.column, token.offset)
+    return token.newFrom(kind = tkInvalid)
   return token
 
 proc parseExpr(self: var Parser): Expression
@@ -84,7 +84,6 @@ proc parseType(self: var Parser, token: Token): Type =
       else:
         self.newError(errSyntax, token)
         result = getUndefinedType()
-  echo result
 
 proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()
@@ -98,7 +97,7 @@ proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
   if self.lexer.peekToken().kind == tkLParen:
     discard self.lexer.nextToken()
     
-    while true:
+    while self.lexer.peekToken().kind != tkRParen:
       let rd = self.lexer.getRollbackData()
       let token = self.lexer.peekToken()
 
@@ -159,12 +158,17 @@ proc parseSpecialExpr(self: var Parser, name: Token): Expression =
   return newSpecialExpression(name, specialKind, namedArgs)
 
 proc parsePrimary(self: var Parser): Expression =
+  let rd = self.lexer.getRollbackData()
   let token = self.lexer.nextToken()
 
   if token.kind == tkLParen:
     result = self.parseExpr()
-    discard self.expectToken(tkRParen)
-    return result
+    if self.lexer.peekToken().kind == tkRParen:
+      discard self.expectToken(tkRParen)
+      return result
+    else:
+      self.lexer.rollback(rd)
+      return newTupleExpression(token, self.parseArguments())
 
   elif token.kind == tkNumber:
     return newNumberExpression(token)
@@ -225,7 +229,7 @@ proc parsePrimary(self: var Parser): Expression =
 proc parsePostfix(self: var Parser): Expression =
   result = self.parsePrimary()
 
-  while self.lexer.peekToken().kind in {tkArrow, tkLBracket}:
+  while self.lexer.peekToken().kind in {tkArrow, tkLBracket, tkDot}:
     let token = self.lexer.nextToken()
 
     if token.kind == tkArrow:
@@ -236,6 +240,15 @@ proc parsePostfix(self: var Parser): Expression =
       let index = self.parseExpr()
       discard self.expectToken(tkRBracket)
       result = newIndexExpression(token, result, index)
+
+    elif token.kind == tkDot:
+      var field = self.lexer.nextToken()
+      if field.kind notin {tkIdentifier, tkNumber}:
+        self.newError(errExpectedSyntax, token, @{"@0": tkIdentifier.mean() & " | " & tkNumber.mean(), 
+          "@1": token.mean()})
+        field = field.newFrom(kind = tkInvalid)
+
+      result = newFieldExpression(token, result, field)
 
 proc parsePrefix(self: var Parser): Expression =
   let token = self.lexer.peekToken()

@@ -38,11 +38,12 @@ type
                          staticArrayData:   ref seq[Value]
                          staticArrayLength: Natural
         
-    of typeArray:        arrayValue:       ArrayValue
+    of typeArray:        arrayValue:        ArrayValue
 
-    of typePtr:          ptrValue:         ref Value
+    of typePtr:          ptrValue:          ref Value
     of typeNul:          discard
-    of typeTuple:        discard  # TODO
+
+    of typeTuple:        tupleValue:        OrderedTable[string, Value]
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -145,6 +146,9 @@ proc newPtrValue*(v: ref Value, baseType: Type): Value =
 
 proc newNulValue*(dataType: Type): Value = 
   Value(kind: typeNul, valueType: dataType)
+
+proc newTupleValue*(dataType: Type, elements: OrderedTable[string, Value]): Value =
+  Value(kind: typeTuple, valueType: dataType, tupleValue: elements)
 
 proc arrayLength*(v: Value): Natural =
   case v.kind:
@@ -503,6 +507,14 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
 method visitNulExpression*(visitor: InterpreterVisitor, node: NulExpression): Value {.base.} =
   return newNulValue(node.returnType)
 
+method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression): Value {.base.} =
+  var elements = initOrderedTable[string, Value]()
+
+  for token, expr in node.elements.pairs:
+    elements[token.lexeme] = visitor.visitExpression(expr)
+
+  return newTupleValue(node.returnType, elements)
+
 # STATEMENTS
 
 method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): auto =
@@ -799,6 +811,8 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
     return visitor.visitNulExpression(NulExpression(node))
   elif node of SpecialExpression:
     return visitor.visitSpecialExpression(SpecialExpression(node))
+  elif node of TupleExpression:
+    return visitor.visitTupleExpression(TupleExpression(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled expression"
 

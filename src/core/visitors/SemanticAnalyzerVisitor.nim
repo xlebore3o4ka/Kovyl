@@ -241,6 +241,49 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
 
   info("exiting IndexExpression")
 
+method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpression): auto =
+  info("visiting TupleExpression")
+  var error = false
+
+  if visitor.expectedContextType.neq typeTuple:
+    warn("non-tuple context")
+    var elements = node.elements
+    var elementTypes = initOrderedTable[string, Type]()
+
+    for nameToken, expr in elements.pairs:
+      visitor.visitExpecting(expr, getUndefinedType())
+      elementTypes[nameToken.lexeme] = expr.returnType
+
+    node.setType(getTupleType(elementTypes))
+
+  else:
+    let expected = visitor.expectedContextType.elements
+    let elements = node.elements
+
+    for name, typ in expected:
+      if name notin elements.keys.toSeq.mapIt(it.lexeme):
+        newError(errMissingArgument, node.token, @{"@0": name})
+        error = true
+
+    for nameToken, expr in elements.pairs:
+      if nameToken.lexeme notin expected:
+        let err = if nameToken.kind == tkNumber: errUnexpectedArgument else: errUnexpectedNamedArgument
+        newError(err, expr.token, @{"@0": nameToken.lexeme})
+        error = true
+        continue
+
+      let typ = expected[nameToken.lexeme]
+      visitor.visitExpecting(expr, typ)
+      if expr.returnType.neq typ:
+        newError(errTypeMismatch, expr.token, @{"@0": $typ, "@1": $expr.returnType})
+        error = true
+        continue
+
+    if not error:
+      node.setType(visitor.expectedContextType)
+
+  info("exiting TupleExpression")
+
 # STATEMENTS
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
@@ -680,6 +723,8 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitIndexExpression(IndexExpression(node))
   elif node of SpecialExpression:
     visitor.visitSpecialExpression(SpecialExpression(node))
+  elif node of TupleExpression:
+    visitor.visitTupleExpression(TupleExpression(node))
   else:
     warn("unhandled expression")
 

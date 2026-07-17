@@ -42,6 +42,13 @@ type
 
   TypeExpression* = ref object of Expression
 
+  TupleExpression* = ref object of Expression
+    elements*: OrderedTable[Token, Expression]
+
+  FieldExpression* = ref object of Expression
+    value*: Expression
+    field*: Token
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
@@ -132,6 +139,12 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
     return skStmtError
 
 # EXPRESSIONS
+
+proc newFieldExpression*(token: Token, value: Expression, field: Token): FieldExpression {.inline.} =
+  FieldExpression(token: token, value: value, field: field)
+
+proc newTupleExpression*(token: Token, elements: OrderedTable[Token, Expression]): TupleExpression {.inline.} =
+  TupleExpression(token: token, returnType: getUndefinedType(), elements: elements)
 
 proc newTypeExpression*(token: Token, returnType: Type): TypeExpression =
   TypeExpression(token: token, returnType: returnType)

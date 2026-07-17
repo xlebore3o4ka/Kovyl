@@ -94,6 +94,7 @@ const operatorTokens = {
   ",": tkComma,
   "->": tkArrow,
   "$": tkDollar,
+  ".": tkDot,
   "!": tkNot,
   ">": tkGT,
   "<": tkLT,
