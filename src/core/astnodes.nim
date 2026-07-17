@@ -141,7 +141,7 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
 # EXPRESSIONS
 
 proc newFieldExpression*(token: Token, value: Expression, field: Token): FieldExpression {.inline.} =
-  FieldExpression(token: token, value: value, field: field)
+  FieldExpression(token: token, value: value, field: field, returnType: getUndefinedType())
 
 proc newTupleExpression*(token: Token, elements: OrderedTable[Token, Expression]): TupleExpression {.inline.} =
   TupleExpression(token: token, returnType: getUndefinedType(), elements: elements)

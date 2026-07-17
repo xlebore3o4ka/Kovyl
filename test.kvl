@@ -1,2 +1,0 @@
-(int, int a) x = (10, a = 10)
-print:fmt:(x.0)

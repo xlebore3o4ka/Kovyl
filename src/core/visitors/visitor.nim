@@ -45,6 +45,9 @@ method visitTypeExpression*(visitor: Visitor, node: TypeExpression): auto {.base
 method visitTupleExpression*(visitor: Visitor, node: TupleExpression): auto {.base.} =
   discard
 
+method visitFieldExpression*(visitor: Visitor, node: FieldExpression): auto {.base.} =
+  discard
+
 # STATEMENTS
 
 method visitWhileStatement*(visitor: Visitor, node: WhileStatement): auto {.base.} =

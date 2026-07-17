@@ -53,8 +53,13 @@ proc parseType(self: var Parser, token: Token): Type =
         break
       var typ = self.parseType(tok)
       var name = $index
-      if self.lexer.peekToken().kind == tkIdentifier:
+      var nameToken = self.lexer.peekToken()
+      if nameToken.kind == tkIdentifier:
         name = self.expectToken(tkIdentifier).lexeme
+        if name in elements:
+          newError(errDuplicateArgument, nameToken, @{"@0": name})
+          result = getUndefinedType()
+          break
       else:
         index += 1
       elements[name] = typ
@@ -504,7 +509,8 @@ proc parse*(self: var Parser): BlockStatement =
     blockStatement.addStatement(self.parseStmt())
     if self.lexer.peekToken().kind == tkEOF:
       break
-    discard self.expectToken(tkEOS)
+    if self.lexer.peekToken().kind == tkEOS:
+      discard self.expectToken(tkEOS)
     if self.lexer.peekToken().kind == tkEOF:
       break
 

@@ -515,6 +515,9 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
 
   return newTupleValue(node.returnType, elements)
 
+method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
+  return visitor.visitExpression(node.value).tupleValue[node.field.lexeme]
+
 # STATEMENTS
 
 method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): auto =
@@ -813,6 +816,8 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
     return visitor.visitSpecialExpression(SpecialExpression(node))
   elif node of TupleExpression:
     return visitor.visitTupleExpression(TupleExpression(node))
+  elif node of FieldExpression:
+    return visitor.visitFieldExpression(FieldExpression(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled expression"
 

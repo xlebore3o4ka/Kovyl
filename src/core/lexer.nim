@@ -166,13 +166,11 @@ proc nextToken*(self: var Lexer): Token =
       self.newError(errUnclosedBracket, last.file, last.line, last.column, last.offset, 1)
     result = tkEOF.newToken("\0", self.file, self.line, self.column, self.pos)
   elif c == '\n'.Rune: 
-    result = tkEOS.newToken("\n", self.file, self.line, self.column, self.pos)
     while self.peek == '\n'.Rune:
       self.line.inc
       self.advance
     self.column = 1
-    if self.lastIsEOS:
-      result = self.nextToken()
+    result = self.nextToken
   elif c == ';'.Rune:
     self.advance
     if self.lastIsEOS:

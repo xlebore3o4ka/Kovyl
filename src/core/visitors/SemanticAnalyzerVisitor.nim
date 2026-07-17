@@ -284,6 +284,27 @@ method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpres
 
   info("exiting TupleExpression")
 
+method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpression): auto =
+  info("visiting FieldExpression")
+  visitor.visitExpression(node.value)
+  var error = false
+
+  if node.value.returnType.neq typeTuple:
+    warn("getting a field from a non-tuple type")
+    newError(errTypeMismatch, node.token, @{"@0": $typeTuple, "@1": $node.value.returnType})
+    error = true
+
+  elif node.field.lexeme notin node.value.returnType.elements:
+    newError(errHaventField, node.token, @{"@0": $node.value.returnType, "@1": node.field.lexeme})
+    error = true
+
+  info("Checking that field ", node.field.lexeme, " exists -> ", not error)
+
+  if not error:
+    node.setType(node.value.returnType.elements[node.field.lexeme])
+
+  info("exiting FieldExpression")
+
 # STATEMENTS
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
@@ -532,7 +553,11 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       node.checkUnexpected(expected = @["0"])
       let expr = node.get("0")
 
-      visitor.visitExpression(expr)
+      if visitor.expectedContextType.eq typePtr:
+        visitor.visitExpecting(expr, visitor.expectedContextType.ptrBase)
+      else:
+        warn("non-ptr context")
+        visitor.visitExpression(expr)
 
       node.setType(getPtrType(expr.returnType))
 
@@ -725,6 +750,8 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitSpecialExpression(SpecialExpression(node))
   elif node of TupleExpression:
     visitor.visitTupleExpression(TupleExpression(node))
+  elif node of FieldExpression:
+    visitor.visitFieldExpression(FieldExpression(node))
   else:
     warn("unhandled expression")
 
