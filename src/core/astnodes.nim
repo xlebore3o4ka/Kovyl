@@ -91,6 +91,23 @@ type
     symbolType*: Type
     name*: Token
 
+  FuncArgument* = object
+    origin*: string
+    expectedType*: Type
+    isOriginal*: bool
+    case hasDefault: bool
+    of true: default*: Expression
+    else: discard
+
+  FuncStatement* = ref object of Statement
+    returnType*: Type
+    name*: Token
+    arguments*: OrderedTable[string, FuncArgument]
+    funcBlock*: BlockStatement
+
+  ReturnStatement* = ref object of Statement
+    token*: Token
+
   # SPECIALS
 
   SpecialExprKind* = enum
@@ -189,6 +206,18 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newReturnStatement*(token: Token): ReturnStatement {.inline.} =
+  ReturnStatement(token: token)
+
+proc newFuncStatement*(returnType: Type, name: Token, arguments: OrderedTable[string, FuncArgument], 
+    funcBlock: BlockStatement): FuncStatement {.inline.} =
+  FuncStatement(returnType: returnType, name: name, arguments: arguments, funcBlock: funcBlock)
+
+proc newFuncArgument*(origin: string, expectedType: Type, hasDefault: bool = false, 
+    default: Expression = nil, isOriginal: bool): FuncArgument =
+  if hasDefault: FuncArgument(origin: origin, expectedType: expectedType, hasDefault: true, default: default)
+  else: FuncArgument(origin: origin, expectedType: expectedType, hasDefault: false, isOriginal: isOriginal)
 
 proc newWhileStatement*(token: Token, condition: Expression, whileBlock: BlockStatement): WhileStatement {.inline.} =
   WhileStatement(token: token, condition: condition, whileBlock: whileBlock)

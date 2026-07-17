@@ -439,17 +439,59 @@ proc parseWhile(self: var Parser): Statement =
 
   let blockStmt = newBlockStatement(self.expectToken(tkDo))
 
-  discard self.expectToken(tkEOS)
+  while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
+    blockStmt.addStatement(self.parseStmt())
+
+  blockStmt.endToken = self.expectToken(tkEnd)
+
+  return newWhileStatement(token, condition, blockStmt)
+
+proc parseFunc(self: var Parser): Statement =
+  discard self.lexer.nextToken()
+
+  var returnType = getUndefinedType()
+  if self.lexer.peekToken().kind in TOKEN_TYPE_KINDS:
+    let typeToken = self.lexer.nextToken()
+    returnType = self.parseType(typeToken)
+
+  let name = self.expectToken(tkIdentifier)
+
+  var index = 0
+  var arguments: OrderedTable[string, FuncArgument]
+
+  discard self.expectToken(tkLParen)
+
+  while self.lexer.peekToken().kind != tkRParen:
+    let argType = self.parseType()
+    let argName = self.expectToken(tkIdentifier)
+    var hasDefault = false
+    var default: Expression = nil
+
+    if self.lexer.peekToken().kind == tkEqual:
+      discard self.lexer.nextToken()
+      default = self.parseExpr()
+      hasDefault = true
+
+    arguments[$index] = newFuncArgument($index, argType, hasDefault, default, true)
+    index = index + 1
+    arguments[argName.lexeme] = newFuncArgument(argName.lexeme, argType, hasDefault, default, false)
+
+    if self.lexer.peekToken().kind == tkRParen:
+      break
+
+    discard self.expectToken(tkComma)
+
+  discard self.expectToken(tkRParen)
+  discard self.expectToken(tkDo)
+
+  let blockStmt = newBlockStatement(self.expectToken(tkDo))
 
   while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
     blockStmt.addStatement(self.parseStmt())
-    discard self.expectToken(tkEOS)
 
-  discard self.expectToken(tkEnd)
+  blockStmt.endToken = self.expectToken(tkEnd)
 
-  blockStmt.endToken = self.lexer.peekToken()
-
-  return newWhileStatement(token, condition, blockStmt)
+  return newFuncStatement(returnType, name, arguments, blockStmt)
 
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
@@ -490,6 +532,12 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkContinue:
     return newContinueStatement(self.lexer.nextToken())
+
+  elif token.kind == tkFunc:
+    return self.parseFunc()
+
+  elif token.kind == tkContinue:
+    return newReturnStatement(self.lexer.nextToken())
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)
