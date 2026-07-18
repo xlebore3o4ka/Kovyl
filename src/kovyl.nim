@@ -12,6 +12,7 @@ proc main() =
   
   var shortErrors = false
   var showAST = false
+  var debug = false
   var filePath = ""
   
   for arg in args:
@@ -19,6 +20,8 @@ proc main() =
       shortErrors = true
     if arg == "-a":
       showAST = true
+    if arg == "-d":
+      debug = true
     else:
       filePath = arg
   
@@ -36,21 +39,29 @@ proc main() =
 
   var parser = newParser(text, filePath)
   var blockStatement: BlockStatement = parser.parse()
+
+  semanticAnalyzerLogging(false)
+  interpreterVisitorLogging(false)
   
   if errors.errors.len == 0:
-    semanticAnalyzerLogging(true)
+    if debug:
+      semanticAnalyzerLogging(true)
     newSemanticAnalyzerVisitor().visitStatement(blockStatement)
   
   # if showAST:
   #   echo newASTPrinterVisitor().printStatement(blockStatement)
 
   if errors.errors.len == 0:
-    echo "[KOVYL] INFO: Compilation successful!"
-    semanticAnalyzerLogging(false)
-    interpreterVisitorLogging(true)
+    if debug:
+      echo "[KOVYL] INFO: Compilation successful!"
+      semanticAnalyzerLogging(false)
+      interpreterVisitorLogging(true)
+      
     let interpreter = newInterpreterVisitor()
     interpreter.visitStatement(blockStatement)
-    echo "\n[KOVYL] INFO: Running successful!"
+
+    if debug:
+      echo "\n[KOVYL] INFO: Running successful!"
     interpreterVisitorLogging(false)
 
   for error in errors.errors:

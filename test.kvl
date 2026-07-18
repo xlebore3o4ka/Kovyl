@@ -1,5 +1,0 @@
-func char[*] greeting(char[] name) do
-  return fmt:("Hello, ", name, "!")
-end
-
-print: greeting("Dev")

@@ -206,7 +206,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
         newError(errTypeMismatch, expr.token, @{"@0": $expr.returnType, "@1": $expected})
         error = true
         break
-      expr.returnType.length = expected.length
+      expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, expected.length)
       info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
 
     elif expr.returnType.neq expected:
@@ -352,15 +352,15 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
 
   var error = false
 
-  let expected = node.symbolType
+  var expected = node.symbolType
 
   visitor.visitExpecting(node.value, expected)
 
-  let valueType = node.value.returnType
+  var valueType = node.value.returnType
 
   if expected.kind.eq(typeStaticArray) and valueType.kind.eq typeStaticArray:
     if expected.length == 0 and valueType.length != 0:
-      expected.length = valueType.length
+      expected = getStaticArrayType(expected.staticArrBase, valueType.length)
       info("The size of the static array '" & node.name.lexeme & "' has been determined to " & $valueType.length)
     elif expected.length == 0 and valueType.length == 0:
       newError(errEmptyStaticArray, node.value.token)
@@ -373,7 +373,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
       newError(errSize, node.value.token, @{"@0": $valueType, "@1": $expected})
       error = true
     elif expected.length > valueType.length:
-      valueType.length = expected.length
+      valueType = getStaticArrayType(expected.staticArrBase, expected.length)
       info("The size of the static array '" & node.value.token.lexeme & "' has been determined to " & $valueType.length)
 
   elif expected.neq valueType:
@@ -420,7 +420,7 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
     if node.left.returnType.length < node.value.returnType.length:
       newError(errSize, node.value.token, @{"@0": $node.value.returnType, "@1": $node.left.returnType})
     else:
-      node.value.returnType.length = node.left.returnType.length
+      node.value.returnType = getStaticArrayType(node.value.returnType.staticArrBase, node.left.returnType.length)
       info("The size of the static array '" & node.left.token.lexeme & 
         "' has been determined to " & $node.value.returnType.length)
 
@@ -538,9 +538,15 @@ proc blockEndsWithReturn(self: SemanticAnalyzerVisitor, node: Statement): bool =
 method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement): auto =
   info("visiting FuncStatement")
 
+  var error = false
+
   var argumentTypes: OrderedTable[string, Type]
 
   for argName, funcArg in node.arguments:
+    if funcArg.expectedType.eq typeStaticArray:
+      newError(errEmptyStaticArray, funcArg.origin)
+      error = true
+      break
     argumentTypes[argName] = funcArg.expectedType
 
   let funcType = getFuncType(argumentTypes, node.returnType)
@@ -555,8 +561,6 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   visitor.visitStatement(node.funcBlock)
   discard visitor.funcStack.pop()
 
-  var error = false
-
   if node.returnType.neq getUndefinedType():
     info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
     if not visitor.blockEndsWithReturn(node.funcBlock):
@@ -569,6 +573,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   visitor.popScope()
 
   if not error:
+    info("Function type is set as: ", funcType)
     node.funcType = funcType
 
   info("exiting FuncStatement")

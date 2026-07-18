@@ -545,18 +545,25 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
   # TODO: stacktrace
   visitor.pushScope()
 
-  let funcValue = visitor.visitExpression(node.value).funcValue
-
-  for index, expr in node.arguments:
-    visitor.newSlot(funcValue.arguments[$index].origin.lexeme, visitor.visitExpression(expr))
-
   try:
-    visitor.visitStatement(funcValue.body)
-  except ReturnException as e:
-    result = e.value
+    let funcValue = visitor.visitExpression(node.value).funcValue
 
-  visitor.popScope()
-  # TODO: stacktrace
+    for index, expr in node.arguments:
+      var value = visitor.visitExpression(expr)
+
+      if value.kind == typeStaticArray:
+        value = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+
+      visitor.newSlot(funcValue.arguments[$index].origin.lexeme, value)
+
+    try:
+      visitor.visitStatement(funcValue.body)
+    except ReturnException as e:
+      result = e.value
+
+  finally:
+    visitor.popScope()
+    # TODO: stacktrace
 
 # STATEMENTS
 
@@ -606,21 +613,21 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
 method visitBranchingStatement*(visitor: InterpreterVisitor, node: BranchingStatement): auto =
   visitor.pushScope()
   
-  if visitor.visitExpression(node.condition).boolValue:
-    visitor.visitStatement(node.ifBlock)
-    visitor.popScope()
-    return
-  
-  for el in node.elifBlocks:
-    if visitor.visitExpression(el.cond).boolValue:
-      visitor.visitStatement(el.elifBlock)
-      visitor.popScope()
+  try:
+    if visitor.visitExpression(node.condition).boolValue:
+      visitor.visitStatement(node.ifBlock)
       return
+    
+    for el in node.elifBlocks:
+      if visitor.visitExpression(el.cond).boolValue:
+        visitor.visitStatement(el.elifBlock)
+        return
+    
+    if node.elseBlock != nil:
+      visitor.visitStatement(node.elseBlock)
   
-  if node.elseBlock != nil:
-    visitor.visitStatement(node.elseBlock)
-  
-  visitor.popScope()
+  finally:
+    visitor.popScope()
 
 method visitBreakStatement*(visitor: InterpreterVisitor, node: BreakStatement): auto =
   raise newException(BreakException, "")
@@ -630,14 +637,18 @@ method visitContinueStatement*(visitor: InterpreterVisitor, node: ContinueStatem
 
 method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): auto =
   visitor.pushScope()
-  while visitor.visitExpression(node.condition).boolValue:
-    try:
-      visitor.visitStatement(node.whileBlock)
-    except BreakException:
-      break
-    except ContinueException:
-      continue
-  visitor.popScope()
+
+  try:
+    while visitor.visitExpression(node.condition).boolValue:
+      try:
+        visitor.visitStatement(node.whileBlock)
+      except BreakException:
+        break
+      except ContinueException:
+        continue
+        
+  finally:
+    visitor.popScope()
 
 method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatement): auto =
   visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))

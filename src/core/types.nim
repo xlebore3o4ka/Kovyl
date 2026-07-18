@@ -188,5 +188,5 @@ proc `$`*(t: Type): string =
     let argsStr = t.arguments.values.toSeq
       .mapIt($it)
       .join(", ")
-    return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "nul")
+    return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
   else: return $t.kind
