@@ -17,6 +17,10 @@ type
     values: seq[Value]
     length: Natural
 
+  FuncValue* = ref object
+    arguments: OrderedTable[string, FuncArgument]
+    body: BlockStatement
+
   Value* = object
     valueType*: Type
     case kind: TypeKind
@@ -44,13 +48,15 @@ type
     of typeNul:          discard
 
     of typeTuple:        tupleValue:        OrderedTable[string, Value]
-    of typeFunc:         discard # TODO
+    of typeFunc:         funcValue:         FuncValue
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
 
   BreakException* = object of CatchableError
   ContinueException* = object of CatchableError
+  ReturnException* = object of CatchableError
+    value*: Value
 
 proc newSlot*(self: InterpreterVisitor, name: string, value: Value) =
   self.environment[^1][name] = value
@@ -151,6 +157,9 @@ proc newNulValue*(dataType: Type): Value =
 proc newTupleValue*(dataType: Type, elements: OrderedTable[string, Value]): Value =
   Value(kind: typeTuple, valueType: dataType, tupleValue: elements)
 
+proc newFuncValue*(valueType: Type, arguments: OrderedTable[string, FuncArgument], funcBlock: BlockStatement): Value =
+  Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(arguments: arguments, body: funcBlock))
+
 proc arrayLength*(v: Value): Natural =
   case v.kind:
   of typeStaticArray:
@@ -248,7 +257,15 @@ proc `==`*(a, b: Value): bool =
   of typePtr:
     return a.ptrValue == b.ptrValue
   of typeNul: return true
-  of typeTuple: discard  # TODO
+  of typeTuple:
+    if a.tupleValue.len != b.tupleValue.len:
+      return false
+    for key, valA in a.tupleValue.pairs:
+      if key notin b.tupleValue:
+        return false
+      if valA != b.tupleValue[key]:
+        return false
+    return true
   of typeFunc: 
     return a.valueType.eq b.valueType
 
@@ -524,6 +541,23 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
 method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
   return visitor.visitExpression(node.value).tupleValue[node.field.lexeme]
 
+method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): Value {.base.} =
+  # TODO: stacktrace
+  visitor.pushScope()
+
+  let funcValue = visitor.visitExpression(node.value).funcValue
+
+  for index, expr in node.arguments:
+    visitor.newSlot(funcValue.arguments[$index].origin.lexeme, visitor.visitExpression(expr))
+
+  try:
+    visitor.visitStatement(funcValue.body)
+  except ReturnException as e:
+    result = e.value
+
+  visitor.popScope()
+  # TODO: stacktrace
+
 # STATEMENTS
 
 method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): auto =
@@ -607,6 +641,15 @@ method visitWhileStatement*(visitor: InterpreterVisitor, node: WhileStatement): 
 
 method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatement): auto =
   visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))
+
+method visitFuncStatement*(visitor: InterpreterVisitor, node: FuncStatement): auto =
+  visitor.newSlot(node.name.lexeme, newFuncValue(node.funcType, node.arguments, node.funcBlock))
+
+proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): auto =
+  let returnValue = visitor.visitExpression(node.value)
+  var e = newException(ReturnException, "")
+  e.value = returnValue
+  raise e
 
 # SPECIALS
 
@@ -824,6 +867,8 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
     return visitor.visitTupleExpression(TupleExpression(node))
   elif node of FieldExpression:
     return visitor.visitFieldExpression(FieldExpression(node))
+  elif node of CallExpression:
+    return visitor.visitCallExpression(CallExpression(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled expression"
 
@@ -847,5 +892,9 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitWhileStatement(WhileStatement(node))
   elif node of DefaultStatement:
     visitor.visitDefaultStatement(DefaultStatement(node))
+  elif node of FuncStatement:
+    visitor.visitFuncStatement(FuncStatement(node))
+  elif node of ReturnStatement:
+    visitor.visitReturnStatement(ReturnStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

@@ -49,6 +49,10 @@ type
     value*: Expression
     field*: Token
 
+  CallExpression* = ref object of Expression
+    value*: Expression
+    arguments*: seq[Expression]
+
   # STATEMENTS
 
   Statement* = ref object of RootObj
@@ -100,6 +104,7 @@ type
     name*: Token
     arguments*: OrderedTable[string, FuncArgument]
     funcBlock*: BlockStatement
+    funcType*: Type
 
   ReturnStatement* = ref object of Statement
     token*: Token
@@ -155,6 +160,9 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
     return skStmtError
 
 # EXPRESSIONS
+
+proc newCallExpression*(token: Token, value: Expression, arguments: seq[Expression]): CallExpression =
+  CallExpression(token: token, value: value, arguments: arguments, returnType: getUndefinedType())
 
 proc newFieldExpression*(token: Token, value: Expression, field: Token): FieldExpression {.inline.} =
   FieldExpression(token: token, value: value, field: field, returnType: getUndefinedType())
@@ -212,7 +220,8 @@ proc newReturnStatement*(token: Token, hasValue: bool, value: Expression = nil):
 
 proc newFuncStatement*(returnType: Type, name: Token, arguments: OrderedTable[string, FuncArgument], 
     funcBlock: BlockStatement): FuncStatement {.inline.} =
-  FuncStatement(returnType: returnType, name: name, arguments: arguments, funcBlock: funcBlock)
+  FuncStatement(returnType: returnType, name: name, arguments: arguments, funcBlock: funcBlock,
+    funcType: getUndefinedType())
 
 proc newFuncArgument*(origin: Token, expectedType: Type): FuncArgument =
   FuncArgument(origin: origin, expectedType: expectedType)

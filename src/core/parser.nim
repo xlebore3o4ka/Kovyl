@@ -249,7 +249,7 @@ proc parsePrimary(self: var Parser): Expression =
 proc parsePostfix(self: var Parser): Expression =
   result = self.parsePrimary()
 
-  while self.lexer.peekToken().kind in {tkArrow, tkLBracket, tkDot}:
+  while self.lexer.peekToken().kind in {tkArrow, tkLBracket, tkDot, tkLParen}:
     let token = self.lexer.nextToken()
 
     if token.kind == tkArrow:
@@ -269,6 +269,19 @@ proc parsePostfix(self: var Parser): Expression =
         field = field.newFrom(kind = tkInvalid)
 
       result = newFieldExpression(token, result, field)
+
+    elif token.kind == tkLParen:
+      var arguments: seq[Expression]
+
+      while self.lexer.peekToken().kind != tkRParen:
+        arguments.add(self.parseExpr())
+
+        if self.lexer.peekToken().kind == tkRParen: break
+        discard self.expectToken(tkComma)
+
+      discard self.expectToken(tkRParen)
+
+      result = newCallExpression(token, result, arguments)
 
 proc parsePrefix(self: var Parser): Expression =
   let token = self.lexer.peekToken()

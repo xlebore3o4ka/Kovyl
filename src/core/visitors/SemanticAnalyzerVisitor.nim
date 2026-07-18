@@ -127,6 +127,7 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
   elif node.checkEqNeq(typeStaticArray): node.setType(getBoolType())
   elif node.checkEqNeq(typeArray):       node.setType(getBoolType())
   elif node.checkEqNeq(typePtr):         node.setType(getBoolType())
+  elif node.checkEqNeq(typeTuple):       node.setType(getBoolType())
   elif node.checkAndOr():                node.setType(getBoolType())
   else:                                  node.newBinaryTypeMismatchError()
 
@@ -305,6 +306,44 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
     node.setType(node.value.returnType.elements[node.field.lexeme])
 
   info("exiting FieldExpression")
+
+method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpression): auto =
+  info("visiting CallExpression")
+
+  visitor.visitExpression(node.value)
+  var error = false
+
+  if node.value.returnType.neq typeFunc:
+    newError(errTypeMismatch, node.token, @{"@0": $typeFunc, "@1": $node.value.returnType})
+    error = true
+
+  elif node.arguments.len < node.value.returnType.arguments.len:
+    newError(errArgumentsNumber, node.token, @{"@0": $node.value.returnType.arguments.len,
+      "@1": $node.arguments.len})
+    error = true
+
+  else:
+    let funcType = node.value.returnType
+
+    var index = 0
+    for expr in node.arguments:
+      if $index notin funcType.arguments:
+        newError(errUnexpectedArgument, expr.token, @{"@0": $index})
+        error = true
+        
+      else:
+        visitor.visitExpecting(expr, funcType.arguments[$index])
+
+        if expr.returnType.neq funcType.arguments[$index]:
+          newError(errTypeMismatch, expr.token, @{"@0": $expr.returnType, "@1": $funcType.arguments[$index]})
+          error = true
+
+      index.inc
+
+  if not error:
+    node.setType(node.value.returnType.returnType)
+
+  info("exiting CallExpression")
 
 # STATEMENTS
 
@@ -504,7 +543,8 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   for argName, funcArg in node.arguments:
     argumentTypes[argName] = funcArg.expectedType
 
-  visitor.newSymbol(node.name, getFuncType(argumentTypes, node.returnType))
+  let funcType = getFuncType(argumentTypes, node.returnType)
+  visitor.newSymbol(node.name, funcType)
 
   visitor.pushScope()
 
@@ -515,15 +555,21 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   visitor.visitStatement(node.funcBlock)
   discard visitor.funcStack.pop()
 
+  var error = false
+
   if node.returnType.neq getUndefinedType():
     info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
     if not visitor.blockEndsWithReturn(node.funcBlock):
       warn("...false")
       newError(errMissingReturn, node.name, @{"@0": node.name.lexeme})
+      error = true
     else:
       info("...true")
 
   visitor.popScope()
+
+  if not error:
+    node.funcType = funcType
 
   info("exiting FuncStatement")
 
@@ -840,6 +886,8 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitTupleExpression(TupleExpression(node))
   elif node of FieldExpression:
     visitor.visitFieldExpression(FieldExpression(node))
+  elif node of CallExpression:
+    visitor.visitCallExpression(CallExpression(node))
   else:
     warn("unhandled expression")
 

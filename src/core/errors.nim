@@ -17,6 +17,8 @@ type
     errUnknownPragma
 
     errUnexpectedArgument, errUnexpectedNamedArgument, errMissingArgument, errDuplicateArgument
+    errArgumentsNumber
+
     errHaventField
 
     errUnreachableCode, errMissingReturn, errFuncNamedArguments
@@ -64,6 +66,7 @@ proc message(kind: ErrorKind): string =
     of errUnexpectedArgument: "Unexpected argument at position @0"
     of errMissingArgument: "Missing required argument '@0'"
     of errDuplicateArgument: "Duplicate argument: @0"
+    of errArgumentsNumber: "Expected @0 arguments, got @1"
     of errHaventField: "@0 does not have field '@1'"
     of errUnreachableCode: "The code after the statement declared at @0(@1:@2) is unreachable"
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
