@@ -10,7 +10,7 @@ type
     errUnclosedString, errUnclosedChar, errEmptyCharLiteral
 
     errBinaryTypeMismatch, errUnaryTypeMismatch, errTypeMismatch, 
-    errUnknownType, errCannotCast, errProhibitedType
+    errUnknownType, errCannotCast
 
     errRedeclaration, errUndeclaredSymbol, errStmtSpecial, errExprSpecial
 
@@ -18,6 +18,8 @@ type
 
     errUnexpectedArgument, errUnexpectedNamedArgument, errMissingArgument, errDuplicateArgument
     errHaventField
+
+    errUnreachableCode, errMissingReturn, errFuncNamedArguments
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -53,7 +55,6 @@ proc message(kind: ErrorKind): string =
     of errTypeMismatch: "Type mismatch (expected @0, got @1)"
     of errUnknownType: "Unknown type"
     of errCannotCast: "Cannot cast from @0 to @1"
-    of errProhibitedType: "@0 is a prohibited type in this construction"
     of errRedeclaration: "Redeclaration of symbol '@0', originally declared at @1(@2:@3)"
     of errUndeclaredSymbol: "Undeclared symbol '@0'"
     of errStmtSpecial: "Unknown special statement"
@@ -64,6 +65,9 @@ proc message(kind: ErrorKind): string =
     of errMissingArgument: "Missing required argument '@0'"
     of errDuplicateArgument: "Duplicate argument: @0"
     of errHaventField: "@0 does not have field '@1'"
+    of errUnreachableCode: "The code after the statement declared at @0(@1:@2) is unreachable"
+    of errMissingReturn: "Function '@0' does not return a value on all control paths"
+    of errFuncNamedArguments: "Named arguments are prohibited in function arguments."
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

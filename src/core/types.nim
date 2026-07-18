@@ -1,4 +1,4 @@
-import std/[strutils, tables, sequtils]
+import std/[strutils, tables, sequtils, sugar]
 
 type
   TypeKind* = enum
@@ -15,6 +15,7 @@ type
     typeNul
 
     typeTuple
+    typeFunc
 
   Type* = ref object
     case kind*: TypeKind
@@ -25,6 +26,9 @@ type
       length*: Natural
     of typeTuple:
       elements*: OrderedTable[string, Type]
+    of typeFunc:
+      arguments*: OrderedTable[string, Type]
+      returnType*: Type
     else: discard
 
 let
@@ -46,6 +50,7 @@ var ptrTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
 var staticArrayTypes*: seq[Type] = @[]
 var tupleTypes*: seq[Type] = @[]
+var funcTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -77,6 +82,13 @@ proc eq*(a: Type, b: Type): bool =
     return a.eq(typeStaticArray) and a.staticArrBase.eq b.staticArrBase
   if a.eq(typeTuple):
     return b.eq(typeTuple) and a.elements == b.elements
+  if a.eq(typeFunc) and b.eq(typeFunc):
+    if not a.returnType.eq(b.returnType): return false
+    if a.arguments.len != b.arguments.len: return false
+    for key, val in a.arguments:
+      if key notin b.arguments: return false
+      if not val.eq(b.arguments[key]): return false
+    return true
 
   return a == b
 
@@ -125,6 +137,14 @@ proc getTupleType*(elements: OrderedTable[string, Type]): Type =
   result = Type(kind: typeTuple, elements: elements)
   tupleTypes.add(result)
 
+proc getFuncType*(args: OrderedTable[string, Type], returnType: Type): Type =
+  for t in funcTypes:
+    if t.arguments == args and t.returnType == returnType:
+      return t
+
+  result = Type(kind: typeFunc, arguments: args, returnType: returnType)
+  funcTypes.add(result)
+
 proc `$`*(k: TypeKind): string =
   case k
   of typeUndefined: "undefined"
@@ -143,6 +163,14 @@ proc `$`*(k: TypeKind): string =
   of typeStaticArray: "T[]"
   of typeNul: "nul"
   of typeTuple: "(T, ...)"
+  of typeFunc: "(T, ...) -> T"
+
+proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
+  try:
+    let v = parseUInt(s)
+    return v <= high(T)
+  except ValueError:
+    return false
 
 proc `$`*(t: Type): string =
   if t == nil: return "nilType"
@@ -151,5 +179,14 @@ proc `$`*(t: Type): string =
   of typeArray: $t.arrBase & "[*]"
   of typeStaticArray: $t.staticArrBase & "[" & (if t.length == 0: "" 
     else: $t.length) & "]" 
-  of typeTuple: "(" & t.elements.pairs.toSeq.mapIt(it[0] & ": " & $it[1]).join(", ") & ")"
+  of typeTuple: 
+    let parts = collect:
+      for k, v in t.elements:
+        if isValidUint[uint64](k): $v else: $v & " " & k
+    "(" & parts.join(", ") & ")"
+  of typeFunc:
+    let argsStr = t.arguments.values.toSeq
+      .mapIt($it)
+      .join(", ")
+    return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "nul")
   else: return $t.kind

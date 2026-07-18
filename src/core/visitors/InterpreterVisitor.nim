@@ -44,6 +44,7 @@ type
     of typeNul:          discard
 
     of typeTuple:        tupleValue:        OrderedTable[string, Value]
+    of typeFunc:         discard # TODO
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -248,6 +249,8 @@ proc `==`*(a, b: Value): bool =
     return a.ptrValue == b.ptrValue
   of typeNul: return true
   of typeTuple: discard  # TODO
+  of typeFunc: 
+    return a.valueType.eq b.valueType
 
 proc `==`*(a, b: ArrayValue): bool =
   if a.values.len != b.values.len:
@@ -293,7 +296,10 @@ proc `$`*(value: Value): string =
     raise newException(ValueError, "Cannot convert nul to string")
   of typeUndefined:
     raise newException(ValueError, "Cannot convert undefined to string")
-  of typeTuple: discard  # TODO
+  of typeTuple:
+    raise newException(ValueError, "Cannot convert tuple to string")
+  of typeFunc:
+    raise newException(ValueError, "Cannot convert func to string")
 
 proc escapeString(s: string): string =
   for c in s:

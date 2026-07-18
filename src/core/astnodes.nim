@@ -92,12 +92,8 @@ type
     name*: Token
 
   FuncArgument* = object
-    origin*: string
+    origin*: Token
     expectedType*: Type
-    isOriginal*: bool
-    case hasDefault: bool
-    of true: default*: Expression
-    else: discard
 
   FuncStatement* = ref object of Statement
     returnType*: Type
@@ -107,6 +103,9 @@ type
 
   ReturnStatement* = ref object of Statement
     token*: Token
+    case hasValue*: bool
+    of true: value*: Expression
+    else: discard
 
   # SPECIALS
 
@@ -207,17 +206,16 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
 
 # STATEMENTS
 
-proc newReturnStatement*(token: Token): ReturnStatement {.inline.} =
-  ReturnStatement(token: token)
+proc newReturnStatement*(token: Token, hasValue: bool, value: Expression = nil): ReturnStatement {.inline.} =
+  if hasValue: ReturnStatement(token: token, hasValue: true, value: value)
+  else: ReturnStatement(token: token, hasValue: false)
 
 proc newFuncStatement*(returnType: Type, name: Token, arguments: OrderedTable[string, FuncArgument], 
     funcBlock: BlockStatement): FuncStatement {.inline.} =
   FuncStatement(returnType: returnType, name: name, arguments: arguments, funcBlock: funcBlock)
 
-proc newFuncArgument*(origin: string, expectedType: Type, hasDefault: bool = false, 
-    default: Expression = nil, isOriginal: bool): FuncArgument =
-  if hasDefault: FuncArgument(origin: origin, expectedType: expectedType, hasDefault: true, default: default)
-  else: FuncArgument(origin: origin, expectedType: expectedType, hasDefault: false, isOriginal: isOriginal)
+proc newFuncArgument*(origin: Token, expectedType: Type): FuncArgument =
+  FuncArgument(origin: origin, expectedType: expectedType)
 
 proc newWhileStatement*(token: Token, condition: Expression, whileBlock: BlockStatement): WhileStatement {.inline.} =
   WhileStatement(token: token, condition: condition, whileBlock: whileBlock)

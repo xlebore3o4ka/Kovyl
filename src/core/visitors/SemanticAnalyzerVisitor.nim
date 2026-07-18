@@ -21,6 +21,7 @@ type
 
     expectedContextType: Type
     loopLevel: Natural = 0
+    funcStack: seq[Type]
 
 var logger = newConsoleLogger(fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
 
@@ -353,8 +354,21 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
 
 method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStatement): auto =
   info("visiting BlockStatement")
-  for node in node.statements:
-    visitor.visitStatement(node)
+
+  var isCodeUnreachable: bool
+  var returnToken: Token
+
+  for stmt in node.statements:
+    if isCodeUnreachable:
+      warn("unreachable code found")
+      newError(errUnreachableCode, returnToken, @{"@0": $returnToken.file, "@1": $returnToken.line,
+        "@2": $returnToken.column})
+      break
+    visitor.visitStatement(stmt)
+    if stmt of ReturnStatement:
+      isCodeUnreachable = true
+      returnToken = ReturnStatement(stmt).token
+
   info("exiting BlockStatement")
 
 method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: AssignmentStatement): auto =
@@ -455,6 +469,80 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
     visitor.newSymbol(node.name, node.symbolType)
 
   info("exiting DefaultStatement")
+
+proc blockEndsWithReturn(self: SemanticAnalyzerVisitor, node: Statement): bool =
+  if node of ReturnStatement:
+    return true
+  elif node of BlockStatement:
+    for stmt in BlockStatement(node).statements:
+      if self.blockEndsWithReturn(stmt):
+        return true
+    return false
+  elif node of BranchingStatement:
+    let br = BranchingStatement(node)
+    let ifEnds = self.blockEndsWithReturn(br.ifBlock)
+    let elseEnds = br.elseBlock != nil and self.blockEndsWithReturn(br.elseBlock)
+    
+    var allElifsEnd = true
+    for el in br.elifBlocks:
+      if not self.blockEndsWithReturn(el.elifBlock):
+        allElifsEnd = false
+        break
+    
+    if br.elseBlock != nil and ifEnds and allElifsEnd and elseEnds:
+      return true
+    else:
+      return false
+  else:
+    return false
+
+method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement): auto =
+  info("visiting FuncStatement")
+
+  var argumentTypes: OrderedTable[string, Type]
+
+  for argName, funcArg in node.arguments:
+    argumentTypes[argName] = funcArg.expectedType
+
+  visitor.newSymbol(node.name, getFuncType(argumentTypes, node.returnType))
+
+  visitor.pushScope()
+
+  for _, funcArg in node.arguments:
+    visitor.newSymbol(funcArg.origin, funcArg.expectedType)
+
+  visitor.funcStack.add(node.returnType)
+  visitor.visitStatement(node.funcBlock)
+  discard visitor.funcStack.pop()
+
+  if node.returnType.neq getUndefinedType():
+    info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
+    if not visitor.blockEndsWithReturn(node.funcBlock):
+      warn("...false")
+      newError(errMissingReturn, node.name, @{"@0": node.name.lexeme})
+    else:
+      info("...true")
+
+  visitor.popScope()
+
+  info("exiting FuncStatement")
+
+method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnStatement): auto =
+  info("visiting ReturnStatement")
+
+  info("Checking func level -> ", visitor.funcStack.len)
+  if visitor.funcStack.len == 0:
+    newError(errForbiddenLocation, node.token)
+
+  if (not node.hasValue) and visitor.funcStack[^1].neq getUndefinedType():
+    newError(errExpression, node.token, @{"@0": "return without expression"})
+
+  else:
+    visitor.visitExpecting(node.value, visitor.funcStack[^1])
+    if node.value.returnType.neq visitor.funcStack[^1]:
+      newError(errTypeMismatch, node.value.token, @{"@0": $visitor.funcStack[^1], "@1": $node.value.returnType})
+
+  info("exiting ReturnStatement")
 
 # SPECIALS
 
@@ -777,5 +865,9 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitWhileStatement(WhileStatement(node))
   elif node of DefaultStatement:
     visitor.visitDefaultStatement(DefaultStatement(node))
+  elif node of FuncStatement:
+    visitor.visitFuncStatement(FuncStatement(node))
+  elif node of ReturnStatement:
+    visitor.visitReturnStatement(ReturnStatement(node))
   else:
     warn("unhandled statement")

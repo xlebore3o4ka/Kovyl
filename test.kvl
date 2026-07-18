@@ -1,3 +1,5 @@
-func int test(int a = 10, int b) do
-  return a + b
+func int test(char a) do
+  return a -> int
 end
+
+(char) -> int x = test

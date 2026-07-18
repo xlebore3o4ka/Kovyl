@@ -77,6 +77,12 @@ method visitBranchingStatement*(visitor: Visitor, node: BranchingStatement): aut
 method visitDefaultStatement*(visitor: Visitor, node: DefaultStatement): auto {.base.} =
   discard
 
+method visitFuncStatement*(visitor: Visitor, node: FuncStatement): auto {.base.} =
+  discard
+
+method visitReturnStatement*(visitor: Visitor, node: ReturnStatement): auto {.base.} =
+  discard
+
 # SPECIALS
 
 method visitSpecialExpression*(visitor: Visitor, node: SpecialExpression): auto {.base.} =
