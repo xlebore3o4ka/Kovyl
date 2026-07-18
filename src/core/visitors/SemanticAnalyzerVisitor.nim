@@ -603,6 +603,30 @@ method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnState
 
   info("exiting ReturnStatement")
 
+method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement): auto =
+  info("visiting ForStatement")
+
+  visitor.pushScope()
+
+  visitor.visitExpression(node.value)
+
+  if node.value.returnType.kind notin {typeStaticArray, typeArray}:
+    newError(errTypeMismatch, node.token, @{"@0": $typeStaticArray & " | " & $typeArray, "@1": $node.value.returnType})
+
+  else:
+    let varType = (if node.value.returnType.eq typeStaticArray: node.value.returnType.staticArrBase
+      else: node.value.returnType.arrBase)
+
+    visitor.newSymbol(node.name, varType)
+
+    visitor.loopLevel.inc
+    visitor.visitStatement(node.forBlock)
+    visitor.loopLevel.dec
+
+  visitor.popScope()
+
+  info("exiting ForStatement")
+
 # SPECIALS
 
 proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
@@ -930,5 +954,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitFuncStatement(FuncStatement(node))
   elif node of ReturnStatement:
     visitor.visitReturnStatement(ReturnStatement(node))
+  elif node of ForStatement:
+    visitor.visitForStatement(ForStatement(node))
   else:
     warn("unhandled statement")

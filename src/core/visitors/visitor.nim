@@ -86,6 +86,9 @@ method visitFuncStatement*(visitor: Visitor, node: FuncStatement): auto {.base.}
 method visitReturnStatement*(visitor: Visitor, node: ReturnStatement): auto {.base.} =
   discard
 
+method visitForStatement*(visitor: Visitor, node: ForStatement): auto {.base.} =
+  discard
+
 # SPECIALS
 
 method visitSpecialExpression*(visitor: Visitor, node: SpecialExpression): auto {.base.} =
