@@ -1,7 +1,9 @@
-# Kovyl
+# KOVYL
 
-The Kovyl programming language is an easy-to-use alternative to the C language with more intuitive constructs and operators.
+**KOVYL** is a statically typed programming language with manual memory management.
 
-Although the language is not as powerful, due to its age, it allows you to do everything that can be done in C. 
+The language emphasizes explicitness of operations — with no hidden runtime behavior or garbage collector.
 
-LGPL license
+KOVYL offers a rich type system, functions as first-class objects, array operations, as well as utilities for string manipulation and formatting. Both procedural and functional programming paradigms are supported.
+
+The language syntax is designed to be readable and unambiguous.
