@@ -112,6 +112,12 @@ type
     of true: value*: Expression
     else: discard
 
+  ForStatement* = ref object of Statement
+    token*: Token
+    name*: Token
+    value*: Expression
+    forBlock*: BlockStatement
+
   # SPECIALS
 
   SpecialExprKind* = enum
@@ -213,6 +219,9 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newForStatement*(token: Token, name: Token, value: Expression, forBlock: BlockStatement): ForStatement {.inline.} =
+  ForStatement(token: token, name: name, value: value, forBlock: forBlock)
 
 proc newReturnStatement*(token: Token, hasValue: bool, value: Expression = nil): ReturnStatement {.inline.} =
   if hasValue: ReturnStatement(token: token, hasValue: true, value: value)

@@ -29,7 +29,7 @@ type
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
-    tkWhile, tkBreak, tkContinue
+    tkWhile, tkFor, tkBreak, tkContinue
     tkFunc, tkReturn
 
     tkEOS
@@ -116,6 +116,7 @@ proc mean*(kind: TokenKind): string =
   of tkElif: return "keyword elif"
   of tkElse: return "keyword else"
   of tkWhile: return "keyword while"
+  of tkFor: return "keyword for"
   of tkBreak: return "keyword break"
   of tkContinue: return "keyword continue"
   of tkFunc: return "keyword func"

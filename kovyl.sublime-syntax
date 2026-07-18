@@ -1,86 +1,101 @@
 %YAML 1.2
 ---
+# http://www.sublimetext.com/docs/3/syntax.html
 name: Kovyl
 file_extensions:
   - kvl
-scope: source.kvl
+  - kovyl
+scope: source.kovyl
+
+variables:
+  ident: '[A-Za-z_][A-Za-z0-9_]*'
 
 contexts:
   main:
-    - include: numbers
-    - include: keywords
-    - include: types
-    - include: constants
-    - include: brackets
-    - include: operators
-    - include: special
-    - include: strings
-    - include: char
     - include: comments
-    - include: eos
-
-  numbers:
-    - match: "\\b[0-9]+\\b"
-      scope: constant.numeric.kovyl
-
-  keywords:
-    - match: "\\b(do|end|if|elif|else|while|break|continue)\\b"
-      scope: keyword.control.kovyl
-
-  types:
-    - match: "\\b(int|int64|int32|int16|int8|uint|uint64|uint32|uint16|uint8|bool|char)\\b"
-      scope: storage.type.kovyl
-
-  constants:
-    - match: "\\b(nul|true|false)\\b"
-      scope: constant.language.kovyl
-
-  brackets:
-    - match: "\\["
-      scope: punctuation.section.brackets.begin.kovyl
-      push:
-        - meta_scope: meta.brackets.kovyl
-        - include: main
-        - match: "\\]"
-          scope: punctuation.section.brackets.end.kovyl
-          pop: true
-    - match: "\\{"
-      scope: punctuation.section.braces.begin.kovyl
-      push:
-        - meta_scope: meta.braces.kovyl
-        - include: main
-        - match: "\\}"
-          scope: punctuation.section.braces.end.kovyl
-          pop: true
-    - match: "\\("
-      scope: punctuation.section.parens.begin.kovyl
-      push:
-        - meta_scope: meta.parens.kovyl
-        - include: main
-        - match: "\\)"
-          scope: punctuation.section.parens.end.kovyl
-          pop: true
-
-  operators:
-    - match: "(\\+|-|\\*|/|%|=|:|,|->|\\$|!|>|<|==|!=|>=|<=|\\band\\b|\\bor\\b)"
-      scope: keyword.operator.kovyl
-
-  special:
-    - match: "\\b[a-zA-Z_][a-zA-Z0-9_]*:"
-      scope: meta.special.kovyl entity.name.function.kovyl
-
-  strings:
-    - match: "\"([^\"\\\\]|\\\\.)*\""
-      scope: string.quoted.double.kovyl
-
-  char:
-    - match: "'([^'\\\\]|\\\\.)'"
-      scope: constant.character.kovyl
-
-  eos:
-    - match: ";"
-      scope: punctuation.terminator.statement.kovyl
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: characters
+    - include: operators
+    - include: brackets
+    - include: function-calls
+    - include: identifiers
 
   comments:
-    - match: "#.*$"
-      scope: comment.line.number-sign.kovyl
+    - match: '#[^!].*$'
+      scope: comment.line.kovyl
+    - match: '#!.*$'
+      scope: comment.line.pragma.kovyl
+
+  keywords:
+    - match: '\b(do|end|if|elif|else|while|for|break|continue|func|return)\b'
+      scope: keyword.control.kovyl
+    - match: '\b(true|false)\b'
+      scope: constant.language.kovyl
+    - match: '\b(nul|null)\b'
+      scope: constant.language.kovyl
+    - match: '\b(print|free|assert|new|arr|len|fmt|take|takeof|join)\b'
+      scope: keyword.other.special.kovyl
+    - match: '\b(int|uint|int8|int16|int32|int64|uint8|uint16|uint32|uint64|bool|char)\b'
+      scope: storage.type.kovyl
+
+  numbers:
+    - match: '\b\d+\b'
+      scope: constant.numeric.integer.kovyl
+    - match: '\b0x[0-9A-Fa-f]+\b'
+      scope: constant.numeric.hex.kovyl
+    - match: '\b0o[0-7]+\b'
+      scope: constant.numeric.octal.kovyl
+    - match: '\b0b[01]+\b'
+      scope: constant.numeric.binary.kovyl
+
+  strings:
+    - match: '"'
+      push:
+        - meta_scope: string.quoted.double.kovyl
+        - match: '"'
+          pop: true
+        - match: '\\([\\"nrt]|[0-7]{1,3})'
+          scope: constant.character.escape.kovyl
+
+  characters:
+    - match: "'"
+      push:
+        - meta_scope: string.quoted.single.kovyl
+        - match: "'"
+          pop: true
+        - match: '\\([\\''nrt]|[0-7]{1,3})'
+          scope: constant.character.escape.kovyl
+        - match: '.'
+          scope: constant.character.kovyl
+
+  operators:
+    - match: '==|!=|>=|<=|&&?|\|\||->|<<|>>'
+      scope: keyword.operator.kovyl
+    - match: '[+\-*/%<>!]'
+      scope: keyword.operator.arithmetic.kovyl
+    - match: '=|:'
+      scope: keyword.operator.assignment.kovyl
+    - match: '[,.]'
+      scope: punctuation.separator.kovyl
+    - match: '\$'
+      scope: keyword.operator.dereference.kovyl
+    - match: '#'
+      scope: keyword.operator.hash.kovyl
+
+  brackets:
+    - match: '\(|\)'
+      scope: punctuation.section.parens.kovyl
+    - match: '\[|\]'
+      scope: punctuation.section.brackets.kovyl
+    - match: '\{|\}'
+      scope: punctuation.section.braces.kovyl
+
+  function-calls:
+    - match: '\b({{ident}})\s*(?=\()'
+      scope: entity.name.function.kovyl
+
+  identifiers:
+    - match: '\b{{ident}}\b'
+      scope: variable.other.kovyl

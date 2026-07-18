@@ -334,8 +334,16 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
       else:
         visitor.visitExpecting(expr, funcType.arguments[$index])
 
-        if expr.returnType.neq funcType.arguments[$index]:
-          newError(errTypeMismatch, expr.token, @{"@0": $expr.returnType, "@1": $funcType.arguments[$index]})
+        if expr.returnType.eq(typeStaticArray) and funcType.arguments[$index].eq typeStaticArray:
+          if expr.returnType.length > funcType.arguments[$index].length:
+            newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $funcType.arguments[$index]})
+            error = true
+
+          else:
+            expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, funcType.arguments[$index].length)
+
+        elif expr.returnType.neq funcType.arguments[$index]:
+          newError(errTypeMismatch, expr.token, @{"@0": $funcType.arguments[$index], "@1": $expr.returnType})
           error = true
 
       index.inc
@@ -543,7 +551,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   var argumentTypes: OrderedTable[string, Type]
 
   for argName, funcArg in node.arguments:
-    if funcArg.expectedType.eq typeStaticArray:
+    if funcArg.expectedType.eq(typeStaticArray) and funcArg.expectedType.length == 0:
       newError(errEmptyStaticArray, funcArg.origin)
       error = true
       break

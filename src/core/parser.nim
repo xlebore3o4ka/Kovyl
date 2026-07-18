@@ -509,6 +509,23 @@ proc parseFunc(self: var Parser): Statement =
 
   return newFuncStatement(returnType, name, arguments, blockStmt)
 
+proc parseFor(self: var Parser): Statement =
+  let token = self.lexer.nextToken()
+  let name = self.expectToken(tkIdentifier)
+
+  discard self.expectToken(tkEqual)
+
+  let value = self.parseExpr()
+
+  let forBlock = newBlockStatement(self.expectToken(tkDo))
+
+  while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
+    forBlock.addStatement(self.parseStmt())
+
+  forBlock.endToken = self.expectToken(tkEnd)
+
+  return newForStatement(token, name, value, forBlock)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -558,6 +575,9 @@ proc parseStmt(self: var Parser): Statement =
       return newReturnStatement(returnToken, true, self.parseExpr())
     else:
       return newReturnStatement(returnToken, false)
+
+  elif token.kind == tkFor:
+    return self.parseFor()
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)
