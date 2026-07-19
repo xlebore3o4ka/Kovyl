@@ -9,7 +9,8 @@ const TOKEN_TYPE_KINDS = {
   tkInt64, tkInt32, tkInt16, tkInt8, 
   tkUint64, tkUint32, tkUint16, tkUint8, 
   tkBool, 
-  tkChar, tkLParen
+  tkChar, tkLParen,
+  tkString
 }
   
 proc newParser*(text, file: string): Parser =
@@ -42,6 +43,7 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkUint8:  result = getUint8Type()
   of tkBool:   result = getBoolType()
   of tkChar:   result = getCharType()
+  of tkString: result = getArrayType(getCharType())
   of tkLParen:
     var elements = initOrderedTable[string, Type]()
     var index = 0

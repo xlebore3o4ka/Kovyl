@@ -297,8 +297,8 @@ proc `==`*(a, b: ArrayValue): bool =
 
 proc validIndex(index: int, arrayLength: int): int =
   result = ((index mod arrayLength) + arrayLength) mod arrayLength
-  if result < -arrayLength or result > arrayLength - 1:
-    raise newError(errIndex, "index " & $result & " outside the range " & 
+  if index < -arrayLength or index > arrayLength - 1:
+    raise newError(errIndex, "index " & $index & " outside the range " & 
       $(-arrayLength) & ".." & $(arrayLength - 1))
 
 proc `$`*(value: Value): string =
@@ -537,11 +537,13 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   var index = visitor.visitExpression(node.index).numberValue
   let arr = visitor.visitExpression(node.value)
   
+  let indexValue = validIndex(index, arr.staticArrayLength)
+
   case arr.kind:
   of typeStaticArray:
-    return arr.staticArrayData[][validIndex(index, arr.staticArrayLength)]
+    return arr.staticArrayData[][indexValue]
   of typeArray:
-    return arr.arrayValue.values[validIndex(index, arr.arrayValue.length)]
+    return arr.arrayValue.values[indexValue]
   else:
     raise newException(ValueError, "not an array")
 
@@ -611,11 +613,13 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
     let index = visitor.visitExpression(indexExpr.index).numberValue
     let arr = visitor.visitExpression(indexExpr.value)
     
+    let indexValue = validIndex(index, arr.arrayLength)
+
     case arr.kind:
     of typeStaticArray:
-      arr.staticArrayData[][validIndex(index, arr.staticArrayLength)] = value
+      arr.staticArrayData[][indexValue] = value
     of typeArray:
-      arr.arrayValue.values[validIndex(index, arr.arrayValue.length)] = value
+      arr.arrayValue.values[indexValue] = value
     else:
       raise newException(ValueError, "not an array")
 

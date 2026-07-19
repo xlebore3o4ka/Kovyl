@@ -132,6 +132,7 @@ const keywordsTokens = {
   "uint": tkUint64, "uint64": tkUint64, "uint32": tkUint32, "uint16": tkUint16, "uint8": tkUint8,
   "bool": tkBool,
   "char": tkChar,
+  "string": tkString,
   "nul": tkNul,
   "true": tkTrue,
   "false": tkFalse,

@@ -192,7 +192,7 @@ for j = forData do
   forTest = forTest + j
 end
 
-assert:(forTest == 52, "forTest != 55")
+assert:(forTest == 52, "forTest != 52")
 
 
 # ФУНКЦИИ
