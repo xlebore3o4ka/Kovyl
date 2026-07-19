@@ -23,17 +23,19 @@ contexts:
     - include: identifiers
 
   comments:
-    - match: '#[^!].*$'
+    - match: '#(?!!).*$'
       scope: comment.line.kovyl
-    - match: '#!.*$'
-      scope: comment.line.pragma.kovyl
-
+    - match: '(#!\w*)'
+      captures:
+        1: support.type.function.pragma.kovyl
+      scope: meta.pragma.kovyl
+      
   keywords:
     - match: '\b(do|end|if|elif|else|while|for|break|continue|func|return)\b'
       scope: keyword.control.kovyl
     - match: '\b(true|false|nul)\b'
       scope: constant.language.kovyl
-    - match: '\b(print|free|assert|resize|new|arr|len|fmt|take|takeof|join|read)\b'
+    - match: '\b(print|free|assert|resize|new|vec|len|fmt|take|takeof|join|read)\b'
       scope: keyword.other.special.kovyl
     - match: '\b(int|uint|int8|int16|int32|int64|uint8|uint16|uint32|uint64|bool|char|string)\b'
       scope: storage.type.kovyl
@@ -79,8 +81,8 @@ contexts:
       scope: punctuation.separator.kovyl
     - match: '\$'
       scope: keyword.operator.dereference.kovyl
-    - match: '#'
-      scope: keyword.operator.hash.kovyl
+    - match: '@'
+      scope: keyword.operator.vector.kovyl
 
   brackets:
     - match: '\(|\)'

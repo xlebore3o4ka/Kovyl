@@ -22,6 +22,10 @@ proc newError(self: var Parser,
   if not self.lexer.hasError:
     newError(kind, token, args)
 
+  let currentLine = token.line
+  while self.lexer.peekToken().line == currentLine and self.lexer.peekToken().kind != tkEOF:
+    discard self.lexer.nextToken()
+
 proc expectToken*(self: var Parser, expected: TokenKind): Token =
   let token = self.lexer.nextToken()
   if token.kind != expected:
@@ -91,28 +95,34 @@ proc parseType(self: var Parser, token: Token): Type =
             newError(errFuncNamedArguments, token)
             return getUndefinedType()
         result = getFuncType(elements, returnType)
+
   else: 
     self.newError(errUnknownType, token, @{"@0": token.lexeme})
     return getUndefinedType()
-  while self.lexer.peekToken().kind in {tkStar, tkLBracket}:
+  while self.lexer.peekToken().kind in {tkStar, tkLBracket, tkAt}:
     let token = self.lexer.nextToken()
 
     if token.kind == tkStar:
       result = getPtrType(result)
+
     elif token.kind == tkLBracket:
       let token = self.lexer.nextToken()
 
       if token.kind == tkNumber:
-        result = getStaticArrayType(result, parseInt(token.lexeme))
-        discard self.expectToken(tkRBracket)
-      elif token.kind == tkStar:
-        result = getVecType(result)
-        discard self.expectToken(tkRBracket)
+        result = getArrayType(result, parseInt(token.lexeme))
+
       elif token.kind == tkRBracket:
-        result = getStaticArrayType(result, 0)
+        result = getArrayType(result, 0)
+        continue
+
       else:
         self.newError(errSyntax, token)
         result = getUndefinedType()
+
+      discard self.expectToken(tkRBracket)
+
+    elif token.kind == tkAt:
+      result = getVecType(result)
 
 proc parseType(self: var Parser): Type {.inline.} =
   let token = self.lexer.nextToken()

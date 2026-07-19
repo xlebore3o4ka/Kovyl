@@ -9,7 +9,7 @@ type
     tkPlus, tkMinus, tkStar, tkSlash, tkPercent
     tkEQ, tkNEQ, tkGT, tkLT, tkGTE, tkLTE
     tkEqual, tkNot
-    tkColon, tkComma, tkArrow, tkDollar, tkDot
+    tkColon, tkComma, tkArrow, tkDollar, tkDot, tkAt
     tkHash, tkPragma
 
     tkLParen, tkRParen
@@ -89,6 +89,7 @@ proc mean*(kind: TokenKind): string =
   of tkArrow:         return "arrow operator '->'"
   of tkDollar:        return "dollar operator '$'"
   of tkDot:           return "dot operator '.'"
+  of tkAt:           return "at operator '@'"
   of tkHash:          return "hash operator '#'"
   of tkPragma:        return "pragma operator '#!'"
 

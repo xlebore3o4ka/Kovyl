@@ -8,7 +8,7 @@ type
 
     typeBool
     typeChar
-    typeStaticArray
+    typeArray
 
     typePtr
     typeVec
@@ -21,8 +21,8 @@ type
     case kind*: TypeKind
     of typePtr: ptrBase*: Type
     of typeVec: vecBase*: Type
-    of typeStaticArray:
-      staticArrBase*: Type
+    of typeArray:
+      arrBase*: Type
       length*: Natural
     of typeTuple:
       elements*: OrderedTable[string, Type]
@@ -47,8 +47,8 @@ let
   nulType* = Type(kind: typeNul)
 
 var ptrTypes*: seq[Type] = @[]
+var vecTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
-var staticArrayTypes*: seq[Type] = @[]
 var tupleTypes*: seq[Type] = @[]
 var funcTypes*: seq[Type] = @[]
 
@@ -76,10 +76,10 @@ proc eq*(a: Type, b: TypeKind): bool {.inline.} =
   return a.kind == b
 
 proc eq*(a: Type, b: Type): bool =
-  if a.eq(typeStaticArray) and a.length == 0:
-    return b.eq(typeStaticArray) and a.staticArrBase.eq b.staticArrBase
-  if b.eq(typeStaticArray) and b.length == 0:
-    return a.eq(typeStaticArray) and a.staticArrBase.eq b.staticArrBase
+  if a.eq(typeArray) and a.length == 0:
+    return b.eq(typeArray) and a.arrBase.eq b.arrBase
+  if b.eq(typeArray) and b.length == 0:
+    return a.eq(typeArray) and a.arrBase.eq b.arrBase
   if a.eq(typeTuple):
     return b.eq(typeTuple) and a.elements == b.elements
   if a.eq(typeFunc) and b.eq(typeFunc):
@@ -110,23 +110,23 @@ proc getVecType*(baseType: Type): Type =
   if baseType.kind == typeUndefined:
     return baseType
 
-  for t in arrayTypes:
+  for t in vecTypes:
     if t.vecBase.eq baseType:
       return t
   
   result = Type(kind: typeVec, vecBase: baseType)
-  arrayTypes.add(result)
+  vecTypes.add(result)
 
-proc getStaticArrayType*(baseType: Type, length: Natural): Type =
+proc getArrayType*(baseType: Type, length: Natural): Type =
   if baseType.kind == typeUndefined:
     return baseType
 
-  for t in staticArrayTypes:
-    if t.staticArrBase.eq(baseType) and t.length == length:
+  for t in arrayTypes:
+    if t.arrBase.eq(baseType) and t.length == length:
       return t
   
-  result = Type(kind: typeStaticArray, staticArrBase: baseType, length: length)
-  staticArrayTypes.add(result)
+  result = Type(kind: typeArray, arrBase: baseType, length: length)
+  arrayTypes.add(result)
 
 proc getTupleType*(elements: OrderedTable[string, Type]): Type =
 
@@ -160,7 +160,7 @@ proc `$`*(k: TypeKind): string =
   of typePtr: "T*"
   of typeChar: "char"
   of typeVec: "T@"
-  of typeStaticArray: "T[]"
+  of typeArray: "T[]"
   of typeNul: "nul"
   of typeTuple: "(T, ...)"
   of typeFunc: "(T, ...) -> T"
@@ -177,7 +177,7 @@ proc `$`*(t: Type): string =
   case t.kind
   of typePtr: $t.ptrBase & "*"
   of typeVec: $t.vecBase & "[*]"
-  of typeStaticArray: $t.staticArrBase & "[" & (if t.length == 0: "" 
+  of typeArray: $t.arrBase & "[" & (if t.length == 0: "" 
     else: $t.length) & "]" 
   of typeTuple: 
     let parts = collect:

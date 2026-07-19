@@ -38,17 +38,17 @@ type
     of typeBool:         boolValue:        bool
     of typeChar:         charValue:        char
 
-    of typeStaticArray:
-                         staticArrayData:   ref seq[Value]
-                         staticArrayLength: Natural
+    of typeArray:
+                         arrayData:        ref seq[Value]
+                         arrayLen:         Natural
         
-    of typeVec:          vecValue:          VecValue
+    of typeVec:          vecValue:         VecValue
 
-    of typePtr:          ptrValue:          ref Value
+    of typePtr:          ptrValue:         ref Value
     of typeNul:          discard
 
-    of typeTuple:        tupleValue:        OrderedTable[string, Value]
-    of typeFunc:         funcValue:         FuncValue
+    of typeTuple:        tupleValue:       OrderedTable[string, Value]
+    of typeFunc:         funcValue:        FuncValue
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -131,21 +131,21 @@ proc newVecValue*(values: seq[Value], baseType: Type): Value =
 
 proc copyValueDeep(v: Value): Value =
   result = v
-  if v.kind == typeStaticArray:
+  if v.kind == typeArray:
     var newData = new seq[Value]
-    for val in v.staticArrayData[]:
+    for val in v.arrayData[]:
       newData[].add(copyValueDeep(val))
-    result.staticArrayData = newData
+    result.arrayData = newData
 
 proc newStaticArrayValue*(values: seq[Value], valType: Type, length: Natural): Value =
   var data = new seq[Value]
   for val in values:
     data[].add(copyValueDeep(val))
   Value(
-    kind: typeStaticArray,
+    kind: typeArray,
     valueType: valType,
-    staticArrayData: data,
-    staticArrayLength: length
+    arrayData: data,
+    arrayLen: length
   )
 
 proc newPtrValue*(v: ref Value, baseType: Type): Value = 
@@ -162,8 +162,8 @@ proc newFuncValue*(valueType: Type, arguments: OrderedTable[string, FuncArgument
 
 proc arrayLength*(v: Value): Natural =
   case v.kind:
-  of typeStaticArray:
-    return v.staticArrayLength
+  of typeArray:
+    return v.arrayLen
   of typeVec:
     return v.vecValue.length
   else:
@@ -171,8 +171,8 @@ proc arrayLength*(v: Value): Natural =
 
 proc arrayValues*(v: Value): seq[Value] =
   case v.kind:
-  of typeStaticArray:
-    return v.staticArrayData[]
+  of typeArray:
+    return v.arrayData[]
   of typeVec:
     return v.vecValue.values
   else:
@@ -181,8 +181,8 @@ proc arrayValues*(v: Value): seq[Value] =
 proc stringValue*(v: Value): string =
   result = ""
   case v.kind:
-  of typeStaticArray:
-    for ch in v.staticArrayData[]:
+  of typeArray:
+    for ch in v.arrayData[]:
       if ch.charValue == '\0': break
       result.add(ch.charValue)
   of typeVec:
@@ -237,8 +237,8 @@ proc `==`*(a, b: Value): bool =
       return a.vecValue == nil
     elif a.kind.eq(typeNul) and b.kind.eq(typeVec):
       return b.vecValue == nil
-    elif a.valueType.eq(getVecType(getCharType())) and b.valueType.eq(getStaticArrayType(getCharType(), 0)) or
-        a.valueType.eq(getStaticArrayType(getCharType(), 0)) and b.valueType.eq(getVecType(getCharType())):
+    elif a.valueType.eq(getVecType(getCharType())) and b.valueType.eq(getArrayType(getCharType(), 0)) or
+        a.valueType.eq(getArrayType(getCharType(), 0)) and b.valueType.eq(getVecType(getCharType())):
       return a.stringValue == b.stringValue
     return false
 
@@ -257,14 +257,14 @@ proc `==`*(a, b: Value): bool =
   of typeUint8:  return a.uint8Value == b.uint8Value
   of typeBool:   return a.boolValue == b.boolValue
   of typeChar:   return a.charValue == b.charValue
-  of typeStaticArray:
-    if a.valueType.eq(getStaticArrayType(getCharType(), 0)) and 
-      b.valueType.eq(getStaticArrayType(getCharType(), 0)):
+  of typeArray:
+    if a.valueType.eq(getArrayType(getCharType(), 0)) and 
+      b.valueType.eq(getArrayType(getCharType(), 0)):
         return a.stringValue == b.stringValue
-    if a.staticArrayData[].len != b.staticArrayData[].len:
+    if a.arrayData[].len != b.arrayData[].len:
       return false
-    for i in 0..<a.staticArrayData[].len:
-      if a.staticArrayData[][i] != b.staticArrayData[][i]:
+    for i in 0..<a.arrayData[].len:
+      if a.arrayData[][i] != b.arrayData[][i]:
         return false
     return true
   of typeVec:
@@ -313,9 +313,9 @@ proc `$`*(value: Value): string =
   of typeUint8:  return $value.uint8Value
   of typeBool:   return $value.boolValue
   of typeChar:   return $value.charValue
-  of typeStaticArray:
-    if value.staticArrayData[].len > 0 and 
-       value.valueType.eq getStaticArrayType(getCharType(), 0):
+  of typeArray:
+    if value.arrayData[].len > 0 and 
+       value.valueType.eq getArrayType(getCharType(), 0):
       return value.stringValue
     else:
       raise newException(ValueError, "Cannot convert static array (non-char) to string")
@@ -529,7 +529,7 @@ method visitArrayExpression*(visitor: InterpreterVisitor, node: ArrayExpression)
 
   if node.values.len != node.returnType.length:
     for _ in node.values.len..node.returnType.length:
-      values.add(newDefaultValue(node.returnType.staticArrBase))
+      values.add(newDefaultValue(node.returnType.arrBase))
 
   return newStaticArrayValue(values, node.returnType, node.returnType.length)
 
@@ -537,11 +537,11 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   var index = visitor.visitExpression(node.index).numberValue
   let arr = visitor.visitExpression(node.value)
   
-  let indexValue = validIndex(index, arr.staticArrayLength)
+  let indexValue = validIndex(index, arr.arrayLen)
 
   case arr.kind:
-  of typeStaticArray:
-    return arr.staticArrayData[][indexValue]
+  of typeArray:
+    return arr.arrayData[][indexValue]
   of typeVec:
     return arr.vecValue.values[indexValue]
   else:
@@ -571,8 +571,8 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
     for index, expr in node.arguments:
       var value = visitor.visitExpression(expr)
 
-      if value.kind == typeStaticArray:
-        value = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+      if value.kind == typeArray:
+        value = newStaticArrayValue(value.arrayData[], value.valueType, value.arrayLen)
 
       visitor.newSlot(funcValue.arguments[$index].origin.lexeme, value)
 
@@ -593,8 +593,8 @@ method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): 
 
 method visitDeclarationStatement*(visitor: InterpreterVisitor, node: DeclarationStatement): auto =
   var value = visitor.visitExpression(node.value)
-  if value.kind == typeStaticArray:
-    value = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+  if value.kind == typeArray:
+    value = newStaticArrayValue(value.arrayData[], value.valueType, value.arrayLen)
   visitor.newSlot(node.name.lexeme, value)
 
 method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentStatement): auto =
@@ -602,8 +602,8 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
   let value = visitor.visitExpression(node.value)
 
   if left of IdentifierExpression:
-    if value.kind == typeStaticArray:
-      var newValue = newStaticArrayValue(value.staticArrayData[], value.valueType, value.staticArrayLength)
+    if value.kind == typeArray:
+      var newValue = newStaticArrayValue(value.arrayData[], value.valueType, value.arrayLen)
       visitor.setSlot(left.token.lexeme, newValue)
     else:
       visitor.setSlot(left.token.lexeme, value)
@@ -616,8 +616,8 @@ method visitAssignmentStatement*(visitor: InterpreterVisitor, node: AssignmentSt
     let indexValue = validIndex(index, arr.arrayLength)
 
     case arr.kind:
-    of typeStaticArray:
-      arr.staticArrayData[][indexValue] = value
+    of typeArray:
+      arr.arrayData[][indexValue] = value
     of typeVec:
       arr.vecValue.values[indexValue] = value
     else:
@@ -687,7 +687,7 @@ proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): 
 method visitForStatement*(visitor: InterpreterVisitor, node: ForStatement): auto =
   visitor.pushScope()
 
-  let varType = (if node.value.returnType.eq typeStaticArray: node.value.returnType.staticArrBase
+  let varType = (if node.value.returnType.eq typeArray: node.value.returnType.arrBase
     else: node.value.returnType.vecBase)
 
   visitor.newSlot(node.name.lexeme, newDefaultValue(varType))
@@ -738,7 +738,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
   of skVec:
     if node.has("@"):
       let typeExpr = node.get("0")
-      let baseType = typeExpr.returnType.staticArrBase
+      let baseType = typeExpr.returnType.arrBase
       let length = typeExpr.returnType.length
       
       var values: seq[Value] = @[]
@@ -754,7 +754,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
       for val in arrValue.arrayValues:
         values.add(val)
       
-      return newVecValue(values, arrValue.valueType.staticArrBase)
+      return newVecValue(values, arrValue.valueType.arrBase)
     
   of skLen:
     let expr = node.get("0")
@@ -805,7 +805,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
       if i < vecValue.vecValue.length:
         values.add(vecValue.vecValue.values[i])
       else:
-        values.add(newDefaultValue(node.returnType.staticArrBase))
+        values.add(newDefaultValue(node.returnType.arrBase))
     
     return newStaticArrayValue(values, node.returnType, length)
 
@@ -826,7 +826,7 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
       if i < vecValue.vecValue.length:
         values.add(vecValue.vecValue.values[i])
       else:
-        values.add(newDefaultValue(typ.returnType.staticArrBase))
+        values.add(newDefaultValue(typ.returnType.arrBase))
     
     return newStaticArrayValue(values, node.returnType, length)
 
@@ -905,12 +905,12 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
 
   of skResize:
     let value = visitor.visitExpression(node.get("0"))
-    let size = visitor.visitExpression(node.get("1"))
+    let size = visitor.visitExpression(node.get("1")).int64Value
 
-    value.vecValue.values.setLen(size.int64Value)
-    for i in value.vecValue.length..<size.int64Value:
+    value.vecValue.values.setLen(size)
+    for i in value.vecValue.length..<size:
       value.vecValue.values[i] = newDefaultValue(value.valueType.vecBase)
-    value.vecValue.length = size.int64Value
+    value.vecValue.length = size
       
   else:
     warn("Unhandled special statement: ", node.kind)

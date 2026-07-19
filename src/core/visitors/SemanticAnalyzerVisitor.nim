@@ -55,14 +55,14 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
   var arrays = false
 
   if left.returnType.eq getVecType(getCharType()):
-    self.visitExpecting(right, getStaticArrayType(left.returnType.vecBase, 0))
+    self.visitExpecting(right, getArrayType(left.returnType.vecBase, 0))
     arrays = true
   else:
     self.visitExpecting(right, left.returnType)
 
   if left.returnType.neq right.returnType:
     if right.returnType.eq getVecType(getCharType()):
-      self.visitExpecting(left, getStaticArrayType(right.returnType.vecBase, 0))
+      self.visitExpecting(left, getArrayType(right.returnType.vecBase, 0))
       arrays = true
     else:
       self.visitExpecting(left, right.returnType)
@@ -134,7 +134,7 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
 
   elif node.trySetNumber():              discard
   elif node.checkEqNeq(typeChar):        node.setType(getBoolType())
-  elif node.checkEqNeq(typeStaticArray): node.setType(getBoolType())
+  elif node.checkEqNeq(typeArray):       node.setType(getBoolType())
   elif node.checkEqNeq(typeVec):         node.setType(getBoolType())
   elif node.checkEqNeq(typePtr):         node.setType(getBoolType())
   elif node.checkEqNeq(typeTuple):       node.setType(getBoolType())
@@ -204,20 +204,20 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   var expected = getUndefinedType()
   var error = false
 
-  if visitor.expectedContextType.kind.eq typeStaticArray:
-    expected = visitor.expectedContextType.staticArrBase
+  if visitor.expectedContextType.kind.eq typeArray:
+    expected = visitor.expectedContextType.arrBase
   else:
     warn("non-static-array context")
 
   info("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
-    if expr.returnType.eq(typeStaticArray) and expected.eq(typeStaticArray):
+    if expr.returnType.eq(typeArray) and expected.eq(typeArray):
       if expr.returnType.length > expected.length:
         newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $expected})
         error = true
         break
-      expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, expected.length)
+      expr.returnType = getArrayType(expr.returnType.arrBase, expected.length)
       info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
 
     elif expr.returnType.neq expected:
@@ -226,7 +226,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
       break
 
   if not error:
-    node.setType(getStaticArrayType(expected, node.values.len))
+    node.setType(getArrayType(expected, node.values.len))
 
   info("exiting ArrayExpression")
 
@@ -234,11 +234,11 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   info("visiting IndexExpression")
   var error = false
 
-  visitor.visitExpecting(node.value, getStaticArrayType(visitor.expectedContextType, 0))
+  visitor.visitExpecting(node.value, getArrayType(visitor.expectedContextType, 0))
   visitor.visitExpression(node.index)
 
-  if node.value.returnType.kind notin {typeVec, typeStaticArray}:
-    newError(errTypeMismatch, node.token, @{"@0": $typeVec & " or " & $typeStaticArray, 
+  if node.value.returnType.kind notin {typeVec, typeArray}:
+    newError(errTypeMismatch, node.token, @{"@0": $typeVec & " or " & $typeArray, 
       "@1": $node.value.returnType})
     error = true
 
@@ -249,7 +249,7 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
   if not error:
     node.setType(
       if node.value.returnType.kind.eq typeVec:   node.value.returnType.vecBase
-      else:                                       node.value.returnType.staticArrBase
+      else:                                       node.value.returnType.arrBase
     )
 
   info("exiting IndexExpression")
@@ -345,16 +345,16 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
       else:
         visitor.visitExpecting(expr, funcType.arguments[$index])
 
-        if expr.returnType.eq(typeStaticArray) and funcType.arguments[$index].eq typeStaticArray:
+        if expr.returnType.eq(typeArray) and funcType.arguments[$index].eq typeArray:
           if funcType.arguments[$index].length == 0 and expr.returnType.length != 0:
-            expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, funcType.arguments[$index].length)
+            expr.returnType = getArrayType(expr.returnType.arrBase, funcType.arguments[$index].length)
 
           if expr.returnType.length > funcType.arguments[$index].length:
             newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $funcType.arguments[$index]})
             error = true
 
           else:
-            expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, funcType.arguments[$index].length)
+            expr.returnType = getArrayType(expr.returnType.arrBase, funcType.arguments[$index].length)
 
         elif expr.returnType.neq funcType.arguments[$index]:
           newError(errTypeMismatch, expr.token, @{"@0": $funcType.arguments[$index], "@1": $expr.returnType})
@@ -380,22 +380,22 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
 
   var valueType = node.value.returnType
 
-  if expected.kind.eq(typeStaticArray) and valueType.kind.eq typeStaticArray:
+  if expected.kind.eq(typeArray) and valueType.kind.eq typeArray:
     if expected.length == 0 and valueType.length != 0:
-      expected = getStaticArrayType(expected.staticArrBase, valueType.length)
+      expected = getArrayType(expected.arrBase, valueType.length)
       info("The size of the static array '" & node.name.lexeme & "' has been determined to " & $valueType.length)
     elif expected.length == 0 and valueType.length == 0:
       newError(errEmptyStaticArray, node.value.token)
       error = true
 
-    if expected.staticArrBase.neq valueType.staticArrBase:
+    if expected.arrBase.neq valueType.arrBase:
       newError(errTypeMismatch, node.name, @{"@0": $expected, "@1": $valueType})
       error = true
     if expected.length < valueType.length:
       newError(errSize, node.value.token, @{"@0": $valueType, "@1": $expected})
       error = true
     elif expected.length > valueType.length:
-      valueType = getStaticArrayType(expected.staticArrBase, expected.length)
+      valueType = getArrayType(expected.arrBase, expected.length)
       info("The size of the static array '" & node.value.token.lexeme & "' has been determined to " & $valueType.length)
 
   elif expected.neq valueType:
@@ -438,11 +438,11 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
   visitor.visitExpression(node.left)
   visitor.visitExpecting(node.value, node.left.returnType)
   
-  if node.left.returnType.kind.eq(typeStaticArray) and node.value.returnType.kind.eq(typeStaticArray):
+  if node.left.returnType.kind.eq(typeArray) and node.value.returnType.kind.eq(typeArray):
     if node.left.returnType.length < node.value.returnType.length:
       newError(errSize, node.value.token, @{"@0": $node.value.returnType, "@1": $node.left.returnType})
     else:
-      node.value.returnType = getStaticArrayType(node.value.returnType.staticArrBase, node.left.returnType.length)
+      node.value.returnType = getArrayType(node.value.returnType.arrBase, node.left.returnType.length)
       info("The size of the static array '" & node.left.token.lexeme & 
         "' has been determined to " & $node.value.returnType.length)
 
@@ -523,7 +523,7 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
     newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": existing.token.file,
       "@2": $existing.token.line, "@3": $existing.token.column})
 
-  elif node.symbolType.kind.eq(typeStaticArray) and node.symbolType.length == 0:
+  elif node.symbolType.kind.eq(typeArray) and node.symbolType.length == 0:
     newError(errEmptyStaticArray, node.name)
 
   else:
@@ -562,7 +562,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
   var error = false
 
-  if node.returnType.eq(typeStaticArray) and node.returnType.length == 0:
+  if node.returnType.eq(typeArray) and node.returnType.length == 0:
     newError(errFuncEmptyStaticArray, node.name)
     error = true
 
@@ -624,11 +624,11 @@ method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement):
 
   visitor.visitExpression(node.value)
 
-  if node.value.returnType.kind notin {typeStaticArray, typeVec}:
-    newError(errTypeMismatch, node.token, @{"@0": $typeStaticArray & " | " & $typeVec, "@1": $node.value.returnType})
+  if node.value.returnType.kind notin {typeArray, typeVec}:
+    newError(errTypeMismatch, node.token, @{"@0": $typeArray & " | " & $typeVec, "@1": $node.value.returnType})
 
   else:
-    let varType = (if node.value.returnType.eq typeStaticArray: node.value.returnType.staticArrBase
+    let varType = (if node.value.returnType.eq typeArray: node.value.returnType.arrBase
       else: node.value.returnType.vecBase)
 
     visitor.newSymbol(node.name, varType)
@@ -764,17 +764,17 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
       var expected = getUndefinedType()
       if visitor.expectedContextType.kind.eq typeVec:
-        expected = getStaticArrayType(visitor.expectedContextType.vecBase, 0)
+        expected = getArrayType(visitor.expectedContextType.vecBase, 0)
       else:
         warn("non-array context")
 
       visitor.visitExpecting(expr, expected)
-      if not node.expect("0", typeStaticArray): break analysis
+      if not node.expect("0", typeArray): break analysis
 
       if expr of TypeExpression:
         node.add("@", newBoolExpression(expr.token.newFrom(kind = tkTrue)))
 
-      node.setType(getVecType(expr.returnType.staticArrBase))
+      node.setType(getVecType(expr.returnType.arrBase))
 
     of skLen:
       info("Semantic analysis of skLen special")
@@ -782,7 +782,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       let expr = node.get("0")
 
       visitor.visitExpression(expr)
-      if not node.expect("0", typeVec, typeStaticArray): break analysis
+      if not node.expect("0", typeVec, typeArray): break analysis
 
       node.setType(getInt64Type())
 
@@ -793,17 +793,17 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
           warn("unexpected named argument found: ", key.lexeme)
           newError(errUnexpectedNamedArgument, key, @{"@0": key.lexeme})
           continue
-        visitor.visitExpecting(expr, getStaticArrayType(getCharType(), 0))
-        if expr.returnType.eq(getStaticArrayType(getCharType(), 0)):
+        visitor.visitExpecting(expr, getArrayType(getCharType(), 0))
+        if expr.returnType.eq(getArrayType(getCharType(), 0)):
           continue
         if expr.returnType.eq getVecType(getCharType()): 
           continue
-        if expr.returnType.kind in {typeStaticArray, typeVec, typePtr, typeNul, typeUndefined}:
+        if expr.returnType.kind in {typeArray, typeVec, typePtr, typeNul, typeUndefined}:
           newError(errTypeMismatch, expr.token, @{"@0": "formatted type", "@1": $expr.returnType})
 
       if node.has("sep"):
-        visitor.visitExpecting(node.get("sep"), getStaticArrayType(getCharType(), 0))
-        if not node.expect("sep", getStaticArrayType(getCharType(), 0)): break analysis
+        visitor.visitExpecting(node.get("sep"), getArrayType(getCharType(), 0))
+        if not node.expect("sep", getArrayType(getCharType(), 0)): break analysis
 
       if node.has("repr"):
         visitor.visitExpecting(node.get("repr"), getBoolType())
@@ -813,7 +813,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
     of skTake:
       info("Semantic analysis of skTake special")
-      if visitor.expectedContextType.kind.neq(typeStaticArray):
+      if visitor.expectedContextType.kind.neq(typeArray):
         newError(errUnknownSize, node.token)
         break analysis
       elif visitor.expectedContextType.length == 0:
@@ -823,13 +823,13 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       node.checkUnexpected(expected = @["0"])
       let expr = node.get("0")
 
-      visitor.visitExpecting(expr, getVecType(visitor.expectedContextType.staticArrBase))
+      visitor.visitExpecting(expr, getVecType(visitor.expectedContextType.arrBase))
       if not node.expect("0", typeVec): break analysis
 
       node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
         lexeme = $visitor.expectedContextType.length)))
 
-      node.setType(getStaticArrayType(expr.returnType.vecBase, visitor.expectedContextType.length))
+      node.setType(getArrayType(expr.returnType.vecBase, visitor.expectedContextType.length))
 
     of skTakeof:
       info("Semantic analysis of skTakeof special")
@@ -837,7 +837,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
       let typ = node.get("0")
 
       visitor.visitExpression(typ)
-      if not node.expect("0", typeStaticArray): break analysis
+      if not node.expect("0", typeArray): break analysis
 
       elif not (typ of TypeExpression):
         newError(errTypeMismatch, typ.token, @{"@0": "type annotation", "@1": "Expression"})
@@ -849,24 +849,24 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
       let expr = node.get("1")
 
-      visitor.visitExpecting(expr, getVecType(typ.returnType.staticArrBase))
+      visitor.visitExpecting(expr, getVecType(typ.returnType.arrBase))
       if not node.expect("1", typeVec): break analysis
 
       node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
         lexeme = $typ.returnType.length)))
 
-      node.setType(getStaticArrayType(typ.returnType.staticArrBase, typ.returnType.length))
+      node.setType(getArrayType(typ.returnType.arrBase, typ.returnType.length))
 
     of skJoin:
       info("Semantic analysis of skJoin special")
       node.checkUnexpected(expected = @["0", "1"])
       let expr = node.get("0")
 
-      visitor.visitExpecting(expr, getStaticArrayType(getStaticArrayType(getCharType(), 0), 0))
-      if not node.expect("0", getStaticArrayType(getStaticArrayType(getCharType(), 0), 0)): break analysis
+      visitor.visitExpecting(expr, getArrayType(getArrayType(getCharType(), 0), 0))
+      if not node.expect("0", getArrayType(getArrayType(getCharType(), 0), 0)): break analysis
 
       let sep = node.get("1")
-      visitor.visitExpecting(sep, getStaticArrayType(getCharType(), 0))
+      visitor.visitExpecting(sep, getArrayType(getCharType(), 0))
 
       node.setType(getVecType(getCharType()))
 
@@ -893,8 +893,8 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
       if not node.expect("0", getVecType(getCharType())): break analysis
 
       if node.has("term"):
-        visitor.visitExpecting(node.get("term"), getStaticArrayType(getCharType(), 0))
-        if not node.expect("term", getStaticArrayType(getCharType(), 0)): break analysis
+        visitor.visitExpecting(node.get("term"), getArrayType(getCharType(), 0))
+        if not node.expect("term", getArrayType(getCharType(), 0)): break analysis
 
       if node.has("free"):
         visitor.visitExpecting(node.get("free"), getBoolType())
@@ -917,8 +917,8 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
       if not node.expect("0", getBoolType()): break analysis
 
       if node.has("1"):
-        visitor.visitExpecting(node.get("1"), getStaticArrayType(getCharType(), 0))
-        if not node.expect("1", getStaticArrayType(getCharType(), 0)): break analysis
+        visitor.visitExpecting(node.get("1"), getArrayType(getCharType(), 0))
+        if not node.expect("1", getArrayType(getCharType(), 0)): break analysis
 
     of skResize:
       info("Semantic analysis of skResize special")
