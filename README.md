@@ -18,6 +18,6 @@ end
 char[32][] names = {"Alice", "Ben", "John"}
 
 for name = names do
-  print: greeting(name)
+  print:(greeting(name), free=true)
 end
 ```
