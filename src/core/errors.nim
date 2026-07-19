@@ -21,7 +21,7 @@ type
 
     errHaventField
 
-    errUnreachableCode, errMissingReturn, errFuncNamedArguments
+    errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -70,7 +70,8 @@ proc message(kind: ErrorKind): string =
     of errHaventField: "@0 does not have field '@1'"
     of errUnreachableCode: "The code after the statement declared at @0(@1:@2) is unreachable"
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
-    of errFuncNamedArguments: "Named arguments are prohibited in function arguments."
+    of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
+    of errUnusedReturn: "function '@0' returns a value and it must be used"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

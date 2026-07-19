@@ -52,12 +52,22 @@ proc visitExpecting(self: SemanticAnalyzerVisitor, expr: Expression, expected: T
 proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, expected: Type): bool =
   info("attempt to coerce types")
   self.visitExpecting(left, expected)
-  self.visitExpecting(right, left.returnType)
+  var arrays = false
+
+  if left.returnType.eq getArrayType(getCharType()):
+    self.visitExpecting(right, getStaticArrayType(left.returnType.arrBase, 0))
+    arrays = true
+  else:
+    self.visitExpecting(right, left.returnType)
 
   if left.returnType.neq right.returnType:
-    self.visitExpecting(left, right.returnType)
+    if right.returnType.eq getArrayType(getCharType()):
+      self.visitExpecting(left, getStaticArrayType(right.returnType.arrBase, 0))
+      arrays = true
+    else:
+      self.visitExpecting(left, right.returnType)
 
-  return left.returnType.eq right.returnType
+  return left.returnType.eq(right.returnType) or arrays
 
 proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type) =
   self.currentScope.symbolTable[name.lexeme] = Symbol(token: name, symbolType: symbolType)
@@ -129,6 +139,7 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
   elif node.checkEqNeq(typePtr):         node.setType(getBoolType())
   elif node.checkEqNeq(typeTuple):       node.setType(getBoolType())
   elif node.checkAndOr():                node.setType(getBoolType())
+  elif node.checkEqNeqStrings():         node.setType(getBoolType())
   else:                                  node.newBinaryTypeMismatchError()
 
   info("exiting BinaryExpression")
@@ -196,21 +207,21 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   if visitor.expectedContextType.kind.eq typeStaticArray:
     expected = visitor.expectedContextType.staticArrBase
   else:
-    warn("Non-static-array context")
+    warn("non-static-array context")
 
   info("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
     if expr.returnType.eq(typeStaticArray) and expected.eq(typeStaticArray):
       if expr.returnType.length > expected.length:
-        newError(errTypeMismatch, expr.token, @{"@0": $expr.returnType, "@1": $expected})
+        newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $expected})
         error = true
         break
       expr.returnType = getStaticArrayType(expr.returnType.staticArrBase, expected.length)
       info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
 
     elif expr.returnType.neq expected:
-      newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $expected})
+      newError(errTypeMismatch, expr.token, @{"@0": $expected, "@1": $expr.returnType})
       error = true
       break
 
@@ -627,6 +638,17 @@ method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement):
 
   info("exiting ForStatement")
 
+method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement): auto =
+  info("visiting CallStatement")
+
+  visitor.visitExpression(node.callExpression)
+  let funcExpr = node.callExpression
+
+  if funcExpr.returnType.neq getUndefinedType():
+    newError(errUnusedReturn, funcExpr.token, @{"@0": funcExpr.token.lexeme})
+
+  info("exiting CallStatement")
+
 # SPECIALS
 
 proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
@@ -845,6 +867,10 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
       node.setType(getArrayType(getCharType()))
 
+    of skRead:
+      info("Semantic analysis of skRead special")
+      node.setType(getArrayType(getCharType()))
+
     else:
       warn("Unhandled special expression: ", node.kind)
 
@@ -974,5 +1000,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitReturnStatement(ReturnStatement(node))
   elif node of ForStatement:
     visitor.visitForStatement(ForStatement(node))
+  elif node of CallStatement:
+    visitor.visitCallStatement(CallStatement(node))
   else:
     warn("unhandled statement")

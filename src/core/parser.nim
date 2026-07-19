@@ -20,8 +20,6 @@ proc newError(self: var Parser,
   args: seq[(string, string)] = @[]) =
   if not self.lexer.hasError:
     newError(kind, token, args)
-    while self.lexer.peekToken().kind notin {tkEOS, tkEOF}:
-      discard self.lexer.nextToken()
 
 proc expectToken*(self: var Parser, expected: TokenKind): Token =
   let token = self.lexer.nextToken()
@@ -47,26 +45,34 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkLParen:
     var elements = initOrderedTable[string, Type]()
     var index = 0
-    while self.lexer.peekToken().kind != tkRParen:
+
+    while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
       let tok = self.lexer.nextToken()
       if tok.kind notin TOKEN_TYPE_KINDS:
         result = getUndefinedType()
         break
+
       var typ = self.parseType(tok)
       var name = $index
       var nameToken = self.lexer.peekToken()
+
       if nameToken.kind == tkIdentifier:
         name = self.expectToken(tkIdentifier).lexeme
         if name in elements:
           newError(errDuplicateArgument, nameToken, @{"@0": name})
           result = getUndefinedType()
           break
+
       else:
         index += 1
+
       elements[name] = typ
       if self.lexer.peekToken().kind == tkRParen: break
+
       discard self.expectToken(tkComma)
+
     discard self.expectToken(tkRParen)
+
     if elements.len == 0:
       result = getUndefinedType()
     else:
@@ -118,7 +124,7 @@ proc parseArguments(self: var Parser): OrderedTable[Token, Expression] =
   if self.lexer.peekToken().kind == tkLParen:
     discard self.lexer.nextToken()
     
-    while self.lexer.peekToken().kind != tkRParen:
+    while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
       let rd = self.lexer.getRollbackData()
       let token = self.lexer.peekToken()
 
@@ -341,9 +347,11 @@ proc parseExpr(self: var Parser): Expression =
 proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
   var symbolType = self.parseType()
   let name = self.expectToken(tkIdentifier)
+
   if self.lexer.peekToken().kind == tkEqual:
     discard self.expectToken(tkEqual)
     return newDeclarationStatement(symbolType, name, self.parseExpr)
+
   return newDefaultStatement(symbolType, name)
 
 proc parseAssignment(self: var Parser, left: Expression): Statement {.inline.} =
@@ -542,10 +550,13 @@ proc parseStmt(self: var Parser): Statement =
       self.lexer.rollback(rd)
 
     left = self.parsePrefix()
-    let token = self.lexer.peekToken()
+    let tok = self.lexer.peekToken()
 
-    if token.kind == tkEqual:
+    if tok.kind == tkEqual:
       return self.parseAssignment(left)
+
+    elif left of CallExpression:
+      return newCallStatement(CallExpression(left))
 
     else:
       self.newError(errStatement, token, @{"@0": token.mean()})

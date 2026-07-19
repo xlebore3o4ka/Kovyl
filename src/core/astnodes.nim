@@ -118,11 +118,14 @@ type
     value*: Expression
     forBlock*: BlockStatement
 
+  CallStatement* = ref object of Statement
+    callExpression*: CallExpression
+
   # SPECIALS
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skArr, skLen, skFmt, skTake, skTakeof, skJoin
+    skNew, skArr, skLen, skFmt, skTake, skTakeof, skJoin, skRead
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
@@ -152,6 +155,7 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
   of "take": skTake
   of "takeof": skTakeof
   of "join": skJoin
+  of "read": skRead
   else:
     newError(errExprSpecial, token)
     return skExprError
@@ -220,6 +224,9 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newCallStatement*(callExpression: CallExpression): CallStatement {.inline.} =
+  CallStatement(callExpression: callExpression)
 
 proc newForStatement*(token: Token, name: Token, value: Expression, forBlock: BlockStatement): ForStatement {.inline.} =
   ForStatement(token: token, name: name, value: value, forBlock: forBlock)

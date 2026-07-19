@@ -237,6 +237,9 @@ proc `==`*(a, b: Value): bool =
       return a.arrayValue == nil
     elif a.kind.eq(typeNul) and b.kind.eq(typeArray):
       return b.arrayValue == nil
+    elif a.valueType.eq(getArrayType(getCharType())) and b.valueType.eq(getStaticArrayType(getCharType(), 0)) or
+        a.valueType.eq(getStaticArrayType(getCharType(), 0)) and b.valueType.eq(getArrayType(getCharType())):
+      return a.stringValue == b.stringValue
     return false
 
   if a.valueType != b.valueType:
@@ -255,6 +258,9 @@ proc `==`*(a, b: Value): bool =
   of typeBool:   return a.boolValue == b.boolValue
   of typeChar:   return a.charValue == b.charValue
   of typeStaticArray:
+    if a.valueType.eq(getStaticArrayType(getCharType(), 0)) and 
+      b.valueType.eq(getStaticArrayType(getCharType(), 0)):
+        return a.stringValue == b.stringValue
     if a.staticArrayData[].len != b.staticArrayData[].len:
       return false
     for i in 0..<a.staticArrayData[].len:
@@ -262,6 +268,9 @@ proc `==`*(a, b: Value): bool =
         return false
     return true
   of typeArray:
+    if a.valueType.eq(getArrayType(getCharType())) and 
+      b.valueType.eq(getArrayType(getCharType())):
+        return a.stringValue == b.stringValue
     return a.arrayValue == b.arrayValue
   of typePtr:
     return a.ptrValue == b.ptrValue
@@ -694,6 +703,9 @@ method visitForStatement*(visitor: InterpreterVisitor, node: ForStatement): auto
   finally:
     visitor.popScope()
 
+method visitCallStatement*(visitor: InterpreterVisitor, node: CallStatement): auto =
+  discard visitor.visitExpression(node.callExpression)
+
 # SPECIALS
 
 proc get*(self: SpecialExpression | SpecialStatement, key: string): Expression =
@@ -833,6 +845,16 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
         buffer.add newCharValue(ch)
 
     return newArrayValue(buffer, getCharType())
+
+  of skRead:
+    var buffer: seq[Value] = @[]
+
+    for ch in stdin.readLine():
+      buffer.add newCharValue(ch)
+
+    buffer.add newCharValue('\0')
+
+    return newArrayValue(buffer, getCharType())
     
   else:
     warn("Unhandled special expression: ", node.kind)
@@ -953,5 +975,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitReturnStatement(ReturnStatement(node))
   elif node of ForStatement:
     visitor.visitForStatement(ForStatement(node))
+  elif node of CallStatement:
+    visitor.visitCallStatement(CallStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

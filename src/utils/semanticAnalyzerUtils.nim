@@ -41,6 +41,19 @@ proc checkEqNeq*(node: BinaryExpression, expected: TypeKind): bool {.inline.} =
   if node.token.kind notin {tkEq, tkNeq}: return false
   node.left.returnType.kind.eq(expected) and node.right.returnType.kind.eq(expected)
 
+proc checkEqNeqStrings*(node: BinaryExpression): bool {.inline.} =
+  if node.token.kind notin {tkEq, tkNeq}: return false
+
+  let dyn = getArrayType(getCharType())
+  let sta = getStaticArrayType(getCharType(), 0)
+  
+  if node.left.returnType.eq(dyn) and node.right.returnType.eq(dyn): return true
+  if node.left.returnType.eq(dyn) and node.right.returnType.eq(sta): return true
+  if node.left.returnType.eq(sta) and node.right.returnType.eq(dyn): return true
+  if node.left.returnType.eq(sta) and node.right.returnType.eq(sta): return true
+
+  return false
+
 proc checkAndOr*(node: BinaryExpression): bool {.inline.} =
   if node.token.kind notin {tkAnd, tkOr}: return false
   node.left.returnType.kind.eq(typeBool) and node.right.returnType.kind.eq(typeBool)
