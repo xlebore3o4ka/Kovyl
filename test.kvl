@@ -1,9 +1,14 @@
-func char[*] greeting(char[32] name) do 
-  return fmt:("Hello from Kovyl, ", name, "!")
+int[*] a = arr: {1, 2, 3}
+
+for i = a do
+  print:fmt: i
+end
+print:(fmt:"", free=true)
+
+resize:(a, 2)
+
+for i = a do
+  print:fmt: i
 end
 
-char[32][] names = {"Alice", "Ben", "John"}
-
-for name = names do
-  print: greeting(name)
-end
+free: a

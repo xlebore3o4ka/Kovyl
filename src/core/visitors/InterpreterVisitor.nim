@@ -229,7 +229,16 @@ proc numberValue*(v: Value): int =
 
 proc `==`*(a, b: Value): bool =
   if a.kind != b.kind:
+    if a.kind.eq(typePtr) and b.kind.eq(typeNul):
+      return a.ptrValue == nil
+    elif a.kind.eq(typeNul) and b.kind.eq(typePtr):
+      return b.ptrValue == nil
+    elif a.kind.eq(typeArray) and b.kind.eq(typeNul):
+      return a.arrayValue == nil
+    elif a.kind.eq(typeNul) and b.kind.eq(typeArray):
+      return b.arrayValue == nil
     return false
+
   if a.valueType != b.valueType:
     return false
 
@@ -662,6 +671,29 @@ proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): 
   e.value = returnValue
   raise e
 
+method visitForStatement*(visitor: InterpreterVisitor, node: ForStatement): auto =
+  visitor.pushScope()
+
+  let varType = (if node.value.returnType.eq typeStaticArray: node.value.returnType.staticArrBase
+    else: node.value.returnType.arrBase)
+
+  visitor.newSlot(node.name.lexeme, newDefaultValue(varType))
+
+  let value = visitor.visitExpression(node.value)
+
+  try:
+    for i in 0..<value.arrayLength:
+      try:
+        visitor.setSlot(node.name.lexeme, value.arrayValues[i])
+        visitor.visitStatement(node.forBlock)
+      except BreakException:
+        break
+      except ContinueException:
+        continue
+        
+  finally:
+    visitor.popScope()
+
 # SPECIALS
 
 proc get*(self: SpecialExpression | SpecialStatement, key: string): Expression =
@@ -809,14 +841,17 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
 method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatement): auto =
   case node.kind:
   of skPrint:
-    
-    var str = visitor.visitExpression(node.get("0")).stringValue
+    var value = visitor.visitExpression(node.get("0"))
+    var str = value.stringValue
 
     var term = "\n"
     if node.has("term"): 
       term = visitor.visitExpression(node.get("term")).stringValue
 
     stdout.write(str & term)
+
+    if node.has("free") and visitor.visitExpression(node.get("free")).boolValue: 
+      value.arrayValue = nil
       
   of skFree:
     let expr = node.get("0")
@@ -841,6 +876,15 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
         raise newError(errAssert, str)
       else:
         raise newError(errAssert, "Assertion failed")
+
+  of skResize:
+    let value = visitor.visitExpression(node.get("0"))
+    let size = visitor.visitExpression(node.get("1"))
+
+    value.arrayValue.values.setLen(size.int64Value)
+    for i in value.arrayValue.length..<size.int64Value:
+      value.arrayValue.values[i] = newDefaultValue(value.valueType.arrBase)
+    value.arrayValue.length = size.int64Value
       
   else:
     warn("Unhandled special statement: ", node.kind)
@@ -907,5 +951,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitFuncStatement(FuncStatement(node))
   elif node of ReturnStatement:
     visitor.visitReturnStatement(ReturnStatement(node))
+  elif node of ForStatement:
+    visitor.visitForStatement(ForStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

@@ -130,7 +130,7 @@ type
 
   SpecialStmtKind* = enum
     skStmtError
-    skPrint, skFree, skAssert
+    skPrint, skFree, skAssert, skResize
 
   SpecialStatement* = ref object of Statement
     token*: Token
@@ -161,6 +161,7 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
   of "print": skPrint
   of "free": skFree
   of "assert": skAssert
+  of "resize": skResize
   else:
     newError(errStmtSpecial, token)
     return skStmtError

@@ -857,7 +857,7 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
     case node.kind:
     of skPrint:
       info("Semantic analysis of skPrint special")
-      node.checkUnexpected(expected = @["0", "term"])
+      node.checkUnexpected(expected = @["0", "term", "free"])
       let expr = node.get("0")
 
       visitor.visitExpecting(expr, getArrayType(getCharType()))
@@ -867,8 +867,12 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
         visitor.visitExpecting(node.get("term"), getStaticArrayType(getCharType(), 0))
         if not node.expect("term", getStaticArrayType(getCharType(), 0)): break analysis
 
+      if node.has("free"):
+        visitor.visitExpecting(node.get("free"), getBoolType())
+        if not node.expect("free", getBoolType()): break analysis
+
     of skFree:
-      info("Semantic analysis of skPrint special")
+      info("Semantic analysis of skFree special")
       node.checkUnexpected(expected = @["0"])
       let expr = node.get("0")
 
@@ -876,16 +880,30 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
       if not node.expect("0", typeArray, typePtr): break analysis
 
     of skAssert:
-      info("Semantic analysis of skPrint special")
+      info("Semantic analysis of skAssert special")
       node.checkUnexpected(expected = @["0", "1"])
       let cond = node.get("0")
-      visitor.visitExpecting(cond, getBoolType())
 
+      visitor.visitExpecting(cond, getBoolType())
       if not node.expect("0", getBoolType()): break analysis
 
       if node.has("1"):
         visitor.visitExpecting(node.get("1"), getStaticArrayType(getCharType(), 0))
         if not node.expect("1", getStaticArrayType(getCharType(), 0)): break analysis
+
+    of skResize:
+      info("Semantic analysis of skResize special")
+      node.checkUnexpected(expected = @["0", "1"])
+      let value = node.get("0")
+      let size = node.get("1")
+      
+      visitor.visitExpression(value)
+      if value.returnType.neq typeArray: 
+        newError(errTypeMismatch, value.token, @{"@0": $typeArray, "@1": $value.returnType})
+        break analysis
+
+      visitor.visitExpression(size)
+      if not node.expect("1", getInt64Type()): break analysis
 
     else:
       warn("Unhandled special statement: ", node.kind)
