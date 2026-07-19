@@ -1,2 +1,5 @@
-string test = arr:"Hello"
-print: test
+int[*] x = vec: {1, 2, 3}
+
+for i = x do
+  print: fmt: i
+end

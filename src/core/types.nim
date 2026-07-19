@@ -11,7 +11,7 @@ type
     typeStaticArray
 
     typePtr
-    typeArray
+    typeVec
     typeNul
 
     typeTuple
@@ -20,7 +20,7 @@ type
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBase*: Type
-    of typeArray: arrBase*: Type
+    of typeVec: vecBase*: Type
     of typeStaticArray:
       staticArrBase*: Type
       length*: Natural
@@ -106,15 +106,15 @@ proc getPtrType*(baseType: Type): Type =
   result = Type(kind: typePtr, ptrBase: baseType)
   ptrTypes.add(result)
 
-proc getArrayType*(baseType: Type): Type =
+proc getVecType*(baseType: Type): Type =
   if baseType.kind == typeUndefined:
     return baseType
 
   for t in arrayTypes:
-    if t.arrBase.eq baseType:
+    if t.vecBase.eq baseType:
       return t
   
-  result = Type(kind: typeArray, arrBase: baseType)
+  result = Type(kind: typeVec, vecBase: baseType)
   arrayTypes.add(result)
 
 proc getStaticArrayType*(baseType: Type, length: Natural): Type =
@@ -159,7 +159,7 @@ proc `$`*(k: TypeKind): string =
   of typeBool: "bool"
   of typePtr: "T*"
   of typeChar: "char"
-  of typeArray: "T[*]"
+  of typeVec: "T@"
   of typeStaticArray: "T[]"
   of typeNul: "nul"
   of typeTuple: "(T, ...)"
@@ -176,7 +176,7 @@ proc `$`*(t: Type): string =
   if t == nil: return "nilType"
   case t.kind
   of typePtr: $t.ptrBase & "*"
-  of typeArray: $t.arrBase & "[*]"
+  of typeVec: $t.vecBase & "[*]"
   of typeStaticArray: $t.staticArrBase & "[" & (if t.length == 0: "" 
     else: $t.length) & "]" 
   of typeTuple: 

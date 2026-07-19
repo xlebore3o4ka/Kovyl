@@ -43,7 +43,7 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkUint8:  result = getUint8Type()
   of tkBool:   result = getBoolType()
   of tkChar:   result = getCharType()
-  of tkString: result = getArrayType(getCharType())
+  of tkString: result = getVecType(getCharType())
   of tkLParen:
     var elements = initOrderedTable[string, Type]()
     var index = 0
@@ -106,7 +106,7 @@ proc parseType(self: var Parser, token: Token): Type =
         result = getStaticArrayType(result, parseInt(token.lexeme))
         discard self.expectToken(tkRBracket)
       elif token.kind == tkStar:
-        result = getArrayType(result)
+        result = getVecType(result)
         discard self.expectToken(tkRBracket)
       elif token.kind == tkRBracket:
         result = getStaticArrayType(result, 0)

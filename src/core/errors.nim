@@ -22,6 +22,7 @@ type
     errHaventField
 
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
+    errFuncEmptyStaticArray
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -72,6 +73,7 @@ proc message(kind: ErrorKind): string =
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
     of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
     of errUnusedReturn: "function '@0' returns a value and it must be used"
+    of errFuncEmptyStaticArray: "The function cannot return an empty array"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

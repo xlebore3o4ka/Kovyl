@@ -125,7 +125,7 @@ type
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skArr, skLen, skFmt, skTake, skTakeof, skJoin, skRead
+    skNew, skVec, skLen, skFmt, skTake, skTakeof, skJoin, skRead
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
@@ -149,7 +149,7 @@ proc newSpecialStatement*(token: Token, kind: SpecialStmtKind, namedArgs: Ordere
 proc getSpecialExprKind*(token: Token): SpecialExprKind =
   case token.lexeme
   of "new": skNew
-  of "arr": skArr
+  of "vec": skVec
   of "len": skLen
   of "fmt": skFmt
   of "take": skTake

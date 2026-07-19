@@ -44,7 +44,7 @@ proc checkEqNeq*(node: BinaryExpression, expected: TypeKind): bool {.inline.} =
 proc checkEqNeqStrings*(node: BinaryExpression): bool {.inline.} =
   if node.token.kind notin {tkEq, tkNeq}: return false
 
-  let dyn = getArrayType(getCharType())
+  let dyn = getVecType(getCharType())
   let sta = getStaticArrayType(getCharType(), 0)
   
   if node.left.returnType.eq(dyn) and node.right.returnType.eq(dyn): return true
