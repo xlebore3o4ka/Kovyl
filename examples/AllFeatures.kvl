@@ -8,7 +8,6 @@
 #   -a   show AST (not working yet)
 #   -s   short errors
 
-
 # TYPES
 
 int  typeInt   # int64

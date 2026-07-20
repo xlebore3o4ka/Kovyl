@@ -1,0 +1,9 @@
+func string concat(string a, string b) do
+  return fmt:(a, b)
+end
+
+func string concat(string a, char b) do
+  return fmt:(a, b)
+end
+
+print:concat(fmt:"Hello, ", '1')

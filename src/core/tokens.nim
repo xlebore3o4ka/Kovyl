@@ -32,6 +32,7 @@ type
     tkIf, tkElif, tkElse
     tkWhile, tkFor, tkBreak, tkContinue
     tkFunc, tkReturn
+    tkPub
 
     tkEOS
     tkEOF
@@ -132,6 +133,7 @@ proc mean*(kind: TokenKind): string =
   of tkContinue:      return "keyword continue"
   of tkFunc:          return "keyword func"
   of tkReturn:        return "keyword return"
+  of tkPub:           return "keyword pub"
   
   of tkInvalid:       return "invalid token"
 

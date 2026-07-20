@@ -11,7 +11,7 @@ type
     typeArray
 
     typePtr
-    typeVec
+    typeVec 
     typeNul
 
     typeTuple
@@ -45,6 +45,52 @@ let
   charType* = Type(kind: typeChar)
 
   nulType* = Type(kind: typeNul)
+
+proc `$`*(k: TypeKind): string =
+  case k
+  of typeUndefined: "undefined"
+  of typeInt64: "int64"
+  of typeInt32: "int32"
+  of typeInt16: "int16"
+  of typeInt8: "int8"
+  of typeUint64: "uint64"
+  of typeUint32: "uint32"
+  of typeUint16: "uint16"
+  of typeUint8: "uint8"
+  of typeBool: "bool"
+  of typePtr: "T*"
+  of typeChar: "char"
+  of typeVec: "T@"
+  of typeArray: "T[]"
+  of typeNul: "nul"
+  of typeTuple: "(T, ...)"
+  of typeFunc: "(T, ...) -> T"
+
+proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
+  try:
+    let v = parseUInt(s)
+    return v <= high(T)
+  except ValueError:
+    return false
+
+proc `$`*(t: Type): string =
+  if t == nil: return "nilType"
+  case t.kind
+  of typePtr: $t.ptrBase & "*"
+  of typeVec: $t.vecBase & "@"
+  of typeArray: $t.arrBase & "[" & (if t.length == 0: "" 
+    else: $t.length) & "]" 
+  of typeTuple: 
+    let parts = collect:
+      for k, v in t.elements:
+        if isValidUint[uint64](k): $v else: $v & " " & k
+    "(" & parts.join(", ") & ")"
+  of typeFunc:
+    let argsStr = t.arguments.values.toSeq
+      .mapIt($it)
+      .join(", ")
+    return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
+  else: return $t.kind
 
 var ptrTypes*: seq[Type] = @[]
 var vecTypes*: seq[Type] = @[]
@@ -129,6 +175,8 @@ proc getArrayType*(baseType: Type, length: Natural): Type =
   arrayTypes.add(result)
 
 proc getTupleType*(elements: OrderedTable[string, Type]): Type =
+  if elements.len == 0:
+    return getUndefinedType()
 
   for t in tupleTypes:
     if t.elements == elements:
@@ -144,49 +192,3 @@ proc getFuncType*(args: OrderedTable[string, Type], returnType: Type): Type =
 
   result = Type(kind: typeFunc, arguments: args, returnType: returnType)
   funcTypes.add(result)
-
-proc `$`*(k: TypeKind): string =
-  case k
-  of typeUndefined: "undefined"
-  of typeInt64: "int64"
-  of typeInt32: "int32"
-  of typeInt16: "int16"
-  of typeInt8: "int8"
-  of typeUint64: "uint64"
-  of typeUint32: "uint32"
-  of typeUint16: "uint16"
-  of typeUint8: "uint8"
-  of typeBool: "bool"
-  of typePtr: "T*"
-  of typeChar: "char"
-  of typeVec: "T@"
-  of typeArray: "T[]"
-  of typeNul: "nul"
-  of typeTuple: "(T, ...)"
-  of typeFunc: "(T, ...) -> T"
-
-proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
-  try:
-    let v = parseUInt(s)
-    return v <= high(T)
-  except ValueError:
-    return false
-
-proc `$`*(t: Type): string =
-  if t == nil: return "nilType"
-  case t.kind
-  of typePtr: $t.ptrBase & "*"
-  of typeVec: $t.vecBase & "[*]"
-  of typeArray: $t.arrBase & "[" & (if t.length == 0: "" 
-    else: $t.length) & "]" 
-  of typeTuple: 
-    let parts = collect:
-      for k, v in t.elements:
-        if isValidUint[uint64](k): $v else: $v & " " & k
-    "(" & parts.join(", ") & ")"
-  of typeFunc:
-    let argsStr = t.arguments.values.toSeq
-      .mapIt($it)
-      .join(", ")
-    return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
-  else: return $t.kind

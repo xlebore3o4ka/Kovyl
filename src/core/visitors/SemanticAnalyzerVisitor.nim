@@ -7,6 +7,10 @@ type
   Symbol = object
     token: Token
     symbolType: Type
+    pub: bool
+    case isFunc: bool
+    of true: overloads: seq[Type]
+    else: discard
 
   Scope = ref object
     depth: Natural = 0
@@ -69,10 +73,13 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
 
   return left.returnType.eq(right.returnType) or arrays
 
-proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type) =
-  self.currentScope.symbolTable[name.lexeme] = Symbol(token: name, symbolType: symbolType)
+proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type, pub: bool) =
+  self.currentScope.symbolTable[name.lexeme] = (
+    if symbolType.neq typeFunc: Symbol(token: name, symbolType: symbolType)
+    else: Symbol(token: name, symbolType: symbolType, isFunc: true)
+  )
   self.symbolScopeStack.mgetOrPut(name.lexeme, @[]).add(self.currentScope)
-  info("Symbol created: ", name.lexeme, " of type ", $symbolType, 
+  info((if pub: "Public s" else: "S") & "ymbol created: ", name.lexeme, " of type ", $symbolType, 
     " at the depth of the scope: ", $self.currentScope.depth)
 
 proc pushScope(self: SemanticAnalyzerVisitor) =
@@ -409,7 +416,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
     error = true
   
   if not error:
-    visitor.newSymbol(node.name, node.value.returnType)
+    visitor.newSymbol(node.name, node.value.returnType, node.pub)
 
   info("exiting DeclarationStatement")
 
@@ -527,7 +534,7 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
     newError(errEmptyStaticArray, node.name)
 
   else:
-    visitor.newSymbol(node.name, node.symbolType)
+    visitor.newSymbol(node.name, node.symbolType, node.pub)
 
   info("exiting DefaultStatement")
 
@@ -572,12 +579,11 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
     argumentTypes[argName] = funcArg.expectedType
 
   let funcType = getFuncType(argumentTypes, node.returnType)
-  visitor.newSymbol(node.name, funcType)
 
   visitor.pushScope()
 
   for _, funcArg in node.arguments:
-    visitor.newSymbol(funcArg.origin, funcArg.expectedType)
+    visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
 
   visitor.funcStack.add(node.returnType)
   visitor.visitStatement(node.funcBlock)
@@ -595,8 +601,32 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   visitor.popScope()
 
   if not error:
-    info("Function type is set as: ", funcType)
-    node.funcType = funcType
+    info("Checking function overloads...")
+    if visitor.symbolExists(node.name.lexeme):
+      var funcSymbol = visitor.getSymbol(node.name.lexeme)
+      error = false
+
+      if funcSymbol.symbolType.eq funcType:
+        newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
+            "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
+        error = true
+
+      for overType in funcSymbol.overloads:
+        if overType.eq funcType:
+          newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
+              "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
+          error = true
+          break
+
+      if not error:
+        funcSymbol.overloads.add(funcType)
+        info("Function ", node.name.lexeme, " overloaded as ", funcType)
+        node.name.lexeme &= $funcType
+        
+    else:
+      info("New function type is set as: ", funcType)
+      node.funcType = funcType
+      visitor.newSymbol(node.name, funcType, node.pub)
 
   info("exiting FuncStatement")
 
@@ -631,7 +661,7 @@ method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement):
     let varType = (if node.value.returnType.eq typeArray: node.value.returnType.arrBase
       else: node.value.returnType.vecBase)
 
-    visitor.newSymbol(node.name, varType)
+    visitor.newSymbol(node.name, varType, false)
 
     visitor.loopLevel.inc
     visitor.visitStatement(node.forBlock)

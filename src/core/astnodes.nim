@@ -52,6 +52,7 @@ type
   CallExpression* = ref object of Expression
     value*: Expression
     arguments*: seq[Expression]
+    funcOverload*: Natural = 0
 
   # STATEMENTS
 
@@ -61,6 +62,7 @@ type
     symbolType*: Type
     name*: Token
     value*: Expression
+    pub*: bool
 
   BlockStatement* = ref object of Statement
     startToken*: Token
@@ -94,6 +96,7 @@ type
   DefaultStatement* = ref object of Statement
     symbolType*: Type
     name*: Token
+    pub*: bool
 
   FuncArgument* = object
     origin*: Token
@@ -105,6 +108,7 @@ type
     arguments*: OrderedTable[string, FuncArgument]
     funcBlock*: BlockStatement
     funcType*: Type
+    pub*: bool
 
   ReturnStatement* = ref object of Statement
     token*: Token
@@ -236,9 +240,9 @@ proc newReturnStatement*(token: Token, hasValue: bool, value: Expression = nil):
   else: ReturnStatement(token: token, hasValue: false)
 
 proc newFuncStatement*(returnType: Type, name: Token, arguments: OrderedTable[string, FuncArgument], 
-    funcBlock: BlockStatement): FuncStatement {.inline.} =
+    funcBlock: BlockStatement, pub: bool): FuncStatement {.inline.} =
   FuncStatement(returnType: returnType, name: name, arguments: arguments, funcBlock: funcBlock,
-    funcType: getUndefinedType())
+    funcType: getUndefinedType(), pub: pub)
 
 proc newFuncArgument*(origin: Token, expectedType: Type): FuncArgument =
   FuncArgument(origin: origin, expectedType: expectedType)
@@ -278,9 +282,9 @@ proc addStatement*(blockStmt: BlockStatement, stmt: Statement) {.inline.} =
   blockStmt.statements.add(stmt)
 
 proc newDeclarationStatement*(
-    symbolType: Type, name: Token, value: Expression
+    symbolType: Type, name: Token, value: Expression, pub: bool
   ): DeclarationStatement {.inline.} =
-  DeclarationStatement(name: name, value: value, symbolType: symbolType)
+  DeclarationStatement(name: name, value: value, symbolType: symbolType, pub: pub)
 
-proc newDefaultStatement*(symbolType: Type, name: Token): DefaultStatement {.inline.} =
-  DefaultStatement(name: name, symbolType: symbolType)
+proc newDefaultStatement*(symbolType: Type, name: Token, pub: bool): DefaultStatement {.inline.} =
+  DefaultStatement(name: name, symbolType: symbolType, pub: pub)

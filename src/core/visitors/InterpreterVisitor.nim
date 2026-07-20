@@ -537,7 +537,7 @@ method visitIndexExpression*(visitor: InterpreterVisitor, node: IndexExpression)
   var index = visitor.visitExpression(node.index).numberValue
   let arr = visitor.visitExpression(node.value)
   
-  let indexValue = validIndex(index, arr.arrayLen)
+  let indexValue = validIndex(index, arr.arrayLength)
 
   case arr.kind:
   of typeArray:

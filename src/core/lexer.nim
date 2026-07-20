@@ -149,7 +149,8 @@ const keywordsTokens = {
   "continue": tkContinue,
   "func": tkFunc,
   "return": tkReturn,
-  "for": tkFor
+  "for": tkFor,
+  "pub": tkPub
 }.toTable
 
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 

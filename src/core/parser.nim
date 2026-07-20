@@ -81,6 +81,8 @@ proc parseType(self: var Parser, token: Token): Type =
 
     if elements.len == 0:
       result = getUndefinedType()
+    elif elements.len == 1 and "0" in elements:
+      result = elements["0"]
     else:
       result = getTupleType(elements)
 
@@ -359,12 +361,21 @@ proc parseExpr(self: var Parser): Expression =
 proc parseSymbolDecl(self: var Parser): Statement {.inline.} =
   var symbolType = self.parseType()
   let name = self.expectToken(tkIdentifier)
-
+  
+  var expr: Expression = nil
   if self.lexer.peekToken().kind == tkEqual:
     discard self.expectToken(tkEqual)
-    return newDeclarationStatement(symbolType, name, self.parseExpr)
-
-  return newDefaultStatement(symbolType, name)
+    expr = self.parseExpr()
+  
+  var pub = false
+  if self.lexer.peekToken().kind == tkPub:
+    pub = true
+    discard self.lexer.nextToken()
+  
+  if expr != nil:
+    return newDeclarationStatement(symbolType, name, expr, pub)
+  else:
+    return newDefaultStatement(symbolType, name, pub)
 
 proc parseAssignment(self: var Parser, left: Expression): Statement {.inline.} =
   discard self.expectToken(tkEqual)
@@ -520,6 +531,11 @@ proc parseFunc(self: var Parser): Statement =
 
   discard self.expectToken(tkRParen)
 
+  var pub = false
+  if self.lexer.peekToken().kind == tkPub:
+    pub = true
+    discard self.lexer.nextToken()
+
   let blockStmt = newBlockStatement(self.expectToken(tkDo))
 
   while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
@@ -527,7 +543,7 @@ proc parseFunc(self: var Parser): Statement =
 
   blockStmt.endToken = self.expectToken(tkEnd)
 
-  return newFuncStatement(returnType, name, arguments, blockStmt)
+  return newFuncStatement(returnType, name, arguments, blockStmt, pub)
 
 proc parseFor(self: var Parser): Statement =
   let token = self.lexer.nextToken()
