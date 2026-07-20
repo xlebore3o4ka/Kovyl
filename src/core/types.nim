@@ -29,6 +29,7 @@ type
     of typeFunc:
       arguments*: OrderedTable[string, Type]
       returnType*: Type
+      funcName*: string
     else: discard
 
 let
@@ -185,10 +186,10 @@ proc getTupleType*(elements: OrderedTable[string, Type]): Type =
   result = Type(kind: typeTuple, elements: elements)
   tupleTypes.add(result)
 
-proc getFuncType*(args: OrderedTable[string, Type], returnType: Type): Type =
+proc getFuncType*(args: OrderedTable[string, Type], returnType: Type, funcName: string = ""): Type =
   for t in funcTypes:
-    if t.arguments == args and t.returnType == returnType:
+    if t.arguments == args and t.returnType == returnType and t.funcName == funcName:
       return t
 
-  result = Type(kind: typeFunc, arguments: args, returnType: returnType)
+  result = Type(kind: typeFunc, arguments: args, returnType: returnType, funcName: funcName)
   funcTypes.add(result)

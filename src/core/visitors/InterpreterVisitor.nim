@@ -18,6 +18,7 @@ type
     length: Natural
 
   FuncValue* = ref object
+    name: string
     arguments: OrderedTable[string, FuncArgument]
     body: BlockStatement
 
@@ -157,8 +158,8 @@ proc newNulValue*(dataType: Type): Value =
 proc newTupleValue*(dataType: Type, elements: OrderedTable[string, Value]): Value =
   Value(kind: typeTuple, valueType: dataType, tupleValue: elements)
 
-proc newFuncValue*(valueType: Type, arguments: OrderedTable[string, FuncArgument], funcBlock: BlockStatement): Value =
-  Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(arguments: arguments, body: funcBlock))
+proc newFuncValue*(name: string, valueType: Type, arguments: OrderedTable[string, FuncArgument], funcBlock: BlockStatement): Value =
+  Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(name: name, arguments: arguments, body: funcBlock))
 
 proc arrayLength*(v: Value): Natural =
   case v.kind:
@@ -508,6 +509,8 @@ method visitUnaryExpression*(visitor: InterpreterVisitor, node: UnaryExpression)
     warn("UnaryExpression invalid operator")
 
 method visitIdentifierExpression*(visitor: InterpreterVisitor, node: IdentifierExpression): Value {.base.} =
+  if node.returnType.eq typeFunc:
+    return visitor.getSlot(node.returnType.funcName)
   return visitor.getSlot(node.token.lexeme)
 
 method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): Value {.base.} =
@@ -676,7 +679,7 @@ method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatemen
   visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))
 
 method visitFuncStatement*(visitor: InterpreterVisitor, node: FuncStatement): auto =
-  visitor.newSlot(node.name.lexeme, newFuncValue(node.funcType, node.arguments, node.funcBlock))
+  visitor.newSlot(node.name.lexeme, newFuncValue(node.name.lexeme, node.funcType, node.arguments, node.funcBlock))
 
 proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): auto =
   let returnValue = visitor.visitExpression(node.value)

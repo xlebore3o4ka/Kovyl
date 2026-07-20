@@ -22,7 +22,7 @@ type
     errHaventField
 
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
-    errFuncEmptyStaticArray
+    errFuncEmptyStaticArray, errFuncResolution
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -72,8 +72,9 @@ proc message(kind: ErrorKind): string =
     of errUnreachableCode: "The code after the statement declared at @0(@1:@2) is unreachable"
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
     of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
-    of errUnusedReturn: "function '@0' returns a value and it must be used"
+    of errUnusedReturn: "Function '@0' returns a value and it must be used"
     of errFuncEmptyStaticArray: "The function cannot return an empty array"
+    of errFuncResolution: "Function '@0' cannot be resolved using given arguments. Available:\n@1"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

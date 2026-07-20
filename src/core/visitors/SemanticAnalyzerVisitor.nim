@@ -112,6 +112,11 @@ proc symbolExistsInCurrentScope(self: SemanticAnalyzerVisitor, name: string): bo
   info("checking symbol existence in current scope: " & name & " -> " & $exists)
   return exists
 
+proc overload(self: SemanticAnalyzerVisitor, name: string, overloadType: Type) =
+  let scope = self.symbolScopeStack[name][^1]
+  scope.symbolTable[name].overloads.add(overloadType)
+  info("Function ", name, " overloaded as ", overloadType)
+
 # EXPRESSIONS
 
 method visitNumberExpression*(visitor: SemanticAnalyzerVisitor, node: NumberExpression): auto =
@@ -330,47 +335,76 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
   visitor.visitExpression(node.value)
   var error = false
+  let varType = node.value.returnType
 
-  if node.value.returnType.neq typeFunc:
-    newError(errTypeMismatch, node.token, @{"@0": $typeFunc, "@1": $node.value.returnType})
-    error = true
+  block checkAll:
+    if varType.neq typeFunc:
+      newError(errTypeMismatch, node.token, @{"@0": $typeFunc, "@1": $node.value.returnType})
+      error = true
+      break checkAll
 
-  elif node.arguments.len < node.value.returnType.arguments.len:
-    newError(errArgumentsNumber, node.token, @{"@0": $node.value.returnType.arguments.len,
-      "@1": $node.arguments.len})
-    error = true
+    block checkDefault:
+      info("checking node == first definded function...")
+      if node.arguments.len != varType.arguments.len:
+        warn("node arguments len != first definded function arguments len")
+        break checkDefault
 
-  else:
-    let funcType = node.value.returnType
+      if visitor.expectedContextType.neq varType.returnType:
+        warn("expected context type != first definded function return type")
+        break checkDefault
 
-    var index = 0
-    for expr in node.arguments:
-      if $index notin funcType.arguments:
-        newError(errUnexpectedArgument, expr.token, @{"@0": $index})
-        error = true
-        
-      else:
-        visitor.visitExpecting(expr, funcType.arguments[$index])
+      for i, expr in node.arguments:
+        let index = $i
+        var expected = node.value.returnType.arguments[index]
 
-        if expr.returnType.eq(typeArray) and funcType.arguments[$index].eq typeArray:
-          if funcType.arguments[$index].length == 0 and expr.returnType.length != 0:
-            expr.returnType = getArrayType(expr.returnType.arrBase, funcType.arguments[$index].length)
+        visitor.visitExpecting(expr, expected)
 
-          if expr.returnType.length > funcType.arguments[$index].length:
-            newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $funcType.arguments[$index]})
-            error = true
+        if expr.returnType != expected:
+          warn("argument types != first definded function argument types")
+          break checkDefault
 
-          else:
-            expr.returnType = getArrayType(expr.returnType.arrBase, funcType.arguments[$index].length)
+      info("node is first definded function")
+      node.setType(node.value.returnType.returnType)
+      break checkAll
+    info("node is not first definded function")
+    info("Creating a function type from arguments and context...")
 
-        elif expr.returnType.neq funcType.arguments[$index]:
-          newError(errTypeMismatch, expr.token, @{"@0": $funcType.arguments[$index], "@1": $expr.returnType})
-          error = true
+    var arguments: OrderedTable[string, Type]
+    for i, expr in node.arguments:
+      visitor.visitExpression(expr)
+      arguments[$i] = expr.returnType
 
-      index.inc
+    let funcType = getFuncType(arguments, visitor.expectedContextType)
+    info("created type: ", funcType)
 
-  if not error:
-    node.setType(node.value.returnType.returnType)
+    block checkOverloads:
+      info("checking overloads...")
+      if not visitor.symbolExists(varType.funcName) or visitor.getSymbol(varType.funcName).overloads.len == 0:
+        warn("no overload was found")
+        break checkOverloads
+
+      for overload in visitor.getSymbol(varType.funcName).overloads:
+        info("overload ", overload, "...")
+        if funcType == overload:
+          info("perfect overload hit found")
+          node.setType(overload.returnType)
+          node.value.setType(overload)
+          break checkAll
+        elif funcType.arguments == overload.arguments:
+          info("overload found with identical arguments")
+          node.setType(overload.returnType)
+          node.value.setType(overload)
+          break checkAll
+
+      warn("No matching overloads found for function ", varType.funcName)
+
+    let funcName = node.value.token
+    var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
+
+    for overload in visitor.getSymbol(varType.funcName).overloads:
+      avaiableOverloadFormatted &= "\n- " & funcName.lexeme & $overload
+
+    newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
 
   info("exiting CallExpression")
 
@@ -578,7 +612,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   for argName, funcArg in node.arguments:
     argumentTypes[argName] = funcArg.expectedType
 
-  let funcType = getFuncType(argumentTypes, node.returnType)
+  let funcType = getFuncType(argumentTypes, node.returnType, node.name.lexeme)
 
   visitor.pushScope()
 
@@ -619,10 +653,10 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
           break
 
       if not error:
-        funcSymbol.overloads.add(funcType)
-        info("Function ", node.name.lexeme, " overloaded as ", funcType)
+        visitor.overload(node.name.lexeme, 
+          getFuncType(funcType.arguments, funcType.returnType, node.name.lexeme & $funcType))
         node.name.lexeme &= $funcType
-        
+
     else:
       info("New function type is set as: ", funcType)
       node.funcType = funcType
@@ -678,7 +712,7 @@ method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement
   let funcExpr = node.callExpression
 
   if funcExpr.returnType.neq getUndefinedType():
-    newError(errUnusedReturn, funcExpr.token, @{"@0": funcExpr.token.lexeme})
+    newError(errUnusedReturn, funcExpr.value.token, @{"@0": funcExpr.token.lexeme})
 
   info("exiting CallStatement")
 
