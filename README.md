@@ -11,13 +11,13 @@ The language syntax is designed to be readable and unambiguous.
 **Syntax example:**
 
 ```kovyl
-func string greeting(char[32] name) do 
+func string greeting(string name) do 
   return fmt:("Hello from Kovyl, ", name, "!")
 end
 
-char[32][] names = {"Alice", "Ben", "John"}
+string[] names = {v"Alice", v"Ben", v"John"}
 
 for name = names do
-  print:(greeting(name), free=true)
+  print:(greeting(name))
 end
 ```
