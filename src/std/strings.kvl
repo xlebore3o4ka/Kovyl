@@ -1,7 +1,29 @@
-#/ Standard module 'strings.kvl' /#
+#/ 
+  Standard module 'strings.kvl' 
+
+  xlebore3o4ka's notes: 
+  - don't use char[] more often than string (char@)
+  - create strings (char@) easily using the v-operator: v"Hello, world"
+/#
+
+string alphabetLower      = v"abcdefghijklmnopqrstuvwxyz" pub
+string alphabetUpper      = v"ABCDEFGHIJKLMNOPQRSTUVWXYZ" pub
+char[] alphabetLowerArray =  "abcdefghijklmnopqrstuvwxyz" pub
+char[] alphabetUpperArray =  "ABCDEFGHIJKLMNOPQRSTUVWXYZ" pub
+
+string alphabet           = fmt:(alphabetLower, alphabetUpper) pub
+char[] alphabetArray      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" pub
+
+string digits             = v"0123456789" pub
+char[] digitsArray        =  "0123456789" pub
+
+string alphaDigits        = fmt:(alphabet, digits) pub
+char[] alphaDigitsArray   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" pub
 
 func int strLen(string str) pub do
-  #/ Returns logical string length of the char@ /#
+  #/ 
+    Returns logical string length of the char@ 
+  /#
   int c = 0
 
   for ch = str do
@@ -13,7 +35,9 @@ func int strLen(string str) pub do
 end
 
 func int strLen(char[] str) pub do
-  #/ Returns logical string length of the char[] /#
+  #/ 
+    Returns logical string length of the char[] 
+  /#
   int c = 0
 
   for ch = str do
@@ -58,4 +82,91 @@ func string substring(string str, int start) pub do
   closure strLen, substring
 
   return substring(str, start, strLen(str))
+end
+
+func int find(string haystack, string needle) pub do
+  #/
+    Searches for a substring in a string, returning the index 
+    of the first occurrence or -1 if not found
+  /#
+  closure strLen
+
+  int haystackLen = strLen(haystack)
+  int needleLen = strLen(needle)
+
+  if needleLen == 0 do
+    return 0
+  end
+
+  if needleLen > haystackLen do
+    return -1
+  end
+
+  int start
+  while start <= haystackLen - needleLen do
+    int match = 0
+
+    while match < needleLen and haystack[start + match] == needle[match] do
+      match = match + 1
+    end
+
+    if match == needleLen do
+      return start
+    end
+
+    start = start + 1
+  end
+
+  return -1
+end
+
+func string@ split(string str, string sep) pub do
+  #/
+    Splits a string by the given separator, returning an vector of substrings
+  /#
+  closure strLen, substring
+
+  string@ result
+  int stringLen = strLen(str)
+  int sepLen = strLen(sep)
+  
+  if stringLen == 0 do return result end
+
+  if sepLen == 0 do
+    resize:(result, 1)
+    result[0] = str
+    return result
+  end
+
+  int start 
+  int i
+  int size
+
+  while i <= stringLen - sepLen do
+    int match
+    while match < sepLen and str[i + match] == sep[match] do
+      match = match + 1
+    end
+
+    if match == sepLen do
+      size = size + 1
+      resize:(result, size)
+      result[size - 1] = substring(str, start, i)
+      i = i + sepLen
+      start = i
+
+    else do
+      i = i + 1
+    end
+  end
+
+  resize:(result, size + 1)
+  result[size] = substring(str, start)
+  return result
+end
+
+func string@ split(string str) pub do
+  closure split
+
+  return split(str, v" ")
 end

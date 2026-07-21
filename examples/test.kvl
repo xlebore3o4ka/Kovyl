@@ -1,3 +1,5 @@
 module str = "std/strings"
 
-print: str.substring(v"Hello", 3)
+for s = str.split(v"He123llo w123orld test123") do
+  print: s
+end

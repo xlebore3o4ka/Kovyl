@@ -217,7 +217,11 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   if visitor.expectedContextType.kind.eq typeArray:
     expected = visitor.expectedContextType.arrBase
   else:
-    warn("non-static-array context")
+    warn("non-array context")
+    for expr in node.values:
+      if not expr.returnType.eq(getUndefinedType()) and not expr.returnType.eq(getNulType()):
+        expected = expr.returnType
+        break
 
   info("visiting ArrayExpression values...")
   for expr in node.values:
@@ -230,7 +234,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
       expr.returnType = getArrayType(expr.returnType.arrBase, expected.length)
       info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
 
-    elif expr.returnType.neq expected:
+    elif expected.neq(getUndefinedType()) and expr.returnType.neq expected:
       newError(errTypeMismatch, expr.token, @{"@0": $expected, "@1": $expr.returnType})
       error = true
       break
@@ -387,7 +391,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
         break checkOverloads
 
       for _, overload in varType.overloads.pairs:
-        info("overload ", overload, "...")
+        info("checking overload ", overload, " equals ", funcType, "...")
         if funcType == overload:
           info("perfect overload hit found")
           node.setType(overload.returnType)
@@ -404,9 +408,8 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     let funcName = node.value.token
     var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
 
-    if visitor.symbolExists(varType.funcName):
-      for name, _ in varType.overloads.pairs:
-        avaiableOverloadFormatted &= "\n- " & name
+    for name, _ in varType.overloads.pairs:
+      avaiableOverloadFormatted &= "\n- " & name
 
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
 
@@ -621,9 +624,6 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
   let funcType = getFuncType(argumentTypes, node.returnType, node.name.lexeme)
 
-  for _, funcArg in node.arguments:
-    visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
-
   if node.returnType.neq getUndefinedType():
     info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
     if not visitor.blockEndsWithReturn(node.funcBlock):
@@ -662,6 +662,9 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
       visitor.newSymbol(node.name, funcType, node.pub)
 
   visitor.pushScope()
+
+  for _, funcArg in node.arguments:
+    visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
 
   visitor.funcStack.add(node)
   visitor.visitStatement(node.funcBlock)

@@ -218,6 +218,7 @@ proc nextToken*(self: var Lexer): Token =
           if self.peek() == '/'.Rune:
             self.advance()
             if self.peek() == '#'.Rune:
+              self.advance()
               break
 
           self.advance()
