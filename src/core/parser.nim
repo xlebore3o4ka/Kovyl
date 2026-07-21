@@ -292,7 +292,7 @@ proc parsePostfix(self: var Parser): Expression =
           "@1": token.mean()})
         field = field.newFrom(kind = tkInvalid)
 
-      result = newFieldExpression(token, result, field)
+      result = newFieldExpression(result, field)
 
     elif token.kind == tkLParen:
       var arguments: seq[Expression]
@@ -574,6 +574,17 @@ proc parseModule(self: var Parser): Statement =
 
   return newModuleStatement(name, path)
 
+proc parseClosure(self: var Parser): Statement =
+  let token = self.lexer.nextToken()
+
+  var names: seq[Token] = @[self.expectToken(tkIdentifier)]
+
+  while self.lexer.peekToken().kind == tkComma:
+    discard self.lexer.nextToken()
+    names.add(self.expectToken(tkIdentifier))
+
+  return newClosureStatement(token, names)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -632,6 +643,9 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkModule:
     return self.parseModule()
+
+  elif token.kind == tkClosure:
+    return self.parseClosure()
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)

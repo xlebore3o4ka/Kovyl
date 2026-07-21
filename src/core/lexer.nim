@@ -151,7 +151,8 @@ const keywordsTokens = {
   "func": tkFunc,
   "return": tkReturn,
   "for": tkFor,
-  "pub": tkPub
+  "pub": tkPub,
+  "closure": tkClosure
 }.toTable
 
 proc newError(self: var Lexer, kind: ErrorKind, file: string, line, column, pos, len: int, 
@@ -209,11 +210,16 @@ proc nextToken*(self: var Lexer): Token =
 
       else:
         while self.peek() != '\0'.Rune: 
+          while self.peek == '\n'.Rune:
+            self.line.inc
+            self.advance
+          self.column = 1
+
           if self.peek() == '/'.Rune:
             self.advance()
             if self.peek() == '#'.Rune:
               break
-              
+
           self.advance()
 
       result = self.nextToken()

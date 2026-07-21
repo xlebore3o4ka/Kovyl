@@ -21,6 +21,7 @@ type
     name: string
     arguments: OrderedTable[string, FuncArgument]
     body: BlockStatement
+    closures: Table[string, Value]
 
   Value* = object
     valueType*: Type
@@ -92,9 +93,6 @@ proc isInt*(t: Type): bool {.inline.} =
 proc isUint*(t: Type): bool {.inline.} =
   t.kind in {typeUint64, typeUint32, typeUint16, typeUint8}
 
-proc newDefaultValue*(valueType: Type): Value =
-  Value(kind: valueType.kind, valueType: valueType)
-
 proc newInt64Value*(v: int64): Value = 
   Value(kind: typeInt64, valueType: getInt64Type(), int64Value: v)
 
@@ -160,11 +158,20 @@ proc newNulValue*(dataType: Type): Value =
 proc newTupleValue*(dataType: Type, elements: OrderedTable[string, Value]): Value =
   Value(kind: typeTuple, valueType: dataType, tupleValue: elements)
 
-proc newFuncValue*(name: string, valueType: Type, arguments: OrderedTable[string, FuncArgument], funcBlock: BlockStatement): Value =
-  Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(name: name, arguments: arguments, body: funcBlock))
+proc newFuncValue*(name: string, valueType: Type, arguments: OrderedTable[string, FuncArgument], 
+  funcBlock: BlockStatement, funcClosures: Table[string, Value]): Value =
+  Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(name: name, arguments: arguments, 
+    body: funcBlock, closures: funcClosures))
 
 proc newModuleValue*(valueType: Type, moduleValues: OrderedTable[string, Value]): Value =
   Value(kind: typeModule, valueType: valueType, moduleValues: moduleValues)
+
+# DEFAULT
+
+proc newDefaultValue*(valueType: Type): Value =
+  if valueType.eq typeVec:
+    return newVecValue(newSeq[Value](), valueType.vecBase)
+  Value(kind: valueType.kind, valueType: valueType)
 
 proc arrayLength*(v: Value): Natural =
   case v.kind:
@@ -518,7 +525,7 @@ method visitUnaryExpression*(visitor: InterpreterVisitor, node: UnaryExpression)
     warn("UnaryExpression invalid operator")
 
 method visitIdentifierExpression*(visitor: InterpreterVisitor, node: IdentifierExpression): Value {.base.} =
-  if node.returnType.eq typeFunc:
+  if node.returnType.eq(typeFunc) and node.returnType.funcName.len != 0:
     return visitor.getSlot(node.returnType.funcName)
   return visitor.getSlot(node.token.lexeme)
 
@@ -573,15 +580,17 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
 method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
   let value = visitor.visitExpression(node.value)
   if value.valueType.eq typeModule:
-    return value.moduleValues[node.field.lexeme]
-  return value.tupleValue[node.field.lexeme]
+    return value.moduleValues[node.token.lexeme]
+  return value.tupleValue[node.token.lexeme]
 
 method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): Value {.base.} =
   # TODO: stacktrace
   visitor.pushScope()
 
+  let funcValue = visitor.visitExpression(node.value).funcValue
+  result = newDefaultValue(getUndefinedType())
+
   try:
-    let funcValue = visitor.visitExpression(node.value).funcValue
 
     for index, expr in node.arguments:
       var value = visitor.visitExpression(expr)
@@ -591,13 +600,20 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
 
       visitor.newSlot(funcValue.arguments[$index].origin.lexeme, value)
 
+    for name, value in funcValue.closures:
+      visitor.newSlot(name, value)
+
     try:
       visitor.visitStatement(funcValue.body)
     except ReturnException as e:
       result = e.value
 
   finally:
+    for name, _ in funcValue.closures:
+      funcValue.closures[name] = visitor.getSlot(name)
+
     visitor.popScope()
+
     # TODO: stacktrace
 
 # STATEMENTS
@@ -691,7 +707,12 @@ method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatemen
   visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))
 
 method visitFuncStatement*(visitor: InterpreterVisitor, node: FuncStatement): auto =
-  visitor.newSlot(node.name.lexeme, newFuncValue(node.name.lexeme, node.funcType, node.arguments, node.funcBlock))
+  var closures: Table[string, Value]
+  for name in node.funcClosures:
+    closures[name] = visitor.getSlot(name)
+
+  visitor.newSlot(node.name.lexeme, newFuncValue(node.name.lexeme, node.funcType, 
+    node.arguments, node.funcBlock, closures))
 
 proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): auto =
   let returnValue = visitor.visitExpression(node.value)
@@ -738,6 +759,9 @@ method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement)
   visitor.popScope()
 
   visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
+
+method visitClosureStatement*(visitor: InterpreterVisitor, node: ClosureStatement): auto =
+  discard
 
 # SPECIALS
 
@@ -1012,5 +1036,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitCallStatement(CallStatement(node))
   elif node of ModuleStatement:
     visitor.visitModuleStatement(ModuleStatement(node))
+  elif node of ClosureStatement:
+    visitor.visitClosureStatement(ClosureStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

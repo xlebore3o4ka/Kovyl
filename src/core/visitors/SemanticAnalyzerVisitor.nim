@@ -29,7 +29,7 @@ type
 
     expectedContextType: Type
     loopLevel: Natural = 0
-    funcStack: seq[Type]
+    funcStack: seq[FuncStatement]
 
 var logger = newConsoleLogger(fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
 
@@ -330,12 +330,12 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
       newError(errFieldless, node.token, @{"@0": $returnType})
       break analysis
 
-    if node.field.lexeme notin fields:
-      newError(errHaventField, node.token, @{"@0": $returnType, "@1": node.field.lexeme})
+    if node.token.lexeme notin fields:
+      newError(errHaventField, node.token, @{"@0": $returnType, "@1": node.token.lexeme})
       break analysis
 
-    info("field ", node.field.lexeme, " is correct")
-    node.setType(fields[node.field.lexeme])
+    info("field ", node.token.lexeme, " is correct")
+    node.setType(fields[node.token.lexeme])
 
   info("exiting FieldExpression")
 
@@ -409,8 +409,9 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     let funcName = node.value.token
     var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
 
-    for overload in visitor.getSymbol(varType.funcName).overloads:
-      avaiableOverloadFormatted &= "\n- " & funcName.lexeme & $overload
+    if visitor.symbolExists(varType.funcName):
+      for overload in visitor.getSymbol(varType.funcName).overloads:
+        avaiableOverloadFormatted &= "\n- " & funcName.lexeme & $overload
 
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
 
@@ -667,7 +668,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
   visitor.pushScope()
 
-  visitor.funcStack.add(node.returnType)
+  visitor.funcStack.add(node)
   visitor.visitStatement(node.funcBlock)
   discard visitor.funcStack.pop()
 
@@ -682,13 +683,14 @@ method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnState
   if visitor.funcStack.len == 0:
     newError(errForbiddenLocation, node.token)
 
-  if (not node.hasValue) and visitor.funcStack[^1].neq getUndefinedType():
+  if (not node.hasValue) and visitor.funcStack[^1].returnType.neq getUndefinedType():
     newError(errExpression, node.token, @{"@0": "return without expression"})
 
   else:
-    visitor.visitExpecting(node.value, visitor.funcStack[^1])
-    if node.value.returnType.neq visitor.funcStack[^1]:
-      newError(errTypeMismatch, node.value.token, @{"@0": $visitor.funcStack[^1], "@1": $node.value.returnType})
+    visitor.visitExpecting(node.value, visitor.funcStack[^1].returnType)
+    if node.value.returnType.neq visitor.funcStack[^1].returnType:
+      newError(errTypeMismatch, node.value.token, @{"@0": $visitor.funcStack[^1].returnType, 
+        "@1": $node.value.returnType})
 
   info("exiting ReturnStatement")
 
@@ -784,6 +786,36 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
     visitor.newSymbol(node.name, node.moduleType, false)
 
   info("exiting ModuleStatement")
+
+
+method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureStatement): auto =
+  info("visiting ClosureStatement")
+
+  info("checking function level -> ", visitor.funcStack.len)
+  if visitor.funcStack.len == 0:
+    newError(errForbiddenLocation, node.token)
+
+  else:
+    var error = false
+
+    for name in node.names:
+      info("closing symbol ", name.lexeme, "...")
+      if not visitor.symbolExists(name.lexeme):
+        newError(errUndeclaredSymbol, name, @{"@0": name.lexeme})
+        error = true
+      else:
+        let symbol = visitor.getSymbol(name.lexeme)
+        visitor.funcStack[^1].funcClosures.add(name.lexeme)
+        info("symbol ", name.lexeme, " added to function ", visitor.funcStack[^1].name.lexeme, " closures")
+
+        if symbol.symbolType.eq typeFunc:
+          info("closing ", name.lexeme, " overloads...")
+          for overload in symbol.overloads:
+            visitor.funcStack[^1].funcClosures.add(overload.funcName)
+            info("overload ", overload.funcName, " added to function ", 
+              visitor.funcStack[^1].name.lexeme, " closures")
+
+  info("exiting ClosureStatement")
 
 # SPECIALS
 
@@ -1140,5 +1172,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitCallStatement(CallStatement(node))
   elif node of ModuleStatement:
     visitor.visitModuleStatement(ModuleStatement(node))
+  elif node of ClosureStatement:
+    visitor.visitClosureStatement(ClosureStatement(node))
   else:
     warn("unhandled statement")

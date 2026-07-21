@@ -34,6 +34,7 @@ type
     tkWhile, tkFor, tkBreak, tkContinue
     tkFunc, tkReturn
     tkPub
+    tkClosure
 
     tkEOS
     tkEOF
@@ -136,6 +137,7 @@ proc mean*(kind: TokenKind): string =
   of tkFunc:          return "keyword func"
   of tkReturn:        return "keyword return"
   of tkPub:           return "keyword pub"
+  of tkClosure:       return "keyword closure"
   
   of tkInvalid:       return "invalid token"
 

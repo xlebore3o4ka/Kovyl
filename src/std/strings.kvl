@@ -24,15 +24,38 @@ func int strLen(char[] str) pub do
   return c
 end
 
-#/
-func string substring(string str, int start) pub do
+
+func string substring(string str, int start, int end_) pub do
+  #/ 
+    Returns a substring of the string, from the start 
+    index to the end index (exclusive)
+  /#
+
+  closure strLen
 
   if start < 0 do start = 0 end
+  if end_ > strLen(str) do end_ = strLen(str) end
+  if start > end_ do start = end_ end
 
   string result
-  int len = strLen(str)
+  int len = end_ - start
+  resize:(result, len)
 
-  while start < 
+  int i = start
+  while i < end_ do
+    result[i - start] = str[i]
+    i = i + 1
+  end
 
+  return result
 end
-/#
+
+func string substring(string str, int start) pub do
+  #/ 
+    Returns a substring of the string, from the start 
+    index to the end of string
+  /#
+  closure strLen, substring
+
+  return substring(str, start, strLen(str))
+end

@@ -209,4 +209,4 @@ proc getModuleType*(modulePath: string, symbols: OrderedTable[string, Type]): Ty
       return t
 
   result = Type(kind: typeModule, modulePath: modulePath, symbols: symbols)
-  funcTypes.add(result)
+  moduleTypes.add(result)

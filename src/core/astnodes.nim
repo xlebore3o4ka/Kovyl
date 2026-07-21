@@ -47,7 +47,6 @@ type
 
   FieldExpression* = ref object of Expression
     value*: Expression
-    field*: Token
 
   CallExpression* = ref object of Expression
     value*: Expression
@@ -107,6 +106,7 @@ type
     name*: Token
     arguments*: OrderedTable[string, FuncArgument]
     funcBlock*: BlockStatement
+    funcClosures*: seq[string]
     funcType*: Type
     pub*: bool
 
@@ -130,6 +130,10 @@ type
     path*: Token
     moduleBlock*: BlockStatement
     moduleType*: Type
+
+  ClosureStatement* = ref object of Statement
+    token*: Token
+    names*: seq[Token]
 
   # SPECIALS
 
@@ -185,8 +189,8 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
 proc newCallExpression*(token: Token, value: Expression, arguments: seq[Expression]): CallExpression =
   CallExpression(token: token, value: value, arguments: arguments, returnType: getUndefinedType())
 
-proc newFieldExpression*(token: Token, value: Expression, field: Token): FieldExpression {.inline.} =
-  FieldExpression(token: token, value: value, field: field, returnType: getUndefinedType())
+proc newFieldExpression*(value: Expression, field: Token): FieldExpression {.inline.} =
+  FieldExpression(value: value, token: field, returnType: getUndefinedType())
 
 proc newTupleExpression*(token: Token, elements: OrderedTable[Token, Expression]): TupleExpression {.inline.} =
   TupleExpression(token: token, returnType: getUndefinedType(), elements: elements)
@@ -234,6 +238,9 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newClosureStatement*(token: Token, names: seq[Token]): ClosureStatement {.inline.} =
+  ClosureStatement(token: token, names: names)
 
 proc newModuleStatement*(name: Token, path: Token): ModuleStatement {.inline.} =
   ModuleStatement(name: name, path: path)

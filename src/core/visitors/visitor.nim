@@ -95,6 +95,9 @@ method visitCallStatement*(visitor: Visitor, node: CallStatement): auto {.base.}
 method visitModuleStatement*(visitor: Visitor, node: ModuleStatement): auto {.base.} =
   discard
 
+method visitClosureStatement*(visitor: Visitor, node: ClosureStatement): auto {.base.} =
+  discard
+
 # SPECIALS
 
 method visitSpecialExpression*(visitor: Visitor, node: SpecialExpression): auto {.base.} =

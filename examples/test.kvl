@@ -1,0 +1,3 @@
+module str = "std/strings"
+
+print: str.substring(v"Hello", 3)
