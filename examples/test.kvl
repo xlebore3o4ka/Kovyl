@@ -1,5 +1,3 @@
 module str = "std/strings"
 
-for s = str.split(v"He123llo w123orld test123") do
-  print: s
-end
+print: str.repeat(v"-", 10)

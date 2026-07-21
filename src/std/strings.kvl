@@ -166,7 +166,219 @@ func string@ split(string str, string sep) pub do
 end
 
 func string@ split(string str) pub do
+  #/
+    Splits a string by space, returning an vector of substrings
+  /#
   closure split
 
   return split(str, v" ")
+end
+
+func string join(string@ vector, string sep) pub do
+  #/
+    Joins a vector of strings into a single string using a separator
+  /#
+  closure strLen
+  
+  string result = v""
+  int vecLen = len: vector
+  
+  if vecLen > 0 do
+    result = vector[0]
+    int i = 1
+    while i < vecLen do
+      int oldLen = strLen(result)
+      int sepLen = strLen(sep)
+      int partLen = strLen(vector[i])
+      
+      resize:(result, oldLen + sepLen + partLen)
+      
+      int j = 0
+      while j < sepLen do
+        result[oldLen + j] = sep[j]
+        j = j + 1
+      end
+      
+      j = 0
+      while j < partLen do
+        result[oldLen + sepLen + j] = vector[i][j]
+        j = j + 1
+      end
+      
+      i = i + 1
+    end
+  end
+  
+  return result
+end
+
+func string trimLeft(string str) pub do
+  #/
+    Removes leading whitespace from a string
+  /#
+  closure strLen, substring
+
+  int len = strLen(str)
+  int start = 0
+  while start < len and (str[start] == ' ' or str[start] == '\t' or 
+                         str[start] == '\n' or str[start] == '\r') do
+    start = start + 1
+  end
+
+  return substring(str, start)
+end
+
+func string trimRight(string str) pub do
+  #/
+    Removes trailing whitespace from a string
+  /#
+  closure strLen, substring
+
+  int len = strLen(str)
+  int end_ = len - 1
+  while end_ >= 0 and (str[end_] == ' ' or str[end_] == '\t' or 
+                       str[end_] == '\n' or str[end_] == '\r') do
+    end_ = end_ - 1
+  end
+
+  return substring(str, 0, end_ + 1)
+end
+
+func string trim(string str) pub do
+  #/
+    Removes leading and trailing whitespace from a string
+  /#
+  closure trimLeft, trimRight
+
+  return trimRight(trimLeft(str))
+end
+
+func string replace(string str, string old, string new) pub do
+  #/
+    Replaces all occurrences of 'old' with 'new' in the string
+  /#
+  closure split, join, strLen
+
+  if strLen(old) == 0 do
+    return str
+  end
+
+  string@ parts = split(str, old)
+  return join(parts, new)
+end
+
+func string toUpper(string str) pub do
+  #/
+    Converts all lowercase ascii letters in the string to uppercase
+    Leaves non-alphabetic characters unchanged
+  /#
+  closure strLen, find, alphabetLower, alphabetUpper
+
+  string result = str
+  int stringLen = strLen(str)
+
+  int i = 0
+  while i < stringLen do
+    int pos = find(alphabetLower, fmt:str[i])
+    if pos != -1 do result[i] = alphabetUpper[pos] end
+    i = i + 1
+  end
+  return result
+end
+
+func string toLower(string str) pub do
+  #/
+    Converts all uppercase ascii letters in the string to lowercase
+    Leaves non-alphabetic characters unchanged
+  /#
+  closure strLen, find, alphabetLower, alphabetUpper
+
+  string result = str
+  int stringLen = strLen(str)
+
+  int i = 0
+  while i < stringLen do
+    int pos = find(alphabetUpper, fmt:str[i])
+    if pos != -1 do result[i] = alphabetLower[pos] end
+    i = i + 1
+  end
+  return result
+end
+
+func bool startsWith(string str, string prefix) pub do
+  #/
+    Checks if the string starts with the given prefix
+  /#
+  closure strLen
+
+  int strLen_ = strLen(str)
+  int prefixLen = strLen(prefix)
+
+  if prefixLen > strLen_ do
+    return false
+  end
+
+  int i = 0
+  while i < prefixLen do
+    if str[i] != prefix[i] do
+      return false
+    end
+    i = i + 1
+  end
+
+  return true
+end
+
+func bool endsWith(string str, string suffix) pub do
+  #/
+    Checks if the string ends with the given suffix
+  /#
+  closure strLen
+
+  int strLen_ = strLen(str)
+  int suffixLen = strLen(suffix)
+
+  if suffixLen > strLen_ do
+    return false
+  end
+
+  int i = 0
+  while i < suffixLen do
+    if str[strLen_ - suffixLen + i] != suffix[i] do
+      return false
+    end
+    i = i + 1
+  end
+
+  return true
+end
+
+func string repeat(string str, int times) pub do
+  #/
+    Repeats the string a specified number of times
+    Returns empty string if times <= 0
+  /#
+  closure strLen
+
+  if times <= 0 do
+    return v""
+  end
+
+  int strLen_ = strLen(str)
+  string result
+  resize:(result, strLen_ * times)
+
+  int pos = 0
+  int i = 0
+  while i < times do
+    int j = 0
+    while j < strLen_ do
+      result[pos] = str[j]
+      pos = pos + 1
+      j = j + 1
+    end
+    i = i + 1
+  end
+
+  return result
 end

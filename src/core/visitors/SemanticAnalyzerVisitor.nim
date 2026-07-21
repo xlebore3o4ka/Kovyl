@@ -1019,19 +1019,6 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
       node.setType(getArrayType(typ.returnType.arrBase, typ.returnType.length))
 
-    of skJoin:
-      info("Semantic analysis of skJoin special")
-      node.checkUnexpected(expected = @["0", "1"])
-      let expr = node.get("0")
-
-      visitor.visitExpecting(expr, getArrayType(getArrayType(getCharType(), 0), 0))
-      if not node.expect("0", getArrayType(getArrayType(getCharType(), 0), 0)): break analysis
-
-      let sep = node.get("1")
-      visitor.visitExpecting(sep, getArrayType(getCharType(), 0))
-
-      node.setType(getVecType(getCharType()))
-
     of skRead:
       info("Semantic analysis of skRead special")
       node.setType(getVecType(getCharType()))

@@ -846,6 +846,8 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
           if ch == '\0': break
           buffer.add newCharValue(ch)
 
+    buffer.add newCharValue('\0')
+
     return newVecValue(buffer, getCharType())
 
   of skTake:
@@ -888,26 +890,6 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
         values.add(newDefaultValue(typ.returnType.arrBase))
     
     return newStaticArrayValue(values, node.returnType, length)
-
-  of skJoin:
-    let arr = visitor.visitExpression(node.get("0")).arrayValues
-    let sep = visitor.visitExpression(node.get("1")).stringValue
-
-    var buffer: seq[Value] = @[]
-
-    var first = true
-    for el in arr:
-      if not first:
-        for ch in sep:
-          buffer.add newCharValue(ch)
-      else:
-        first = false
-
-      for ch in $el:
-        if ch == '\0': break
-        buffer.add newCharValue(ch)
-
-    return newVecValue(buffer, getCharType())
 
   of skRead:
     var buffer: seq[Value] = @[]

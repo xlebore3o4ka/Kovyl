@@ -231,16 +231,16 @@ proc parsePrimary(self: var Parser): Expression =
     if self.lexer.peekToken().kind == tkColon:
       result = self.parseSpecialExpr(token)
 
-    elif token.lexeme == "v" and self.lexer.peekToken().kind in {tkStringLiteral, tkLBracket}:
+    elif token.lexeme == "v" and self.lexer.peekToken().kind in {tkStringLiteral, tkLBrace}:
       self.lexer.rollback(rd)
       result = self.parseSpecialExpr(token.newFrom(lexeme = "vec"))
-    
+
     return result
 
   elif token.kind == tkLBrace:
     var arrayExpr = newArrayExpression(token)
 
-    while self.lexer.peekToken().kind != tkRBrace:
+    while self.lexer.peekToken().kind notin {tkRBrace, tkEOF}:
       arrayExpr.addExpr(self.parseExpr())
 
       if self.lexer.peekToken().kind == tkRBrace: 
@@ -297,7 +297,7 @@ proc parsePostfix(self: var Parser): Expression =
     elif token.kind == tkLParen:
       var arguments: seq[Expression]
 
-      while self.lexer.peekToken().kind != tkRParen:
+      while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
         arguments.add(self.parseExpr())
 
         if self.lexer.peekToken().kind == tkRParen: break
@@ -521,7 +521,7 @@ proc parseFunc(self: var Parser): Statement =
 
   discard self.expectToken(tkLParen)
 
-  while self.lexer.peekToken().kind != tkRParen:
+  while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
     let argType = self.parseType()
     let argName = self.expectToken(tkIdentifier)
 

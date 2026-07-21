@@ -209,17 +209,23 @@ proc nextToken*(self: var Lexer): Token =
           self.advance()
 
       else:
+        self.advance()
         while self.peek() != '\0'.Rune: 
-          while self.peek == '\n'.Rune:
+          if self.peek() == '\n'.Rune:
             self.line.inc
-            self.advance
-          self.column = 1
+            self.advance()
+            self.column = 1
 
           if self.peek() == '/'.Rune:
             self.advance()
             if self.peek() == '#'.Rune:
               self.advance()
               break
+              
+          if self.peek() == '\n'.Rune:
+            self.line.inc
+            self.advance()
+            self.column = 1
 
           self.advance()
 
