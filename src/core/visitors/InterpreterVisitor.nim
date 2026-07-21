@@ -580,7 +580,10 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
 method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
   let value = visitor.visitExpression(node.value)
   if value.valueType.eq typeModule:
-    return value.moduleValues[node.token.lexeme]
+    result = value.moduleValues[node.token.lexeme]
+    if node.returnType.eq(typeFunc) and node.returnType.funcName != result.valueType.funcName:
+      result = value.moduleValues[node.returnType.funcName]
+    return result
   return value.tupleValue[node.token.lexeme]
 
 method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): Value {.base.} =
@@ -755,6 +758,9 @@ method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement)
 
   for name, _ in node.moduleType.symbols:
     moduleValues[name] = visitor.getSlot(name)
+    if moduleValues[name].valueType.eq(typeFunc):
+      for olName, _ in moduleValues[name].valueType.overloads:
+        moduleValues[olName] = visitor.getSlot(olName)
 
   visitor.popScope()
 

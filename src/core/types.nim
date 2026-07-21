@@ -32,7 +32,7 @@ type
       arguments*: OrderedTable[string, Type]
       returnType*: Type
       funcName*: string
-      overloads*: seq[Type]
+      overloads*: OrderedTable[string, Type]
     of typeModule:
       modulePath*: string
       symbols*: OrderedTable[string, Type]

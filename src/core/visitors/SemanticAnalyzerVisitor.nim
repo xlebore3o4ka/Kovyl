@@ -112,7 +112,7 @@ proc symbolExistsInCurrentScope(self: SemanticAnalyzerVisitor, name: string): bo
 
 proc overload(self: SemanticAnalyzerVisitor, name: string, overloadType: Type) =
   let scope = self.symbolScopeStack[name][^1]
-  scope.symbolTable[name].symbolType.overloads.add(overloadType)
+  scope.symbolTable[name].symbolType.overloads[name & $overloadType] = overloadType
   info("Function ", name, " overloaded as ", overloadType)
 
 # EXPRESSIONS
@@ -386,7 +386,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
         warn("no overload was found")
         break checkOverloads
 
-      for overload in varType.overloads:
+      for _, overload in varType.overloads.pairs:
         info("overload ", overload, "...")
         if funcType == overload:
           info("perfect overload hit found")
@@ -405,8 +405,8 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
 
     if visitor.symbolExists(varType.funcName):
-      for overload in varType.overloads:
-        avaiableOverloadFormatted &= "\n- " & funcName.lexeme & $overload
+      for name, _ in varType.overloads.pairs:
+        avaiableOverloadFormatted &= "\n- " & name
 
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
 
@@ -644,7 +644,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
             "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
         error = true
 
-      for overType in funcSymbol.symbolType.overloads:
+      for _, overType in funcSymbol.symbolType.overloads.pairs:
         if overType.eq funcType:
           newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
               "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
@@ -804,9 +804,9 @@ method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureSta
 
         if symbol.symbolType.eq typeFunc:
           info("closing ", name.lexeme, " overloads...")
-          for overload in symbol.symbolType.overloads:
-            visitor.funcStack[^1].funcClosures.add(overload.funcName)
-            info("overload ", overload.funcName, " added to function ", 
+          for name, overload in symbol.symbolType.overloads.pairs:
+            visitor.funcStack[^1].funcClosures.add(name)
+            info("overload ", name, " added to function ", 
               visitor.funcStack[^1].name.lexeme, " closures")
 
   info("exiting ClosureStatement")
