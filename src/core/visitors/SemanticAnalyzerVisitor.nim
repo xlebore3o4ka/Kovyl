@@ -10,9 +10,6 @@ type
     token: Token
     symbolType: Type
     pub: bool
-    case isFunc: bool
-    of true: overloads: seq[Type]
-    else: discard
 
   Scope = ref object
     depth: Natural = 0
@@ -78,10 +75,7 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
   return left.returnType.eq(right.returnType) or arrays
 
 proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type, pub: bool) =
-  self.currentScope.symbolTable[name.lexeme] = (
-    if symbolType.neq typeFunc: Symbol(token: name, symbolType: symbolType, pub: pub)
-    else: Symbol(token: name, symbolType: symbolType, isFunc: true, pub: pub)
-  )
+  self.currentScope.symbolTable[name.lexeme] = Symbol(token: name, symbolType: symbolType, pub: pub)
   self.symbolScopeStack.mgetOrPut(name.lexeme, @[]).add(self.currentScope)
   info((if pub: "Public s" else: "S") & "ymbol created: ", name.lexeme, " of type ", $symbolType, 
     " at the depth of the scope: ", $self.currentScope.depth)
@@ -118,7 +112,7 @@ proc symbolExistsInCurrentScope(self: SemanticAnalyzerVisitor, name: string): bo
 
 proc overload(self: SemanticAnalyzerVisitor, name: string, overloadType: Type) =
   let scope = self.symbolScopeStack[name][^1]
-  scope.symbolTable[name].overloads.add(overloadType)
+  scope.symbolTable[name].symbolType.overloads.add(overloadType)
   info("Function ", name, " overloaded as ", overloadType)
 
 # EXPRESSIONS
@@ -374,6 +368,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
       info("node is first definded function")
       node.setType(node.value.returnType.returnType)
       break checkAll
+
     info("node is not first definded function")
     info("Creating a function type from arguments and context...")
 
@@ -387,11 +382,11 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
     block checkOverloads:
       info("checking overloads...")
-      if not visitor.symbolExists(varType.funcName) or visitor.getSymbol(varType.funcName).overloads.len == 0:
+      if varType.overloads.len == 0:
         warn("no overload was found")
         break checkOverloads
 
-      for overload in visitor.getSymbol(varType.funcName).overloads:
+      for overload in varType.overloads:
         info("overload ", overload, "...")
         if funcType == overload:
           info("perfect overload hit found")
@@ -410,7 +405,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
 
     if visitor.symbolExists(varType.funcName):
-      for overload in visitor.getSymbol(varType.funcName).overloads:
+      for overload in varType.overloads:
         avaiableOverloadFormatted &= "\n- " & funcName.lexeme & $overload
 
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
@@ -649,7 +644,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
             "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
         error = true
 
-      for overType in funcSymbol.overloads:
+      for overType in funcSymbol.symbolType.overloads:
         if overType.eq funcType:
           newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
               "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
@@ -787,7 +782,6 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
 
   info("exiting ModuleStatement")
 
-
 method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureStatement): auto =
   info("visiting ClosureStatement")
 
@@ -810,7 +804,7 @@ method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureSta
 
         if symbol.symbolType.eq typeFunc:
           info("closing ", name.lexeme, " overloads...")
-          for overload in symbol.overloads:
+          for overload in symbol.symbolType.overloads:
             visitor.funcStack[^1].funcClosures.add(overload.funcName)
             info("overload ", overload.funcName, " added to function ", 
               visitor.funcStack[^1].name.lexeme, " closures")
