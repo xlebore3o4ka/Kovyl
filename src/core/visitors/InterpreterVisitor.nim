@@ -51,7 +51,7 @@ type
     of typeTuple:        tupleValue:       OrderedTable[string, Value]
     of typeFunc:         funcValue:        FuncValue
 
-    of typeModule:       discard  # TODO
+    of typeModule:       moduleValues:    OrderedTable[string, Value]
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
@@ -162,6 +162,9 @@ proc newTupleValue*(dataType: Type, elements: OrderedTable[string, Value]): Valu
 
 proc newFuncValue*(name: string, valueType: Type, arguments: OrderedTable[string, FuncArgument], funcBlock: BlockStatement): Value =
   Value(kind: typeFunc, valueType: valueType, funcValue: FuncValue(name: name, arguments: arguments, body: funcBlock))
+
+proc newModuleValue*(valueType: Type, moduleValues: OrderedTable[string, Value]): Value =
+  Value(kind: typeModule, valueType: valueType, moduleValues: moduleValues)
 
 proc arrayLength*(v: Value): Natural =
   case v.kind:
@@ -289,7 +292,8 @@ proc `==`*(a, b: Value): bool =
     return true
   of typeFunc: 
     return a.valueType.eq b.valueType
-  of typeModule:       discard  # TODO
+  of typeModule:
+    return a.valueType.modulePath == b.valueType.modulePath
 
 proc `==`*(a, b: VecValue): bool =
   if a.values.len != b.values.len:
@@ -339,7 +343,8 @@ proc `$`*(value: Value): string =
     raise newException(ValueError, "Cannot convert tuple to string")
   of typeFunc:
     raise newException(ValueError, "Cannot convert func to string")
-  of typeModule:       discard  # TODO
+  of typeModule:
+    raise newException(ValueError, "Cannot convert module to string")
 
 proc escapeString(s: string): string =
   for c in s:
@@ -566,7 +571,10 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
   return newTupleValue(node.returnType, elements)
 
 method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
-  return visitor.visitExpression(node.value).tupleValue[node.field.lexeme]
+  let value = visitor.visitExpression(node.value)
+  if value.valueType.eq typeModule:
+    return value.moduleValues[node.field.lexeme]
+  return value.tupleValue[node.field.lexeme]
 
 method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): Value {.base.} =
   # TODO: stacktrace
@@ -718,7 +726,18 @@ method visitCallStatement*(visitor: InterpreterVisitor, node: CallStatement): au
   discard visitor.visitExpression(node.callExpression)
 
 method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement): auto =
-  discard
+  visitor.pushScope()
+
+  visitor.visitStatement(node.moduleBlock)
+
+  var moduleValues: OrderedTable[string, Value]
+
+  for name, _ in node.moduleType.symbols:
+    moduleValues[name] = visitor.getSlot(name)
+
+  visitor.popScope()
+
+  visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
 
 # SPECIALS
 

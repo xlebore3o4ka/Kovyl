@@ -316,21 +316,26 @@ method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpres
 method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpression): auto =
   info("visiting FieldExpression")
   visitor.visitExpression(node.value)
-  var error = false
+  
+  let returnType = node.value.returnType
 
-  if node.value.returnType.neq typeTuple:
-    warn("getting a field from a non-tuple type")
-    newError(errTypeMismatch, node.token, @{"@0": $typeTuple, "@1": $node.value.returnType})
-    error = true
+  block analysis:
+    var fields = initOrderedTable[string, Type]()
 
-  elif node.field.lexeme notin node.value.returnType.elements:
-    newError(errHaventField, node.token, @{"@0": $node.value.returnType, "@1": node.field.lexeme})
-    error = true
+    case returnType.kind 
+    of typeTuple: fields = returnType.elements 
+    of typeModule: fields = returnType.symbols
+    else: 
+      warn("getting a field from a fieldless type")
+      newError(errFieldless, node.token, @{"@0": $returnType})
+      break analysis
 
-  info("Checking that field ", node.field.lexeme, " exists -> ", not error)
+    if node.field.lexeme notin fields:
+      newError(errHaventField, node.token, @{"@0": $returnType, "@1": node.field.lexeme})
+      break analysis
 
-  if not error:
-    node.setType(node.value.returnType.elements[node.field.lexeme])
+    info("field ", node.field.lexeme, " is correct")
+    node.setType(fields[node.field.lexeme])
 
   info("exiting FieldExpression")
 
@@ -355,7 +360,6 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
       if visitor.expectedContextType.neq varType.returnType:
         warn("expected context type != first definded function return type")
-        break checkDefault
 
       for i, expr in node.arguments:
         let index = $i
@@ -568,8 +572,11 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
     newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": existing.token.file,
       "@2": $existing.token.line, "@3": $existing.token.column})
 
-  elif node.symbolType.kind.eq(typeArray) and node.symbolType.length == 0:
+  elif node.symbolType.eq(typeArray) and node.symbolType.length == 0:
     newError(errEmptyStaticArray, node.name)
+
+  elif node.symbolType.eq(typeFunc):
+    newError(errFuncSignatureUnknown, node.name)
 
   else:
     visitor.newSymbol(node.name, node.symbolType, node.pub)
@@ -618,14 +625,8 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
   let funcType = getFuncType(argumentTypes, node.returnType, node.name.lexeme)
 
-  visitor.pushScope()
-
   for _, funcArg in node.arguments:
     visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
-
-  visitor.funcStack.add(node.returnType)
-  visitor.visitStatement(node.funcBlock)
-  discard visitor.funcStack.pop()
 
   if node.returnType.neq getUndefinedType():
     info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
@@ -635,8 +636,6 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
       error = true
     else:
       info("...true")
-
-  visitor.popScope()
 
   if not error:
     info("Checking function overloads...")
@@ -665,6 +664,14 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
       info("New function type is set as: ", funcType)
       node.funcType = funcType
       visitor.newSymbol(node.name, funcType, node.pub)
+
+  visitor.pushScope()
+
+  visitor.funcStack.add(node.returnType)
+  visitor.visitStatement(node.funcBlock)
+  discard visitor.funcStack.pop()
+
+  visitor.popScope()
 
   info("exiting FuncStatement")
 
@@ -723,19 +730,25 @@ method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement
 method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleStatement): auto =
   info("visiting ModuleStatement")
 
-  let currentFile = node.name.file
-  let modulePath = node.path.lexeme
-
-  let (dir, _, _) = splitFile(currentFile)
-
-  let fullPath = (
-    if modulePath.startsWith("std/"): visitor.stdLibPath / modulePath[4..^1] & ".kvl"
-    else: joinPath(dir, modulePath)
-  )
-
-  info("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
-
   block analysis:
+    if visitor.symbolExistsInCurrentScope(node.name.lexeme):
+      let existing = visitor.getSymbol(node.name.lexeme)
+      newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": existing.token.file,
+        "@2": $existing.token.line, "@3": $existing.token.column})
+      break analysis
+
+    let currentFile = node.name.file
+    let modulePath = node.path.lexeme
+
+    let (dir, _, _) = splitFile(currentFile)
+
+    let fullPath = (
+      if modulePath.startsWith("std/"): visitor.stdLibPath / modulePath[4..^1] & ".kvl"
+      else: joinPath(dir, modulePath)
+    )
+
+    info("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
+
     if not fileExists(fullPath):
       warn("module ", node.path.lexeme, " does not exists")
       newError(errModuleNotFound, node.path, @{"@0": node.path.lexeme})
@@ -746,14 +759,14 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
     let text = readFile(fullPath)
 
     var parser = newParser(text, fullPath)
-    var blockStatement: BlockStatement = parser.parse()
+    node.moduleBlock = parser.parse()
 
     if errors.errors.len != 0:
       raise ModuleError()
 
     visitor.pushScope()
     info("semantic analysis of the ", node.path.lexeme, " module...")
-    visitor.visitStatement(blockStatement)
+    visitor.visitStatement(node.moduleBlock)
 
     info("creating a module type...")
 
@@ -767,8 +780,8 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
 
     visitor.popScope()
 
-    let moduleType = getModuleType(fullPath, symbols)
-    visitor.newSymbol(node.name, moduleType, false)
+    node.moduleType = getModuleType(fullPath, symbols)
+    visitor.newSymbol(node.name, node.moduleType, false)
 
   info("exiting ModuleStatement")
 

@@ -1,4 +1,4 @@
-import std/[strutils, tables, sequtils, sugar]
+import std/[strutils, tables, sequtils, sugar, os]
 
 type
   TypeKind* = enum
@@ -98,7 +98,7 @@ proc `$`*(t: Type): string =
       .join(", ")
     return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
   of typeModule:
-    return "module " & t.modulePath
+    return "module '" & extractFilename(t.modulePath) & "'"
   else: return $t.kind
 
 var ptrTypes*: seq[Type] = @[]

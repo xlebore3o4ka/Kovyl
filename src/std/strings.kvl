@@ -1,0 +1,38 @@
+#/ Standard module 'strings.kvl' /#
+
+func int strLen(string str) pub do
+  #/ Returns logical string length of the char@ /#
+  int c = 0
+
+  for ch = str do
+    if ch == '\0' do break end
+    c = c + 1
+  end
+
+  return c
+end
+
+func int strLen(char[] str) pub do
+  #/ Returns logical string length of the char[] /#
+  int c = 0
+
+  for ch = str do
+    if ch == '\0' do break end
+    c = c + 1
+  end
+
+  return c
+end
+
+#/
+func string substring(string str, int start) pub do
+
+  if start < 0 do start = 0 end
+
+  string result
+  int len = strLen(str)
+
+  while start < 
+
+end
+/#

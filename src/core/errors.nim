@@ -19,10 +19,10 @@ type
     errUnexpectedArgument, errUnexpectedNamedArgument, errMissingArgument, errDuplicateArgument
     errArgumentsNumber
 
-    errHaventField
+    errHaventField, errFieldless
 
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
-    errFuncEmptyStaticArray, errFuncResolution
+    errFuncEmptyStaticArray, errFuncResolution, errFuncSignatureUnknown
 
     errModuleNotFound
 
@@ -71,12 +71,14 @@ proc message(kind: ErrorKind): string =
     of errDuplicateArgument: "Duplicate argument: @0"
     of errArgumentsNumber: "Expected @0 arguments, got @1"
     of errHaventField: "@0 does not have field '@1'"
+    of errFieldless: "type '@0' does not support field access"
     of errUnreachableCode: "The code after the statement declared at @0(@1:@2) is unreachable"
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
     of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
     of errUnusedReturn: "Function '@0' returns a value and it must be used"
     of errFuncEmptyStaticArray: "The function cannot return an empty array"
     of errFuncResolution: "Function '@0' cannot be resolved using given arguments. Available:\n@1"
+    of errFuncSignatureUnknown: "Function signtature is unknown"
     of errModuleNotFound: "Module '@0' was not found"
 
 proc newError*(

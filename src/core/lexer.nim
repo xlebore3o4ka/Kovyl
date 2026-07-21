@@ -202,10 +202,26 @@ proc nextToken*(self: var Lexer): Token =
 
     let kind = operatorTokens[$op]
 
-    if kind == tkHash or kind == tkPragma and pos == 0:
+    if kind == tkHash:
+      if self.peek() != '/'.Rune:
+        while self.peek() != '\n'.Rune and self.peek() != '\0'.Rune: 
+          self.advance()
+
+      else:
+        while self.peek() != '\0'.Rune: 
+          if self.peek() == '/'.Rune:
+            self.advance()
+            if self.peek() == '#'.Rune:
+              break
+              
+          self.advance()
+
+      result = self.nextToken()
+
+    elif kind == tkPragma and pos == 0:  # skip shebang
       while self.peek() != '\n'.Rune and self.peek() != '\0'.Rune: 
         self.advance()
-      result = self.nextToken()
+
     else:
       result = kind.newToken(op, self.file, self.line, column, pos)
   elif c in openBracketTokens:

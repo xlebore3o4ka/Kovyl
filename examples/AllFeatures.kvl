@@ -28,7 +28,7 @@ int@ typeDynamicArray
 (int a, int b) typeTupleNamed
 (int,   int b) typeTupleMixed
 
-(int, int) -> int funcType
+# (int, int) -> int funcType  DEPRECATED (errFuncSignatureUnknown)
 
 # Пример инициализации каждого типа
 
@@ -223,7 +223,7 @@ func proc() do end
 
 # Функции - граждане первого класса, так что их можно присвоить переменной
 
-funcType = add
+(int, int) -> int funcType = add
 
 # И вызывать через переменную
 

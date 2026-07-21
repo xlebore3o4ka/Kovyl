@@ -128,6 +128,8 @@ type
   ModuleStatement* = ref object of Statement
     name*: Token
     path*: Token
+    moduleBlock*: BlockStatement
+    moduleType*: Type
 
   # SPECIALS
 

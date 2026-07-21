@@ -21,8 +21,16 @@ contexts:
     - include: brackets
     - include: function-calls
     - include: identifiers
+    - include: vector-operator
 
   comments:
+    - match: '#/'
+      push:
+        - meta_scope: comment.block.kovyl
+        - match: '/#'
+          pop: true
+        - match: .
+          scope: comment.block.kovyl
     - match: '#(?!!).*$'
       scope: comment.line.kovyl
     - match: '(#!)(\w*)'
@@ -102,3 +110,7 @@ contexts:
   identifiers:
     - match: '\b{{ident}}\b'
       scope: variable.other.kovyl
+
+  vector-operator:
+    - match: '\bv(?=["{])'
+      scope: keyword.operator.vector.kovyl
