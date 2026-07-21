@@ -1,9 +1,11 @@
-import ../[astnodes, tokens, types, errors]
+import ../[astnodes, tokens, types, errors, parser]
 import ../../utils/semanticAnalyzerUtils
 import visitor
-import std/[logging, tables, strutils, sequtils]
+import std/[logging, tables, strutils, sequtils, os]
 
 type
+  ModuleError* = ref object of CatchableError
+
   Symbol = object
     token: Token
     symbolType: Type
@@ -20,6 +22,8 @@ type
     of true: discard
 
   SemanticAnalyzerVisitor* = ref object of Visitor
+    stdLibPath*: string
+
     currentScope: Scope
     symbolScopeStack: Table[string, seq[Scope]]
 
@@ -36,8 +40,8 @@ proc semanticAnalyzerLogging*(enabled: bool) =
   else:
     logger.levelThreshold = lvlNone
 
-proc newSemanticAnalyzerVisitor*(): SemanticAnalyzerVisitor =
-  result = SemanticAnalyzerVisitor(expectedContextType: getUndefinedType(),
+proc newSemanticAnalyzerVisitor*(stdLibPath: string): SemanticAnalyzerVisitor =
+  result = SemanticAnalyzerVisitor(stdLibPath: stdLibPath, expectedContextType: getUndefinedType(),
     currentScope: Scope(isGlobal: true, symbolTable: initTable[string, Symbol]()))
   info("SemanticAnalyzerVisitor initialized")
 
@@ -75,8 +79,8 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
 
 proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type, pub: bool) =
   self.currentScope.symbolTable[name.lexeme] = (
-    if symbolType.neq typeFunc: Symbol(token: name, symbolType: symbolType)
-    else: Symbol(token: name, symbolType: symbolType, isFunc: true)
+    if symbolType.neq typeFunc: Symbol(token: name, symbolType: symbolType, pub: pub)
+    else: Symbol(token: name, symbolType: symbolType, isFunc: true, pub: pub)
   )
   self.symbolScopeStack.mgetOrPut(name.lexeme, @[]).add(self.currentScope)
   info((if pub: "Public s" else: "S") & "ymbol created: ", name.lexeme, " of type ", $symbolType, 
@@ -716,6 +720,58 @@ method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement
 
   info("exiting CallStatement")
 
+method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleStatement): auto =
+  info("visiting ModuleStatement")
+
+  let currentFile = node.name.file
+  let modulePath = node.path.lexeme
+
+  let (dir, _, _) = splitFile(currentFile)
+
+  let fullPath = (
+    if modulePath.startsWith("std/"): visitor.stdLibPath / modulePath[4..^1] & ".kvl"
+    else: joinPath(dir, modulePath)
+  )
+
+  info("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
+
+  block analysis:
+    if not fileExists(fullPath):
+      warn("module ", node.path.lexeme, " does not exists")
+      newError(errModuleNotFound, node.path, @{"@0": node.path.lexeme})
+      break analysis
+
+    info("found module ", node.path.lexeme, " on the path ", fullPath)
+
+    let text = readFile(fullPath)
+
+    var parser = newParser(text, fullPath)
+    var blockStatement: BlockStatement = parser.parse()
+
+    if errors.errors.len != 0:
+      raise ModuleError()
+
+    visitor.pushScope()
+    info("semantic analysis of the ", node.path.lexeme, " module...")
+    visitor.visitStatement(blockStatement)
+
+    info("creating a module type...")
+
+    var symbols: OrderedTable[string, Type]
+    for name, symbol in visitor.currentScope.symbolTable.pairs:
+      if symbol.pub:
+        info("Public symbol added to the module type: ", name)
+        symbols[name] = symbol.symbolType
+      else:
+        info("Private symbol was skipped: ", name)
+
+    visitor.popScope()
+
+    let moduleType = getModuleType(fullPath, symbols)
+    visitor.newSymbol(node.name, moduleType, false)
+
+  info("exiting ModuleStatement")
+
 # SPECIALS
 
 proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
@@ -1069,5 +1125,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitForStatement(ForStatement(node))
   elif node of CallStatement:
     visitor.visitCallStatement(CallStatement(node))
+  elif node of ModuleStatement:
+    visitor.visitModuleStatement(ModuleStatement(node))
   else:
     warn("unhandled statement")

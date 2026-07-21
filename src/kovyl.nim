@@ -14,6 +14,8 @@ proc main() =
   var showAST = false
   var debug = false
   var filePath = ""
+
+  let stdPath = getCurrentDir() / "src/std"
   
   for arg in args:
     if arg == "-s":
@@ -46,7 +48,10 @@ proc main() =
   if errors.errors.len == 0:
     if debug:
       semanticAnalyzerLogging(true)
-    newSemanticAnalyzerVisitor().visitStatement(blockStatement)
+    try:
+      newSemanticAnalyzerVisitor(stdPath).visitStatement(blockStatement)
+    except ModuleError:
+      discard
   
   # if showAST:
   #   echo newASTPrinterVisitor().printStatement(blockStatement)

@@ -24,6 +24,8 @@ type
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
     errFuncEmptyStaticArray, errFuncResolution
 
+    errModuleNotFound
+
   CompileError* = ref object
     kind*: ErrorKind
     file*: string
@@ -75,6 +77,7 @@ proc message(kind: ErrorKind): string =
     of errUnusedReturn: "Function '@0' returns a value and it must be used"
     of errFuncEmptyStaticArray: "The function cannot return an empty array"
     of errFuncResolution: "Function '@0' cannot be resolved using given arguments. Available:\n@1"
+    of errModuleNotFound: "Module '@0' was not found"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

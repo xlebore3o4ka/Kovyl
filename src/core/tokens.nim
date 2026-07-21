@@ -27,6 +27,7 @@ type
     tkBool
     tkChar
     tkString
+    tkModule
 
     tkDo, tkEnd
     tkIf, tkElif, tkElse
@@ -115,6 +116,7 @@ proc mean*(kind: TokenKind): string =
   of tkBool:          return "bool type"
   of tkChar:          return "char type"
   of tkString:        return "string type"
+  of tkModule:        return "module type"
 
   of tkTrue:          return "true literal"
   of tkFalse:         return "false literal"

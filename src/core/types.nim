@@ -17,6 +17,8 @@ type
     typeTuple
     typeFunc
 
+    typeModule
+
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBase*: Type
@@ -30,6 +32,9 @@ type
       arguments*: OrderedTable[string, Type]
       returnType*: Type
       funcName*: string
+    of typeModule:
+      modulePath*: string
+      symbols*: OrderedTable[string, Type]
     else: discard
 
 let
@@ -66,6 +71,7 @@ proc `$`*(k: TypeKind): string =
   of typeNul: "nul"
   of typeTuple: "(T, ...)"
   of typeFunc: "(T, ...) -> T"
+  of typeModule: "module"
 
 proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
   try:
@@ -91,6 +97,8 @@ proc `$`*(t: Type): string =
       .mapIt($it)
       .join(", ")
     return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
+  of typeModule:
+    return "module " & t.modulePath
   else: return $t.kind
 
 var ptrTypes*: seq[Type] = @[]
@@ -98,6 +106,7 @@ var vecTypes*: seq[Type] = @[]
 var arrayTypes*: seq[Type] = @[]
 var tupleTypes*: seq[Type] = @[]
 var funcTypes*: seq[Type] = @[]
+var moduleTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -192,4 +201,12 @@ proc getFuncType*(args: OrderedTable[string, Type], returnType: Type, funcName: 
       return t
 
   result = Type(kind: typeFunc, arguments: args, returnType: returnType, funcName: funcName)
+  funcTypes.add(result)
+
+proc getModuleType*(modulePath: string, symbols: OrderedTable[string, Type]): Type =
+  for t in moduleTypes:
+    if t.symbols == symbols and t.modulePath == modulePath:
+      return t
+
+  result = Type(kind: typeModule, modulePath: modulePath, symbols: symbols)
   funcTypes.add(result)

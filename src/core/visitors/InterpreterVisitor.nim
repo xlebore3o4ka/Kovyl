@@ -51,6 +51,8 @@ type
     of typeTuple:        tupleValue:       OrderedTable[string, Value]
     of typeFunc:         funcValue:        FuncValue
 
+    of typeModule:       discard  # TODO
+
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
 
@@ -287,6 +289,7 @@ proc `==`*(a, b: Value): bool =
     return true
   of typeFunc: 
     return a.valueType.eq b.valueType
+  of typeModule:       discard  # TODO
 
 proc `==`*(a, b: VecValue): bool =
   if a.values.len != b.values.len:
@@ -336,6 +339,7 @@ proc `$`*(value: Value): string =
     raise newException(ValueError, "Cannot convert tuple to string")
   of typeFunc:
     raise newException(ValueError, "Cannot convert func to string")
+  of typeModule:       discard  # TODO
 
 proc escapeString(s: string): string =
   for c in s:
@@ -713,6 +717,9 @@ method visitForStatement*(visitor: InterpreterVisitor, node: ForStatement): auto
 method visitCallStatement*(visitor: InterpreterVisitor, node: CallStatement): auto =
   discard visitor.visitExpression(node.callExpression)
 
+method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement): auto =
+  discard
+
 # SPECIALS
 
 proc get*(self: SpecialExpression | SpecialStatement, key: string): Expression =
@@ -984,5 +991,7 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitForStatement(ForStatement(node))
   elif node of CallStatement:
     visitor.visitCallStatement(CallStatement(node))
+  elif node of ModuleStatement:
+    visitor.visitModuleStatement(ModuleStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

@@ -1,11 +1,1 @@
-func int test() do return 10 end
-func string test() do return fmt:"Hello" end
-
-
-int x = test()
-string y = test()
-int z = 10 + test()
-
-print:fmt:x # 10
-print:y # Hello
-print:fmt:z # 20
+module test = "std/test"

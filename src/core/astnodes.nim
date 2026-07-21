@@ -125,6 +125,10 @@ type
   CallStatement* = ref object of Statement
     callExpression*: CallExpression
 
+  ModuleStatement* = ref object of Statement
+    name*: Token
+    path*: Token
+
   # SPECIALS
 
   SpecialExprKind* = enum
@@ -228,6 +232,9 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newModuleStatement*(name: Token, path: Token): ModuleStatement {.inline.} =
+  ModuleStatement(name: name, path: path)
 
 proc newCallStatement*(callExpression: CallExpression): CallStatement {.inline.} =
   CallStatement(callExpression: callExpression)

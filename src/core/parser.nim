@@ -562,6 +562,14 @@ proc parseFor(self: var Parser): Statement =
 
   return newForStatement(token, name, value, forBlock)
 
+proc parseModule(self: var Parser): Statement =
+  discard self.lexer.nextToken()
+  let name = self.expectToken(tkIdentifier)
+  discard self.expectToken(tkEqual)
+  let path = self.expectToken(tkStringLiteral)
+
+  return newModuleStatement(name, path)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -617,6 +625,9 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkFor:
     return self.parseFor()
+
+  elif token.kind == tkModule:
+    return self.parseModule()
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)

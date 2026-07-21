@@ -40,7 +40,7 @@ contexts:
       captures:
         1: keyword.other.special.kovyl
         2: keyword.operator.assignment.kovyl
-    - match: '\b(int|uint|int8|int16|int32|int64|uint8|uint16|uint32|uint64|bool|char|string)\b'
+    - match: '\b(int|uint|int8|int16|int32|int64|uint8|uint16|uint32|uint64|bool|char|string|module)\b'
       scope: storage.type.kovyl
 
   numbers:
