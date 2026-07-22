@@ -216,11 +216,11 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   var error = false
 
   for expr in node.values:
+    visitor.visitExpecting(expr, derived)
     if not expr.returnType.eq(getUndefinedType()) and not expr.returnType.eq(getNulType()):
-      visitor.visitExpecting(expr, derived)
       derived = expr.returnType
       break
-  info("expected type was derived from the array elements as ", derived)
+  info("type was derived from the array elements as ", derived)
 
   if visitor.expectedContextType.kind.eq typeArray:
     expected = visitor.expectedContextType.arrBase
@@ -233,6 +233,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   info("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
+
     if expr.returnType.eq(typeArray) and expected.eq(typeArray):
       if expr.returnType.length > expected.length:
         newError(errSize, expr.token, @{"@0": $expr.returnType, "@1": $expected})

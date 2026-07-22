@@ -408,7 +408,7 @@ func string repeat(string str, int times) pub do
   return result
 end
 
-func @ do
+func testAll() do
   assert:(strLen(v"1234")      == 4, "strLen 1")
   assert:(strLen(v"a 3 ] /")   == 7, "strLen 2")
   assert:(strLen(v"123\0 456") == 3, "strLen 3")

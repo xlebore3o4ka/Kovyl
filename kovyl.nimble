@@ -3,11 +3,11 @@
 version       = "0.0.0"
 author        = "Thinkeater Studio"
 description   = "Raw programming language Kovyl"
-license       = "Proprietary"
+license       = "LGPL-3.0"
 
 srcDir        = "src"
 binDir        = "build"
-bin           = @["kovyl"]
+bin           = @["kovyl", "linter"]
 
 # Dependencies
 
