@@ -66,6 +66,14 @@ proc trySetNumber*(node: BinaryExpression): bool {.inline.} =
       node.setType(getBoolType()); return true
   return false
 
+proc trySetChar*(node: BinaryExpression): bool {.inline.} =
+  if node.left.returnType.eq(typeChar) and node.right.returnType.eq node.left.returnType: 
+    if node.token.kind in {tkPlus, tkMinus, tkStar, tkSlash, tkPercent}: 
+      node.setType(node.left.returnType); return true
+    elif node.token.kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}: 
+      node.setType(getBoolType()); return true
+  return false
+
 proc newBinaryTypeMismatchError*(node: BinaryExpression) {.inline.} =
   newError(errBinaryTypeMismatch, node.token, @{"@0": node.token.lexeme, "@1": $node.left.returnType, 
       "@2": $node.right.returnType})

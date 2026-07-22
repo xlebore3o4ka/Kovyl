@@ -35,6 +35,7 @@ type
     tkFunc, tkReturn
     tkPub
     tkClosure
+    tkAs
 
     tkEOS
     tkEOF
@@ -138,6 +139,7 @@ proc mean*(kind: TokenKind): string =
   of tkReturn:        return "keyword return"
   of tkPub:           return "keyword pub"
   of tkClosure:       return "keyword closure"
+  of tkAs:            return "keyword as"
   
   of tkInvalid:       return "invalid token"
 

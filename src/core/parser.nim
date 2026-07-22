@@ -273,10 +273,10 @@ proc parsePrimary(self: var Parser): Expression =
 proc parsePostfix(self: var Parser): Expression =
   result = self.parsePrimary()
 
-  while self.lexer.peekToken().kind in {tkArrow, tkLBracket, tkDot, tkLParen}:
+  while self.lexer.peekToken().kind in {tkAs, tkLBracket, tkDot, tkLParen}:
     let token = self.lexer.nextToken()
 
-    if token.kind == tkArrow:
+    if token.kind == tkAs:
       let castType = self.parseType()
       result = newCastExpression(token, castType, result)
 
@@ -646,6 +646,9 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkClosure:
     return self.parseClosure()
+
+  if self.lexer.peekToken().kind == tkEOS:
+    discard self.expectToken(tkEOS)
   
   self.newError(errStatement, token, @{"@0": token.mean()})
   return newErrorStatement(token)

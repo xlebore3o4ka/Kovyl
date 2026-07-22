@@ -24,7 +24,7 @@ type
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
     errFuncEmptyStaticArray, errFuncResolution, errFuncSignatureUnknown
 
-    errModuleNotFound
+    errModuleNotFound, errCorruptedModule
 
   CompileError* = ref object
     kind*: ErrorKind
@@ -77,9 +77,10 @@ proc message(kind: ErrorKind): string =
     of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
     of errUnusedReturn: "Function '@0' returns a value and it must be used"
     of errFuncEmptyStaticArray: "The function cannot return or accept an empty array"
-    of errFuncResolution: "The signature of the function '@0@1' call does not match any of the available ones:\n@2"
+    of errFuncResolution: "The signature of the function call '@0@1' does not match any of the available ones:\n@2"
     of errFuncSignatureUnknown: "Function signature is unknown"
     of errModuleNotFound: "Module '@0' was not found"
+    of errCorruptedModule: "Module '@0' contains errors"
 
 proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 

@@ -1,0 +1,12 @@
+#/
+  Standard module 'panics.kvl' 
+  - Unified enumeration of panic types
+/#
+
+func string registerPanic(char[64] name) pub do
+  return fmt:(name[0])
+end
+
+string userError    = registerPanic("userError")    pub  # Use it whenever you want
+string valueError   = registerPanic("valueError")   pub  # Use it when the value is incorrect or cannot be created
+string zeroDivision = registerPanic("zeroDivision") pub  # Use it when you suspect division by zero

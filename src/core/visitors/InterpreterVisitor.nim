@@ -9,9 +9,13 @@ type
     errIndex
     errAssert
     errArrayLengthMismatch
+    errInvalidConversion
 
   RuntimeError* = object of CatchableError
     kind: ErrorKind
+
+  Panic* = object of CatchableError
+    code: string
 
   VecValue* = ref object
     values: seq[Value]
@@ -215,6 +219,9 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) {.base.}
 proc newError(kind: ErrorKind, msg: string = ""): ref RuntimeError =
   return (ref RuntimeError)(msg: msg, kind: kind)
 
+proc panic(code: string, msg: string): ref Panic =
+  return (ref Panic)(msg: msg, code: code)
+
 var logger = newConsoleLogger(fmtStr = "KOVYL [InterpreterVisitor] $levelname: ")
 
 proc interpreterVisitorLogging*(enabled: bool) =
@@ -311,10 +318,12 @@ proc `==`*(a, b: VecValue): bool =
   return true
 
 proc validIndex(index: int, arrayLength: int): int =
-  result = ((index mod arrayLength) + arrayLength) mod arrayLength
+  if arrayLength == 0:
+    raise newError(errIndex, "indexing an empty array")
   if index < -arrayLength or index > arrayLength - 1:
     raise newError(errIndex, "index " & $index & " outside the range " & 
       $(-arrayLength) & ".." & $(arrayLength - 1))
+  result = ((index mod arrayLength) + arrayLength) mod arrayLength
 
 proc `$`*(value: Value): string =
   case value.kind:
@@ -395,6 +404,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newUint32Value(left.uint32Value + right.uint32Value)
     elif left.valueType.eq typeUint16: return newUint16Value(left.uint16Value + right.uint16Value)
     elif left.valueType.eq typeUint8: return newUint8Value(left.uint8Value + right.uint8Value)
+    elif left.valueType.eq typeChar: return newCharValue(chr(ord(left.charValue) + ord(right.charValue)))
     else: warn("BinaryExpression invalid value type")
 
   of tkMinus:
@@ -406,6 +416,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newUint32Value(left.uint32Value - right.uint32Value)
     elif left.valueType.eq typeUint16: return newUint16Value(left.uint16Value - right.uint16Value)
     elif left.valueType.eq typeUint8: return newUint8Value(left.uint8Value - right.uint8Value)
+    elif left.valueType.eq typeChar: return newCharValue(chr(ord(left.charValue) - ord(right.charValue)))
     else: warn("BinaryExpression invalid value type")
 
   of tkStar:
@@ -417,6 +428,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newUint32Value(left.uint32Value * right.uint32Value)
     elif left.valueType.eq typeUint16: return newUint16Value(left.uint16Value * right.uint16Value)
     elif left.valueType.eq typeUint8: return newUint8Value(left.uint8Value * right.uint8Value)
+    elif left.valueType.eq typeChar: return newCharValue(chr(ord(left.charValue) * ord(right.charValue)))
     else: warn("BinaryExpression invalid value type")
 
   of tkSlash:
@@ -428,6 +440,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newUint32Value(left.uint32Value div right.uint32Value)
     elif left.valueType.eq typeUint16: return newUint16Value(left.uint16Value div right.uint16Value)
     elif left.valueType.eq typeUint8: return newUint8Value(left.uint8Value div right.uint8Value)
+    elif left.valueType.eq typeChar: return newCharValue(chr(ord(left.charValue) div ord(right.charValue)))
     else: warn("BinaryExpression invalid value type")
 
   of tkPercent:
@@ -439,6 +452,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newUint32Value(((left.uint32Value mod right.uint32Value) + right.uint32Value) mod right.uint32Value)
     elif left.valueType.eq typeUint16: return newUint16Value(((left.uint16Value mod right.uint16Value) + right.uint16Value) mod right.uint16Value)
     elif left.valueType.eq typeUint8: return newUint8Value(((left.uint8Value mod right.uint8Value) + right.uint8Value) mod right.uint8Value)
+    elif left.valueType.eq typeChar: return newCharValue(chr(((ord(left.charValue) mod ord(right.charValue)) + ord(right.charValue)) mod ord(right.charValue)))
     else: warn("BinaryExpression invalid value type")
 
   of tkGT:
@@ -450,6 +464,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newBoolValue(left.uint32Value > right.uint32Value)
     elif left.valueType.eq typeUint16: return newBoolValue(left.uint16Value > right.uint16Value)
     elif left.valueType.eq typeUint8: return newBoolValue(left.uint8Value > right.uint8Value)
+    elif left.valueType.eq typeChar: return newBoolValue(ord(left.charValue) > ord(right.charValue))
     else: warn("BinaryExpression invalid value type")
 
   of tkLT:
@@ -461,6 +476,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newBoolValue(left.uint32Value < right.uint32Value)
     elif left.valueType.eq typeUint16: return newBoolValue(left.uint16Value < right.uint16Value)
     elif left.valueType.eq typeUint8: return newBoolValue(left.uint8Value < right.uint8Value)
+    elif left.valueType.eq typeChar: return newBoolValue(ord(left.charValue) < ord(right.charValue))
     else: warn("BinaryExpression invalid value type")
 
   of tkGTE:
@@ -472,6 +488,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newBoolValue(left.uint32Value >= right.uint32Value)
     elif left.valueType.eq typeUint16: return newBoolValue(left.uint16Value >= right.uint16Value)
     elif left.valueType.eq typeUint8: return newBoolValue(left.uint8Value >= right.uint8Value)
+    elif left.valueType.eq typeChar: return newBoolValue(ord(left.charValue) >= ord(right.charValue))
     else: warn("BinaryExpression invalid value type")
 
   of tkLTE:
@@ -483,6 +500,7 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     elif left.valueType.eq typeUint32: return newBoolValue(left.uint32Value <= right.uint32Value)
     elif left.valueType.eq typeUint16: return newBoolValue(left.uint16Value <= right.uint16Value)
     elif left.valueType.eq typeUint8: return newBoolValue(left.uint8Value <= right.uint8Value)
+    elif left.valueType.eq typeChar: return newBoolValue(ord(left.charValue) <= ord(right.charValue))
     else: warn("BinaryExpression invalid value type")
 
   of tkEQ:
@@ -528,7 +546,72 @@ method visitIdentifierExpression*(visitor: InterpreterVisitor, node: IdentifierE
   return visitor.getSlot(node.token.lexeme)
 
 method visitCastExpression*(visitor: InterpreterVisitor, node: CastExpression): Value {.base.} =
-  warn("CastExpression TODO")
+  let value = visitor.visitExpression(node.value)
+  let targetType = node.returnType
+  
+  if value.valueType == targetType:
+    return value
+  
+  # number/char -> number
+  if targetType.isNumber:
+    var num: int
+    if value.valueType.isNumber:
+      num = value.numberValue
+    elif value.kind == typeChar:
+      num = ord(value.charValue)
+    else:
+      raise newError(errInvalidConversion)
+    
+    case targetType.kind:
+    of typeInt64:  return newInt64Value(int64(num))
+    of typeInt32:  return newInt32Value(int32(num))
+    of typeInt16:  return newInt16Value(int16(num))
+    of typeInt8:   return newInt8Value(int8(num))
+    of typeUint64: return newUint64Value(uint64(num))
+    of typeUint32: return newUint32Value(uint32(num))
+    of typeUint16: return newUint16Value(uint16(num))
+    of typeUint8:  return newUint8Value(uint8(num))
+    else: discard
+  
+  # number/bool -> char
+  if targetType == getCharType():
+    if value.valueType.isNumber:
+      return newCharValue(char(value.numberValue))
+    elif value.kind == typeBool:
+      return newCharValue(char(ord(value.boolValue)))
+    else:
+      raise newError(errInvalidConversion)
+  
+  # -> bool
+  if targetType == getBoolType():
+    if value.valueType.isNumber:
+      return newBoolValue(value.numberValue != 0)
+    elif value.kind == typeChar:
+      return newBoolValue(ord(value.charValue) != 0)
+    elif value.kind == typePtr:
+      return newBoolValue(value.ptrValue != nil)
+    elif value.kind == typeNul:
+      return newBoolValue(false)
+    elif value.kind == typeBool:
+      return value
+    else:
+      raise newError(errInvalidConversion)
+  
+  # Ptr -> Ptr, Nul -> Ptr
+  if targetType.kind == typePtr:
+    if value.kind == typePtr:
+      return newPtrValue(value.ptrValue, targetType.ptrBase)
+    elif value.kind == typeNul:
+      return newNulValue(targetType)
+    else:
+      raise newError(errInvalidConversion)
+  
+  # Nul -> Vec
+  if targetType.kind == typeVec and value.kind == typeNul:
+    return newVecValue(newSeq[Value](), targetType.vecBase)
+  
+  raise newError(errInvalidConversion, 
+    "Cannot cast " & $value.valueType & " to " & $targetType)
 
 method visitDerefExpression*(visitor: InterpreterVisitor, node: DerefExpression): Value {.base.} =
   let ptrValue = visitor.visitExpression(node.value)
@@ -950,6 +1033,12 @@ method visitSpecialStatement*(visitor: InterpreterVisitor, node: SpecialStatemen
     for i in value.vecValue.length..<size:
       value.vecValue.values[i] = newDefaultValue(value.valueType.vecBase)
     value.vecValue.length = size
+
+  of skPanic:
+    let panicCode = visitor.visitExpression(node.get("0")).stringValue
+    let msg = visitor.visitExpression(node.get("1")).stringValue
+
+    raise panic(panicCode, msg)
       
   else:
     warn("Unhandled special statement: ", node.kind)

@@ -34,5 +34,6 @@ proc toJson*(filePath: string): JsonNode =
       "line": error.line - 1,
       "column": error.col - 1,
       "len": error.len,
-      "pos": error.pos
+      "pos": error.pos,
+      "file": filePath
     })

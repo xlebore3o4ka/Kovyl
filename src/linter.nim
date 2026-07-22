@@ -24,7 +24,10 @@ proc main() =
 
   if errors.errors.len == 0:
     semanticAnalyzerLogging(false)
-    newSemanticAnalyzerVisitor(stdPath).visitStatement(blockStatement)
+    try:
+      newSemanticAnalyzerVisitor(stdPath).visitStatement(blockStatement)
+    except ModuleError:
+      discard
 
   stdout.write($toJson(filePath))
 

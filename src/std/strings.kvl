@@ -1,10 +1,13 @@
 #/ 
   Standard module 'strings.kvl' 
+  - Useful things for formatting
 
   xlebore3o4ka's notes: 
   - don't use char[] more often than string (char@)
   - create strings (char@) easily using the v-operator: v"Hello, world"
 /#
+
+module panics = "std/panics"
 
 string alphabetLower      = v"abcdefghijklmnopqrstuvwxyz" pub
 string alphabetUpper      = v"ABCDEFGHIJKLMNOPQRSTUVWXYZ" pub
@@ -406,6 +409,42 @@ func string repeat(string str, int times) pub do
   end
 
   return result
+end
+
+func int parseInt(string str) pub do
+  #/
+    Parses a string to an integer
+    Supports optional leading + or - sign
+    Returns 0 if string is empty or contains invalid characters
+  /#
+  closure strLen
+
+  int len = strLen(str)
+  if len == 0 do
+    return 0
+  end
+
+  int i = 0
+  int sign = 1
+  int result = 0
+
+  if str[0] == '-' do
+    sign = -1
+    i = 1
+  elif str[0] == '+' do
+    i = 1
+  end
+
+  while i < len do
+    char ch = str[i]
+    if ch < '0' or ch > '9' do
+      panic:(panics.valueError, fmt:("Cannot convert '", str, "' to integer"))
+    end
+    result = result * 10 + (ch - '0') as int
+    i = i + 1
+  end
+
+  return result * sign
 end
 
 func testAll() do

@@ -143,6 +143,7 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
     node.newBinaryTypeMismatchError()
 
   elif node.trySetNumber():              discard
+  elif node.trySetChar():                discard
   elif node.checkEqNeq(typeChar):        node.setType(getBoolType())
   elif node.checkEqNeq(typeArray):       node.setType(getBoolType())
   elif node.checkEqNeq(typeVec):         node.setType(getBoolType())
@@ -373,6 +374,15 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
         visitor.visitExpecting(expr, expected)
 
+        if expected.kind.eq(typeArray) and expr.returnType.kind.eq(typeArray):
+          if expected.arrBase.neq expr.returnType.arrBase:
+            break checkDefault
+          if expected.length < expr.returnType.length:
+            break checkDefault
+          elif expected.length > expr.returnType.length:
+            expr.returnType = expected
+            info("Array size promoted from ", expr.returnType.length, " to ", expected.length)
+
         if expr.returnType != expected:
           warn("argument types != first definded function argument types")
           break checkDefault
@@ -405,11 +415,33 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
           node.setType(overload.returnType)
           node.value.setType(overload)
           break checkAll
-        elif funcType.arguments == overload.arguments:
-          info("overload found with identical arguments")
-          node.setType(overload.returnType)
-          node.value.setType(overload)
-          break checkAll
+        else:
+          var argsMatch = true
+          if funcType.arguments.len == overload.arguments.len:
+            for key in funcType.arguments.keys:
+              let argType = funcType.arguments[key]
+              let overloadArgType = overload.arguments[key]
+              
+              if argType.kind == typeArray and overloadArgType.kind == typeArray:
+                if argType.arrBase != overloadArgType.arrBase:
+                  argsMatch = false
+                  break
+                if argType.length < overloadArgType.length:
+                  continue
+                elif argType.length > overloadArgType.length:
+                  argsMatch = false
+                  break
+              elif argType != overloadArgType:
+                argsMatch = false
+                break
+          else:
+            argsMatch = false
+          
+          if argsMatch:
+            info("overload found with compatible arguments")
+            node.setType(overload.returnType)
+            node.value.setType(overload)
+            break checkAll
 
       warn("No matching overloads found for function ", varType.funcName)
 
@@ -774,7 +806,7 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
     node.moduleBlock = parser.parse()
 
     if errors.errors.len != 0:
-      raise ModuleError()
+      newError(errCorruptedModule, node.name, @{"@0": node.path.lexeme})
 
     visitor.pushScope()
     info("semantic analysis of the ", node.path.lexeme, " module...")
@@ -792,8 +824,12 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
 
     visitor.popScope()
 
-    node.moduleType = getModuleType(fullPath, symbols)
-    visitor.newSymbol(node.name, node.moduleType, false)
+
+    if errors.errors.len != 0:
+      newError(errCorruptedModule, node.name, @{"@0": node.path.lexeme})
+    else:
+      node.moduleType = getModuleType(fullPath, symbols)
+      visitor.newSymbol(node.name, node.moduleType, false)
 
   info("exiting ModuleStatement")
 
@@ -1079,7 +1115,7 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
 
       if node.has("1"):
         visitor.visitExpecting(node.get("1"), getArrayType(getCharType(), 0))
-        if not node.expect("1", getArrayType(getCharType(), 0)): break analysis
+        if not node.expect("1", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
 
     of skResize:
       info("Semantic analysis of skResize special")
@@ -1094,6 +1130,18 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
 
       visitor.visitExpression(size)
       if not node.expect("1", getInt64Type()): break analysis
+
+    of skPanic:
+      info("Semantic analysis of skPanic special")
+      node.checkUnexpected(expected = @["0", "1"])
+      let panicCode = node.get("0")
+      let msg = node.get("1")
+
+      visitor.visitExpecting(panicCode, getArrayType(getCharType(), 0))
+      if not node.expect("0", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
+
+      visitor.visitExpecting(msg, getArrayType(getCharType(), 0))
+      if not node.expect("1", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
 
     else:
       warn("Unhandled special statement: ", node.kind)

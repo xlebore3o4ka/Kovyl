@@ -139,7 +139,7 @@ type
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead
+    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead  # TODO: resized
 
   SpecialExpression* = ref object of Expression
     kind*: SpecialExprKind
@@ -147,7 +147,7 @@ type
 
   SpecialStmtKind* = enum
     skStmtError
-    skPrint, skFree, skAssert, skResize
+    skPrint, skFree, skAssert, skResize, skPanic
 
   SpecialStatement* = ref object of Statement
     token*: Token
@@ -179,6 +179,7 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
   of "free": skFree
   of "assert": skAssert
   of "resize": skResize
+  of "panic": skPanic
   else:
     newError(errStmtSpecial, token)
     return skStmtError

@@ -109,8 +109,8 @@ def send_diagnostics(ls, uri, errors):
             ),
             message=e.get('message', 'Error'),
             severity=DiagnosticSeverity.Error,
-            code=e.get('pos'),
-            source='kovyl'
+            code=f"{e.get('line', 0)}:{e.get('column', 0)}",
+            source=e.get('file')
         ))
 
     logger.info(f"Publishing {len(diagnostics)} diagnostics")
