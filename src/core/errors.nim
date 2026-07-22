@@ -76,9 +76,9 @@ proc message(kind: ErrorKind): string =
     of errMissingReturn: "Function '@0' does not return a value on all control paths"
     of errFuncNamedArguments: "Named arguments are prohibited in function arguments"
     of errUnusedReturn: "Function '@0' returns a value and it must be used"
-    of errFuncEmptyStaticArray: "The function cannot return an empty array"
-    of errFuncResolution: "Function '@0' cannot be resolved using given arguments. Available:\n@1"
-    of errFuncSignatureUnknown: "Function signtature is unknown"
+    of errFuncEmptyStaticArray: "The function cannot return or accept an empty array"
+    of errFuncResolution: "The signature of the function '@0@1' call does not match any of the available ones:\n@2"
+    of errFuncSignatureUnknown: "Function signature is unknown"
     of errModuleNotFound: "Module '@0' was not found"
 
 proc newError*(

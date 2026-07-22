@@ -212,16 +212,23 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   info("visiting ArrayExpression")
 
   var expected = getUndefinedType()
+  var derived = getUndefinedType()
   var error = false
+
+  for expr in node.values:
+    if not expr.returnType.eq(getUndefinedType()) and not expr.returnType.eq(getNulType()):
+      visitor.visitExpecting(expr, derived)
+      derived = expr.returnType
+      break
+  info("expected type was derived from the array elements as ", derived)
 
   if visitor.expectedContextType.kind.eq typeArray:
     expected = visitor.expectedContextType.arrBase
   else:
-    warn("non-array context")
-    for expr in node.values:
-      if not expr.returnType.eq(getUndefinedType()) and not expr.returnType.eq(getNulType()):
-        expected = expr.returnType
-        break
+    info("non-array context")
+
+  if expected != derived:
+    expected = derived
 
   info("visiting ArrayExpression values...")
   for expr in node.values:
@@ -411,7 +418,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     for name, _ in varType.overloads.pairs:
       avaiableOverloadFormatted &= "\n- " & name
 
-    newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": avaiableOverloadFormatted})
+    newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
 
   info("exiting CallExpression")
 
@@ -620,6 +627,9 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   var argumentTypes: OrderedTable[string, Type]
 
   for argName, funcArg in node.arguments:
+    if funcArg.expectedType.eq(typeArray) and funcArg.expectedType.length == 0:
+      newError(errFuncEmptyStaticArray, node.name)
+      error = true
     argumentTypes[argName] = funcArg.expectedType
 
   let funcType = getFuncType(argumentTypes, node.returnType, node.name.lexeme)
@@ -661,16 +671,17 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
       node.funcType = funcType
       visitor.newSymbol(node.name, funcType, node.pub)
 
-  visitor.pushScope()
+  if not error:
+    visitor.pushScope()
 
-  for _, funcArg in node.arguments:
-    visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
+    for _, funcArg in node.arguments:
+      visitor.newSymbol(funcArg.origin, funcArg.expectedType, false)
 
-  visitor.funcStack.add(node)
-  visitor.visitStatement(node.funcBlock)
-  discard visitor.funcStack.pop()
+    visitor.funcStack.add(node)
+    visitor.visitStatement(node.funcBlock)
+    discard visitor.funcStack.pop()
 
-  visitor.popScope()
+    visitor.popScope()
 
   info("exiting FuncStatement")
 

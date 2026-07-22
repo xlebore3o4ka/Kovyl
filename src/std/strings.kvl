@@ -34,21 +34,6 @@ func int strLen(string str) pub do
   return c
 end
 
-func int strLen(char[] str) pub do
-  #/ 
-    Returns logical string length of the char[] 
-  /#
-  int c = 0
-
-  for ch = str do
-    if ch == '\0' do break end
-    c = c + 1
-  end
-
-  return c
-end
-
-
 func string substring(string str, int start, int end_) pub do
   #/ 
     Returns a substring of the string, from the start 
@@ -115,6 +100,25 @@ func int find(string haystack, string needle) pub do
     end
 
     start = start + 1
+  end
+
+  return -1
+end
+
+func int find(string haystack, char needle) pub do
+  #/
+    Searches for a character in a string, returning the index 
+    of the first occurrence or -1 if not found
+  /#
+  closure strLen
+
+  int len = strLen(haystack)
+  int i = 0
+  while i < len do
+    if haystack[i] == needle do
+      return i
+    end
+    i = i + 1
   end
 
   return -1
@@ -248,9 +252,30 @@ func string trim(string str) pub do
   #/
     Removes leading and trailing whitespace from a string
   /#
-  closure trimLeft, trimRight
+  closure strLen, substring
 
-  return trimRight(trimLeft(str))
+  int len = strLen(str)
+  if len == 0 do
+    return v""
+  end
+
+  int start = 0
+  while start < len and (str[start] == ' ' or str[start] == '\t' or 
+                         str[start] == '\n' or str[start] == '\r') do
+    start = start + 1
+  end
+
+  if start == len do
+    return v""
+  end
+
+  int end_ = len - 1
+  while end_ >= 0 and (str[end_] == ' ' or str[end_] == '\t' or 
+                       str[end_] == '\n' or str[end_] == '\r') do
+    end_ = end_ - 1
+  end
+
+  return substring(str, start, end_ + 1)
 end
 
 func string replace(string str, string old, string new) pub do
@@ -279,7 +304,7 @@ func string toUpper(string str) pub do
 
   int i = 0
   while i < stringLen do
-    int pos = find(alphabetLower, fmt:str[i])
+    int pos = find(alphabetLower, str[i])
     if pos != -1 do result[i] = alphabetUpper[pos] end
     i = i + 1
   end
@@ -298,7 +323,7 @@ func string toLower(string str) pub do
 
   int i = 0
   while i < stringLen do
-    int pos = find(alphabetUpper, fmt:str[i])
+    int pos = find(alphabetUpper, str[i])
     if pos != -1 do result[i] = alphabetLower[pos] end
     i = i + 1
   end
@@ -381,4 +406,78 @@ func string repeat(string str, int times) pub do
   end
 
   return result
+end
+
+func @ do
+  assert:(strLen(v"1234")      == 4, "strLen 1")
+  assert:(strLen(v"a 3 ] /")   == 7, "strLen 2")
+  assert:(strLen(v"123\0 456") == 3, "strLen 3")
+
+  assert:(substring(v"123TEST123", 3, 7) == "TEST", "substring 1")
+  assert:(substring(v"1234TEST",   4)    == "TEST", "substring 2")
+
+  assert:(find(v"1234TEST1234", v"TEST") == 4,  "find 1")
+  assert:(find(v"123412341234", v"TEST") == -1, "find 2")
+
+  string@ split1 = split(v"TEST1 TEST2 TEST3")
+  assert:(len:(split1) == 3, "split1 len")
+  assert:(split1[0] == "TEST1", "split1 1")
+  assert:(split1[1] == "TEST2", "split1 2")
+  assert:(split1[2] == "TEST3", "split1 3")
+
+  string@ split2 = split(v"TEST1-!-TEST2-!-TEST3", v"-!-")
+  assert:(len:(split2) == 3, "split2 len")
+  assert:(split2[0] == "TEST1", "split2 1")
+  assert:(split2[1] == "TEST2", "split2 2")
+  assert:(split2[2] == "TEST3", "split2 3")
+
+  assert:(join(split1, v"-!-") == "TEST1-!-TEST2-!-TEST3", "join")
+
+  assert:(trimLeft(v"   TEST")  == "TEST", "trimLeft")
+  assert:(trimRight(v"TEST   ") == "TEST", "trimRight")
+  assert:(trim(v"   TEST   ")   == "TEST", "trim")
+
+  assert:(replace(v"a", v"a", v"b") == "b", "replace 1")
+  assert:(replace(v"abc", v"abc", v"b") == "b", "replace 2")
+  assert:(replace(v"a", v"a", v"abc") == "abc", "replace 3")
+  assert:(replace(v"abc", v"abc", v"bca") == "bca", "replace 4")
+  assert:(replace(v"abc", v"b", v"bcab") == "abcabc", "replace 5")
+  assert:(replace(v"123@123@123", v"@", v"test") == "123test123test123", "replace 6")
+  assert:(replace(v"123test123test123", v"test", v"TEST") == "123TEST123TEST123", "replace 7")
+  assert:(replace(v"123456", v"test", v"TEST") == "123456", "replace 8")
+
+  assert:(toUpper(v"Hello, World! 123") == "HELLO, WORLD! 123", "toUpper 1")
+  assert:(toUpper(v"abcDEF123!@#") == "ABCDEF123!@#", "toUpper 2")
+  assert:(toLower(v"HELLO, WORLD! 123") == "hello, world! 123", "toLower 1")
+  assert:(toLower(v"ABCdef123!@#") == "abcdef123!@#", "toLower 2")
+
+  assert:(startsWith(v"Hello World", v"Hello"), "startsWith 1")
+  assert:(!startsWith(v"Hello World", v"World"), "startsWith 2")
+  assert:(!startsWith(v"Hello", v"Hello World"), "startsWith 3")
+  assert:(startsWith(v"", v""), "startsWith 4")
+
+  assert:(endsWith(v"Hello World", v"World"), "endsWith 1")
+  assert:(!endsWith(v"Hello World", v"Hello"), "endsWith 2")
+  assert:(!endsWith(v"Hello", v"Hello World"), "endsWith 3")
+  assert:(endsWith(v"", v""), "endsWith 4")
+
+  assert:(repeat(v"abc", 3) == "abcabcabc", "repeat 1")
+  assert:(repeat(v"-", 5) == "-----", "repeat 2")
+  assert:(repeat(v"hi", 0) == "", "repeat 3")
+  assert:(repeat(v"", 10) == "", "repeat 4")
+  assert:(repeat(v"a", 1) == "a", "repeat 5")
+
+  assert:(replace(v"Hello World", v"o", v"0") == "Hell0 W0rld", "replace 9")
+  assert:(replace(v"Hello World", v" ", v"") == "HelloWorld", "replace 10")
+  assert:(replace(v"abcabcabc", v"abc", v"x") == "xxx", "replace 11")
+  assert:(replace(v"abcabcabc", v"b", v"") == "acacac", "replace 12")
+
+  assert:(find(v"Hello World", 'o') == 4, "find char 1")
+  assert:(find(v"Hello World", 'W') == 6, "find char 2")
+  assert:(find(v"Hello World", 'z') == -1, "find char 3")
+  assert:(find(v"", 'a') == -1, "find char 4")
+  assert:(find(v"aaaaa", 'a') == 0, "find char 5")
+  assert:(find(v"abcABC", 'A') == 3, "find char 6")
+
+  print:v"All test passed!"
 end

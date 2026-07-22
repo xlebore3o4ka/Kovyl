@@ -329,14 +329,12 @@ proc `$`*(value: Value): string =
   of typeBool:   return $value.boolValue
   of typeChar:   return $value.charValue
   of typeArray:
-    if value.arrayData[].len > 0 and 
-       value.valueType.eq getArrayType(getCharType(), 0):
+    if value.valueType.eq getArrayType(getCharType(), 0):
       return value.stringValue
     else:
       raise newException(ValueError, "Cannot convert static array (non-char) to string")
   of typeVec:
-    if value.arrayLength > 0 and 
-       value.valueType.eq getVecType(getCharType()):
+    if value.valueType.eq getVecType(getCharType()):
       return value.stringValue
     else:
       raise newException(ValueError, "Cannot convert array (non-char) to string")
