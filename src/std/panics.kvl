@@ -4,7 +4,7 @@
 /#
 
 func string registerPanic(char[64] name) pub do
-  return fmt:(name[0])
+  return fmt:(name)
 end
 
 string userError    = registerPanic("userError")    pub  # Use it whenever you want

@@ -19,6 +19,8 @@ type
 
     typeModule
 
+    typeGen
+
   Type* = ref object
     case kind*: TypeKind
     of typePtr: ptrBase*: Type
@@ -36,6 +38,8 @@ type
     of typeModule:
       modulePath*: string
       symbols*: OrderedTable[string, Type]
+    of typeGen:
+      genName*: string
     else: discard
 
 let
@@ -73,6 +77,7 @@ proc `$`*(k: TypeKind): string =
   of typeTuple: "(T, ...)"
   of typeFunc: "(T, ...) -> T"
   of typeModule: "module"
+  of typeGen: "gen"
 
 proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
   try:
@@ -100,6 +105,7 @@ proc `$`*(t: Type): string =
     return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
   of typeModule:
     return "module '" & extractFilename(t.modulePath) & "'"
+  of typeGen: "gen[" & t.genName & "]"
   else: return $t.kind
 
 var ptrTypes*: seq[Type] = @[]
@@ -108,6 +114,7 @@ var arrayTypes*: seq[Type] = @[]
 var tupleTypes*: seq[Type] = @[]
 var funcTypes*: seq[Type] = @[]
 var moduleTypes*: seq[Type] = @[]
+var genTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -211,3 +218,11 @@ proc getModuleType*(modulePath: string, symbols: OrderedTable[string, Type]): Ty
 
   result = Type(kind: typeModule, modulePath: modulePath, symbols: symbols)
   moduleTypes.add(result)
+
+proc getGenType*(genName: string): Type =
+  for t in genTypes:
+    if t.genName == genName:
+      return t
+
+  result = Type(kind: typeGen, genName: genName)
+  genTypes.add(result)

@@ -518,5 +518,17 @@ func testAll() do
   assert:(find(v"aaaaa", 'a') == 0, "find char 5")
   assert:(find(v"abcABC", 'A') == 3, "find char 6")
 
+  assert:(parseInt(v"123") == 123, "parseInt 1")
+  assert:(parseInt(v"-123") == -123, "parseInt 2")
+  assert:(parseInt(v"+123") == 123, "parseInt 3")
+  # assert:(parseInt(v"0") == 0, "parseInt 4")
+  # assert:(parseInt(v"") == 0, "parseInt 5")
+  # assert:(parseInt(v"12a") == 0, "parseInt 6")
+  # assert:(parseInt(v"  123") == 0, "parseInt 7")
+  assert:(parseInt(v"999") == 999, "parseInt 8")
+  assert:(parseInt(v"-999") == -999, "parseInt 9")
+  assert:(parseInt(v"2147483647") == 2147483647, "parseInt 10")
+  assert:(parseInt(v"-2147483648") == -2147483648, "parseInt 11")
+
   print:v"All test passed!"
 end

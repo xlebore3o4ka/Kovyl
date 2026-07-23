@@ -30,7 +30,7 @@ type
   Value* = object
     valueType*: Type
     case kind: TypeKind
-    of typeUndefined: discard
+    of typeUndefined, typeGen: discard
 
     of typeInt64:        int64Value:       int64
     of typeInt32:        int32Value:       int32
@@ -266,7 +266,7 @@ proc `==`*(a, b: Value): bool =
     return false
 
   case a.kind:
-  of typeUndefined: return true
+  of typeUndefined, typeGen: return false
   of typeInt64:  return a.int64Value == b.int64Value
   of typeInt32:  return a.int32Value == b.int32Value
   of typeInt16:  return a.int16Value == b.int16Value
@@ -351,7 +351,7 @@ proc `$`*(value: Value): string =
     raise newException(ValueError, "Cannot convert pointer to string")
   of typeNul:
     raise newException(ValueError, "Cannot convert nul to string")
-  of typeUndefined:
+  of typeUndefined, typeGen:
     raise newException(ValueError, "Cannot convert undefined to string")
   of typeTuple:
     raise newException(ValueError, "Cannot convert tuple to string")

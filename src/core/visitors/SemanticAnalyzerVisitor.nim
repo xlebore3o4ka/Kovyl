@@ -223,11 +223,14 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
       break
   info("type was derived from the array elements as ", derived)
 
-  if visitor.expectedContextType.kind.eq typeArray:
+  if visitor.expectedContextType.eq typeArray:
     expected = visitor.expectedContextType.arrBase
   else:
     info("non-array context")
 
+  if expected.eq(typeArray) and derived.eq(typeArray):
+    if expected.length > derived.length:
+      derived = expected
   if expected != derived:
     expected = derived
 
@@ -338,7 +341,7 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
       break analysis
 
     if node.token.lexeme notin fields:
-      newError(errHaventField, node.token, @{"@0": $returnType, "@1": node.token.lexeme})
+      newError(errHasNoField, node.token, @{"@0": $returnType, "@1": node.token.lexeme})
       break analysis
 
     info("field ", node.token.lexeme, " is correct")

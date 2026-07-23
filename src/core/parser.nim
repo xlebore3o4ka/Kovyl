@@ -97,7 +97,9 @@ proc parseType(self: var Parser, token: Token): Type =
             newError(errFuncNamedArguments, token)
             return getUndefinedType()
         result = getFuncType(elements, returnType)
-
+  of tkIdentifier:
+    result = getGenType(token.lexeme)
+    echo result
   else: 
     self.newError(errUnknownType, token, @{"@0": token.lexeme})
     return getUndefinedType()

@@ -107,7 +107,6 @@ string str2 # тот же тип char@
 # -----
 
 char[8][] fruits = {"apple", "banana", "orange"}  # массив массивов символов
-char@ joined = join:(fruits, ", ")              # Спешл join:(char[][], char[]) - склеивает все строки в массиве разделителем
 
 char@ fmt1 = fmt:(10)    # Спешл fmt: конвертирует любой тип в char@
 char@ fmt2 = fmt:(true)
