@@ -1,0 +1,24 @@
+# будущая архитектура памяти
+objects = []           # [ptr, ptr, ...] - индекс = ID
+arena_of = []          # [arena_id, arena_id, ...] - индекс = ID
+arenas = []            # [alive, alive, ...] - индекс = arena_id
+gen = []               # [1, 2, 3, ...] - поколение ID
+
+GENE_BITS = 32         # чем больше генов, тем чаще объекты можно создавать
+                       # чем меньше индексов, тем больше объектов можно создавать
+GENE_MASK = (1 << GENE_BITS) - 1
+
+def get(oid):
+    idx = oid >> GENE_BITS
+    g = oid & GENE_MASK
+    
+    if idx >= len(objects) or gen[idx] != g:
+        return None
+    
+    arena_id = arena_of[idx]
+    if arena_id >= len(arenas) or not arenas[arena_id]:
+        return None
+    
+    return objects[idx]
+
+# умный выдаватель id с переиспользованием

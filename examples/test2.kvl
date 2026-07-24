@@ -1,0 +1,3 @@
+module str = "std/strings"
+
+string fromStr = str.alphabet pub

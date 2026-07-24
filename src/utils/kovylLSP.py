@@ -109,7 +109,7 @@ def send_diagnostics(ls, uri, errors):
             ),
             message=e.get('message', 'Error'),
             severity=DiagnosticSeverity.Error,
-            code=f"{e.get('line', 0)}:{e.get('column', 0)}",
+            code=f"{e.get('line', 0) + 1}:{e.get('column', 0) + 1}",
             source=e.get('file')
         ))
 

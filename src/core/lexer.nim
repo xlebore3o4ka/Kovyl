@@ -150,6 +150,7 @@ const keywordsTokens = {
   "continue": tkContinue,
   "func": tkFunc,
   "return": tkReturn,
+  "form": tkForm,
   "for": tkFor,
   "pub": tkPub,
   "closure": tkClosure,

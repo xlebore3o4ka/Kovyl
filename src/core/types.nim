@@ -19,7 +19,7 @@ type
 
     typeModule
 
-    typeGen
+    typeVar
 
   Type* = ref object
     case kind*: TypeKind
@@ -38,8 +38,8 @@ type
     of typeModule:
       modulePath*: string
       symbols*: OrderedTable[string, Type]
-    of typeGen:
-      genName*: string
+    of typeVar:
+      varName*: string
     else: discard
 
 let
@@ -77,7 +77,7 @@ proc `$`*(k: TypeKind): string =
   of typeTuple: "(T, ...)"
   of typeFunc: "(T, ...) -> T"
   of typeModule: "module"
-  of typeGen: "gen"
+  of typeVar: "T"
 
 proc isValidUint*[T: SomeUnsignedInt](s: string): bool =
   try:
@@ -105,7 +105,7 @@ proc `$`*(t: Type): string =
     return "(" & argsStr & ") -> " & (if t.returnType.kind != typeUndefined: $t.returnType else: "()")
   of typeModule:
     return "module '" & extractFilename(t.modulePath) & "'"
-  of typeGen: "gen[" & t.genName & "]"
+  of typeVar: t.varName
   else: return $t.kind
 
 var ptrTypes*: seq[Type] = @[]
@@ -114,7 +114,8 @@ var arrayTypes*: seq[Type] = @[]
 var tupleTypes*: seq[Type] = @[]
 var funcTypes*: seq[Type] = @[]
 var moduleTypes*: seq[Type] = @[]
-var genTypes*: seq[Type] = @[]
+var varTypes*: seq[Type] = @[]
+var formTypes*: seq[Type] = @[]
 
 proc getUndefinedType*(): Type {.inline.} = undefinedType
 proc getInt64Type*(): Type {.inline.} = int64Type
@@ -219,10 +220,47 @@ proc getModuleType*(modulePath: string, symbols: OrderedTable[string, Type]): Ty
   result = Type(kind: typeModule, modulePath: modulePath, symbols: symbols)
   moduleTypes.add(result)
 
-proc getGenType*(genName: string): Type =
-  for t in genTypes:
-    if t.genName == genName:
+proc getVarType*(varName: string): Type =
+  for t in varTypes:
+    if t.varName == varName:
       return t
 
-  result = Type(kind: typeGen, genName: genName)
-  genTypes.add(result)
+  result = Type(kind: typeVar, varName: varName)
+  varTypes.add(result)
+
+proc substituteTypeVar*(t: Type, varName: string, replacement: Type): Type =
+  if t == nil: return nil
+  
+  case t.kind
+  of typeVar:
+    if t.varName == varName:
+      return replacement
+    return t
+  
+  of typePtr:
+    return getPtrType(substituteTypeVar(t.ptrBase, varName, replacement))
+  
+  of typeVec:
+    return getVecType(substituteTypeVar(t.vecBase, varName, replacement))
+  
+  of typeArray:
+    return getArrayType(
+      substituteTypeVar(t.arrBase, varName, replacement),
+      t.length
+    )
+  
+  of typeTuple:
+    var newElements = initOrderedTable[string, Type]()
+    for key, val in t.elements:
+      newElements[key] = substituteTypeVar(val, varName, replacement)
+    return getTupleType(newElements)
+  
+  of typeFunc:
+    var newArgs = initOrderedTable[string, Type]()
+    for key, val in t.arguments:
+      newArgs[key] = substituteTypeVar(val, varName, replacement)
+    let newReturn = substituteTypeVar(t.returnType, varName, replacement)
+    return getFuncType(newArgs, newReturn, t.funcName)
+  
+  else:
+    return t

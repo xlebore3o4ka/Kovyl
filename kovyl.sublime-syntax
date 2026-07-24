@@ -39,7 +39,7 @@ contexts:
       scope: meta.pragma.kovyl
       
   keywords:
-    - match: '\b(do|end|if|elif|else|while|for|break|continue|func|return|pub|closure|as)\b'
+    - match: '\b(do|end|if|elif|else|while|for|break|continue|func|return|pub|closure|as|form)\b'
       scope: keyword.control.kovyl
     - match: '\b(true|false|nul)\b'
       scope: constant.language.kovyl
@@ -49,6 +49,8 @@ contexts:
         2: keyword.operator.assignment.kovyl
     - match: '\b(int|uint|int8|int16|int32|int64|uint8|uint16|uint32|uint64|bool|char|string|module)\b'
       scope: storage.type.kovyl
+    - match: '\b[A-Z]\b'
+      scope: support.type.kovyl
 
   numbers:
     - match: '\b\d+\b'

@@ -3,8 +3,12 @@
   - Unified enumeration of panic types
 /#
 
+uint id = 0
+
 func string registerPanic(char[64] name) pub do
-  return fmt:(name)
+  closure id
+  id = id + 1
+  return fmt:("std/panics.", name, "(id=", id - 1, ")")
 end
 
 string userError    = registerPanic("userError")    pub  # Use it whenever you want

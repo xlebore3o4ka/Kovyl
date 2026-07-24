@@ -51,6 +51,9 @@ method visitFieldExpression*(visitor: Visitor, node: FieldExpression): auto {.ba
 method visitCallExpression*(visitor: Visitor, node: CallExpression): auto {.base.} =
   discard
 
+method visitInstanceExpression*(visitor: Visitor, node: InstanceExpression): auto {.base.} =
+  discard
+
 # STATEMENTS
 
 method visitWhileStatement*(visitor: Visitor, node: WhileStatement): auto {.base.} =
@@ -96,6 +99,9 @@ method visitModuleStatement*(visitor: Visitor, node: ModuleStatement): auto {.ba
   discard
 
 method visitClosureStatement*(visitor: Visitor, node: ClosureStatement): auto {.base.} =
+  discard
+
+method visitFormStatement*(visitor: Visitor, node: FormStatement): auto {.base.} =
   discard
 
 # SPECIALS

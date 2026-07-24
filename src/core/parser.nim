@@ -10,7 +10,8 @@ const TOKEN_TYPE_KINDS = {
   tkUint64, tkUint32, tkUint16, tkUint8, 
   tkBool, 
   tkChar, tkLParen,
-  tkString
+  tkString,
+  tkIdentifier
 }
   
 proc newParser*(text, file: string): Parser =
@@ -98,8 +99,7 @@ proc parseType(self: var Parser, token: Token): Type =
             return getUndefinedType()
         result = getFuncType(elements, returnType)
   of tkIdentifier:
-    result = getGenType(token.lexeme)
-    echo result
+    result = getVarType(token.lexeme)
   else: 
     self.newError(errUnknownType, token, @{"@0": token.lexeme})
     return getUndefinedType()
@@ -236,6 +236,18 @@ proc parsePrimary(self: var Parser): Expression =
     elif token.lexeme == "v" and self.lexer.peekToken().kind in {tkStringLiteral, tkLBrace}:
       self.lexer.rollback(rd)
       result = self.parseSpecialExpr(token.newFrom(lexeme = "vec"))
+
+    elif self.lexer.peekToken().kind == tkLT:
+      discard self.lexer.nextToken()
+      var types = @[self.parseType()]
+
+      while self.lexer.peekToken().kind == tkComma:
+        discard self.lexer.nextToken()
+        types.add(self.parseType())
+
+      discard self.expectToken(tkGT)
+
+      return newInstanceExpression(token, types)
 
     return result
 
@@ -512,9 +524,15 @@ proc parseFunc(self: var Parser): Statement =
   discard self.lexer.nextToken()
 
   var returnType = getUndefinedType()
+  let rd = self.lexer.getRollbackData()
+
   if self.lexer.peekToken().kind in TOKEN_TYPE_KINDS:
     let typeToken = self.lexer.nextToken()
     returnType = self.parseType(typeToken)
+
+  if self.lexer.peekToken().kind == tkLParen:
+    returnType = getUndefinedType()
+    self.lexer.rollback(rd)
 
   let name = self.expectToken(tkIdentifier)
 
@@ -587,13 +605,68 @@ proc parseClosure(self: var Parser): Statement =
 
   return newClosureStatement(token, names)
 
+proc parseForm(self: var Parser): Statement =
+  discard self.lexer.nextToken()
+  discard self.expectToken(tkLT)
+
+  var formParams: seq[Token] = @[self.expectToken(tkIdentifier)]
+
+  while self.lexer.peekToken().kind == tkComma:
+    discard self.lexer.nextToken()
+    formParams.add(self.expectToken(tkIdentifier))
+
+  discard self.expectToken(tkGT)
+
+  var returnType = getUndefinedType()
+  let rd = self.lexer.getRollbackData()
+
+  if self.lexer.peekToken().kind in TOKEN_TYPE_KINDS:
+    let typeToken = self.lexer.nextToken()
+    returnType = self.parseType(typeToken)
+
+  if self.lexer.peekToken().kind == tkLParen:
+    returnType = getUndefinedType()
+    self.lexer.rollback(rd)
+
+  let name = self.expectToken(tkIdentifier)
+
+  var index = 0
+  var arguments: OrderedTable[string, FuncArgument]
+
+  discard self.expectToken(tkLParen)
+
+  while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
+    let argType = self.parseType()
+    let argName = self.expectToken(tkIdentifier)
+
+    arguments[$index] = newFuncArgument(argName, argType)
+    index = index + 1
+
+    if self.lexer.peekToken().kind in {tkRParen, tkEOF}:
+      break
+
+    if self.expectToken(tkComma).kind != tkComma: break
+
+  discard self.expectToken(tkRParen)
+
+  var pub = false
+  if self.lexer.peekToken().kind == tkPub:
+    pub = true
+    discard self.lexer.nextToken()
+
+  let blockStmt = newBlockStatement(self.expectToken(tkDo))
+
+  while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
+    blockStmt.addStatement(self.parseStmt())
+
+  blockStmt.endToken = self.expectToken(tkEnd)
+
+  return newFormStatement(returnType, name, arguments, blockStmt, formParams, pub)
+
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in TOKEN_TYPE_KINDS:
-    return self.parseSymbolDecl()
-
-  elif token.kind in {tkIdentifier, tkDollar}:
+  if token.kind in {tkIdentifier, tkDollar}:
     let rd = self.lexer.getRollbackData()
     var left: Expression = newIdentifierExpression(self.lexer.nextToken())
 
@@ -614,6 +687,9 @@ proc parseStmt(self: var Parser): Statement =
     else:
       self.newError(errStatement, token, @{"@0": token.mean()})
       return newErrorStatement(token)
+
+  elif token.kind in TOKEN_TYPE_KINDS:
+    return self.parseSymbolDecl()
 
   elif token.kind == tkPragma:
     return self.parsePragma()
@@ -648,6 +724,9 @@ proc parseStmt(self: var Parser): Statement =
 
   elif token.kind == tkClosure:
     return self.parseClosure()
+
+  elif token.kind == tkForm:
+    return self.parseForm()
 
   if self.lexer.peekToken().kind == tkEOS:
     discard self.expectToken(tkEOS)

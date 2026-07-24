@@ -10,98 +10,104 @@ type
 
   ErrorExpression* = ref object of Expression
 
-  NumberExpression* = ref object of Expression
+  NumberExpression* = ref object of Expression  # 10
 
-  BoolExpression* = ref object of Expression
+  BoolExpression* = ref object of Expression  # true/false
 
-  BinaryExpression* = ref object of Expression
+  BinaryExpression* = ref object of Expression  # <left> <token> <right>
     left*: Expression
     right*: Expression
 
-  UnaryExpression* = ref object of Expression
+  UnaryExpression* = ref object of Expression  # <token> <value>
     value*: Expression
 
-  IdentifierExpression* = ref object of Expression
+  IdentifierExpression* = ref object of Expression  # ident
 
-  CastExpression* = ref object of Expression
+  CastExpression* = ref object of Expression  # <value> as T
     value*: Expression
 
-  DerefExpression* = ref object of Expression
+  DerefExpression* = ref object of Expression  # $<value>
     value*: Expression
 
-  CharExpression* = ref object of Expression
+  CharExpression* = ref object of Expression  # 'c'
 
-  ArrayExpression* = ref object of Expression
+  ArrayExpression* = ref object of Expression  # {<value>, ...}
     values*: seq[Expression]
 
-  IndexExpression* = ref object of Expression
+  IndexExpression* = ref object of Expression  # <value>[<index>]
     value*: Expression
     index*: Expression
 
-  NulExpression* = ref object of Expression
+  NulExpression* = ref object of Expression  # nul
 
-  TypeExpression* = ref object of Expression
+  TypeExpression* = ref object of Expression  # T
 
-  TupleExpression* = ref object of Expression
+  TupleExpression* = ref object of Expression  # (<elements>, ...)
     elements*: OrderedTable[Token, Expression]
 
-  FieldExpression* = ref object of Expression
+  FieldExpression* = ref object of Expression  # <value>.<token>
     value*: Expression
 
-  CallExpression* = ref object of Expression
+  CallExpression* = ref object of Expression  # <value>(<arguments>)
     value*: Expression
     arguments*: seq[Expression]
     funcOverload*: Natural = 0
+
+  InstanceExpression* = ref object of Expression  # [module.]<name>< <types>, ... >
+    module*: IdentifierExpression
+    name*: Token
+    types*: seq[Type]
+    overloads*: OrderedTable[string, FuncStatement]
 
   # STATEMENTS
 
   Statement* = ref object of RootObj
 
-  DeclarationStatement* = ref object of Statement
+  ErrorStatement* = ref object of Statement
+    token*: Token
+
+  DeclarationStatement* = ref object of Statement  # T <name> = <value> [pub]
     symbolType*: Type
     name*: Token
     value*: Expression
     pub*: bool
 
-  BlockStatement* = ref object of Statement
+  BlockStatement* = ref object of Statement  # <start> <statements>... <end>
     startToken*: Token
     endToken*: Token
     statements*: seq[Statement]
 
-  AssignmentStatement* = ref object of Statement
+  AssignmentStatement* = ref object of Statement  # <left> = <value>
     left*: Expression
     value*: Expression
 
-  ErrorStatement* = ref object of Statement
-    token*: Token
-
-  BranchingStatement* = ref object of Statement
+  BranchingStatement* = ref object of Statement  # if <condition> <block> [elif] <cond> <elifBlock> ... [else] <elseBlock>
     condition*: Expression
     ifBlock*: BlockStatement
     elifBlocks*: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
     elseBlock*: BlockStatement
 
-  WhileStatement* = ref object of Statement
+  WhileStatement* = ref object of Statement  # while <condition> <whileBlock>
     token*: Token
     condition*: Expression
     whileBlock*: BlockStatement
 
-  BreakStatement* = ref object of Statement
+  BreakStatement* = ref object of Statement  # break
     token*: Token
 
-  ContinueStatement* = ref object of Statement
+  ContinueStatement* = ref object of Statement  # continue
     token*: Token
 
-  DefaultStatement* = ref object of Statement
+  DefaultStatement* = ref object of Statement  # T <name> [pub]
     symbolType*: Type
     name*: Token
     pub*: bool
 
-  FuncArgument* = object
+  FuncArgument* = ref object  # T <origin>
     origin*: Token
     expectedType*: Type
 
-  FuncStatement* = ref object of Statement
+  FuncStatement* = ref object of Statement  # func [T] <name>(<arguments>) [pub] <funcBlock>
     returnType*: Type
     name*: Token
     arguments*: OrderedTable[string, FuncArgument]
@@ -110,30 +116,39 @@ type
     funcType*: Type
     pub*: bool
 
-  ReturnStatement* = ref object of Statement
+  ReturnStatement* = ref object of Statement  # return [value]
     token*: Token
     case hasValue*: bool
     of true: value*: Expression
     else: discard
 
-  ForStatement* = ref object of Statement
+  ForStatement* = ref object of Statement  # for <name> = <value> <forBlock>
     token*: Token
     name*: Token
     value*: Expression
     forBlock*: BlockStatement
 
-  CallStatement* = ref object of Statement
+  CallStatement* = ref object of Statement  # <callExpression>
     callExpression*: CallExpression
 
-  ModuleStatement* = ref object of Statement
+  ModuleStatement* = ref object of Statement  # module <name> = "<path>"
     name*: Token
     path*: Token
+    fullPath*: string
     moduleBlock*: BlockStatement
     moduleType*: Type
 
-  ClosureStatement* = ref object of Statement
+  ClosureStatement* = ref object of Statement  # closure <names>
     token*: Token
     names*: seq[Token]
+
+  FormStatement* = ref object of Statement  # form< <formParam>, ... > [T] <name>(<arguments>) [pub] <formBlock>
+    formParams*: seq[Token]
+    returnType*: Type
+    name*: Token
+    arguments*: OrderedTable[string, FuncArgument]
+    formBlock*: BlockStatement
+    pub*: bool
 
   # SPECIALS
 
@@ -141,7 +156,7 @@ type
     skExprError
     skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead  # TODO: resized
 
-  SpecialExpression* = ref object of Expression
+  SpecialExpression* = ref object of Expression  # <token>:(<args>)
     kind*: SpecialExprKind
     namedArgs*: OrderedTable[Token, Expression]
 
@@ -149,7 +164,7 @@ type
     skStmtError
     skPrint, skFree, skAssert, skResize, skPanic
 
-  SpecialStatement* = ref object of Statement
+  SpecialStatement* = ref object of Statement  # <token>:(<args>)
     token*: Token
     kind*: SpecialStmtKind
     namedArgs*: OrderedTable[Token, Expression]
@@ -185,6 +200,9 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
     return skStmtError
 
 # EXPRESSIONS
+
+proc newInstanceExpression*(name: Token, types: seq[Type]): InstanceExpression =
+  InstanceExpression(name: name, types: types, returnType: getUndefinedType())
 
 proc newCallExpression*(token: Token, value: Expression, arguments: seq[Expression]): CallExpression =
   CallExpression(token: token, value: value, arguments: arguments, returnType: getUndefinedType())
@@ -238,6 +256,11 @@ proc newIdentifierExpression*(name: Token): IdentifierExpression {.inline.} =
   IdentifierExpression(token: name, returnType: getUndefinedType())
 
 # STATEMENTS
+
+proc newFormStatement*(returnType: Type, name: Token, arguments: OrderedTable[string, FuncArgument], 
+    formBlock: BlockStatement, formParams: seq[Token], pub: bool): FormStatement {.inline.} =
+  FormStatement(returnType: returnType, name: name, arguments: arguments, formBlock: formBlock,
+    formParams: formParams, pub: pub)
 
 proc newClosureStatement*(token: Token, names: seq[Token]): ClosureStatement {.inline.} =
   ClosureStatement(token: token, names: names)
@@ -304,3 +327,4 @@ proc newDeclarationStatement*(
 
 proc newDefaultStatement*(symbolType: Type, name: Token, pub: bool): DefaultStatement {.inline.} =
   DefaultStatement(name: name, symbolType: symbolType, pub: pub)
+  

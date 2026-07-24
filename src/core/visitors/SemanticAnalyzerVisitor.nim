@@ -27,6 +27,9 @@ type
     expectedContextType: Type
     loopLevel: Natural = 0
     funcStack: seq[FuncStatement]
+    moduleCache: Table[string, Type]
+
+    formTable: Table[string, seq[FormStatement]]
 
 var logger = newConsoleLogger(fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
 
@@ -454,9 +457,60 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     for name, _ in varType.overloads.pairs:
       avaiableOverloadFormatted &= "\n- " & name
 
+    if funcName.lexeme in visitor.formTable:
+      for form in visitor.formTable[funcName.lexeme]:
+        avaiableOverloadFormatted &= "\n- " & formToString(form)
+
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
 
   info("exiting CallExpression")
+
+proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types: seq[Type]): FuncStatement =
+  var typeMap: Table[string, Type]
+  for i in 0..types.len:
+    typeMap[form.formParams[i].lexeme] = types[i]
+  info("type mapping has been created")
+  recursivMonomorphization(deepCopy(form.formBlock), typeMap)
+  info("the recursive monomorphization of the copy is complete")
+  form.returnType
+
+method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: InstanceExpression): auto =
+  info("visiting InstanceExpression")
+
+  if node.name.lexeme in visitor.formTable:
+    info("forms of ", node.name.lexeme, " was found in the table. Comparison")
+
+    var foundAtLeastOne = false
+    for form in visitor.formTable[node.name.lexeme]:
+      info("- with ", formToString(form))
+      if form.formParams.len != node.types.len:
+        info("param length mismatch")
+        continue
+      foundAtLeastOne = true
+      info("suitable form has been found. Monomorphization...")
+      let funcStatement = visitor.monomorphizeForm(form, node.types)
+      if funcStatement != nil:
+        info("the function was successfully generated and cached")
+        node.overloads[funcStatement.name.lexeme] = funcStatement
+        if node.returnType.neq getUndefinedType():
+          node.returnType.overloads[funcStatement.name.lexeme] = funcStatement.funcType
+          info("The function was overloaded")
+        else:
+          node.setType(funcStatement.funcType)
+
+    if not foundAtLeastOne:
+      var avaiableOverloadFormatted: string
+      for n, form in visitor.formTable[node.name.lexeme]:
+        if n != 0: avaiableOverloadFormatted &= "\n"
+        avaiableOverloadFormatted &= "- " & formToString(form)
+
+      newError(errFormResolution, node.name, @{"@0": node.name.lexeme, "@1": "<" & node.types.mapIt($it).join(", ") & ">", "@2": avaiableOverloadFormatted})
+
+  # TODO: modules
+  else:
+    newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
+
+  info("exiting InstanceExpression")
 
 # STATEMENTS
 
@@ -625,32 +679,6 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
 
   info("exiting DefaultStatement")
 
-proc blockEndsWithReturn(self: SemanticAnalyzerVisitor, node: Statement): bool =
-  if node of ReturnStatement:
-    return true
-  elif node of BlockStatement:
-    for stmt in BlockStatement(node).statements:
-      if self.blockEndsWithReturn(stmt):
-        return true
-    return false
-  elif node of BranchingStatement:
-    let br = BranchingStatement(node)
-    let ifEnds = self.blockEndsWithReturn(br.ifBlock)
-    let elseEnds = br.elseBlock != nil and self.blockEndsWithReturn(br.elseBlock)
-    
-    var allElifsEnd = true
-    for el in br.elifBlocks:
-      if not self.blockEndsWithReturn(el.elifBlock):
-        allElifsEnd = false
-        break
-    
-    if br.elseBlock != nil and ifEnds and allElifsEnd and elseEnds:
-      return true
-    else:
-      return false
-  else:
-    return false
-
 method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement): auto =
   info("visiting FuncStatement")
 
@@ -672,7 +700,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
   if node.returnType.neq getUndefinedType():
     info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
-    if not visitor.blockEndsWithReturn(node.funcBlock):
+    if not blockEndsWithReturn(node.funcBlock):
       warn("...false")
       newError(errMissingReturn, node.name, @{"@0": node.name.lexeme})
       error = true
@@ -770,7 +798,7 @@ method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement
   let funcExpr = node.callExpression
 
   if funcExpr.returnType.neq getUndefinedType():
-    newError(errUnusedReturn, funcExpr.value.token, @{"@0": funcExpr.token.lexeme})
+    newError(errUnusedReturn, funcExpr.value.token, @{"@0": funcExpr.value.token.lexeme})
 
   info("exiting CallStatement")
 
@@ -791,10 +819,17 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
 
     let fullPath = (
       if modulePath.startsWith("std/"): visitor.stdLibPath / modulePath[4..^1] & ".kvl"
-      else: joinPath(dir, modulePath)
+      else: joinPath(dir, modulePath) & ".kvl"
     )
 
     info("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
+
+    if fullPath in visitor.moduleCache:
+      info("found module ", node.path.lexeme, " in the module cache")
+      node.moduleType = visitor.moduleCache[fullPath]
+      node.fullPath = fullPath
+      visitor.newSymbol(node.name, node.moduleType, false)
+      break analysis
 
     if not fileExists(fullPath):
       warn("module ", node.path.lexeme, " does not exists")
@@ -827,12 +862,13 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
 
     visitor.popScope()
 
-
     if errors.errors.len != 0:
       newError(errCorruptedModule, node.name, @{"@0": node.path.lexeme})
     else:
       node.moduleType = getModuleType(fullPath, symbols)
       visitor.newSymbol(node.name, node.moduleType, false)
+      visitor.moduleCache[fullPath] = node.moduleType
+      node.fullPath = fullPath
 
   info("exiting ModuleStatement")
 
@@ -864,6 +900,48 @@ method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureSta
               visitor.funcStack[^1].name.lexeme, " closures")
 
   info("exiting ClosureStatement")
+
+method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement): auto =
+  info("visiting FormStatement")
+
+  var error = false
+
+  info("finding form overloads...")
+  if node.name.lexeme in visitor.formTable:
+    info("equality check self signature ", formToString(node))
+    for form in visitor.formTable[node.name.lexeme]:
+      info("- with ", formToString(form))
+      if node.formParams.len != form.formParams.len: info("form params length mismatch"); continue
+      if node.arguments.len  != form.arguments.len:  info("arguments length mismatch");   continue
+      var cont = false
+      for index in 0..<node.formParams.len:
+        if node.formParams[index].lexeme != form.formParams[index].lexeme: 
+          info("param mismatch")
+          cont = true
+          break
+      if cont: continue
+      if node.returnType.neq(form.returnType): continue
+      for index in 0..<node.arguments.len:
+        if node.arguments[$index].expectedType.neq form.arguments[$index].expectedType: 
+          info("argument mismatch")
+          cont = true
+          break
+      if cont: continue
+      warn("a match was found")
+      error = true
+      newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": form.name.file, "@2": $form.name.line, "@3": $form.name.column})
+      break
+    if not error:
+      info("no matches found")
+      
+  else:
+    info("not found")
+  
+  if not error:
+    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(node)
+    info(node.name.lexeme, " was added or overloaded to the form table")
+
+  info("exiting FormStatement")
 
 # SPECIALS
 
@@ -1184,6 +1262,8 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
     visitor.visitFieldExpression(FieldExpression(node))
   elif node of CallExpression:
     visitor.visitCallExpression(CallExpression(node))
+  elif node of InstanceExpression:
+    visitor.visitInstanceExpression(InstanceExpression(node))
   else:
     warn("unhandled expression")
 
@@ -1221,5 +1301,7 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitModuleStatement(ModuleStatement(node))
   elif node of ClosureStatement:
     visitor.visitClosureStatement(ClosureStatement(node))
+  elif node of FormStatement:
+    visitor.visitFormStatement(FormStatement(node))
   else:
     warn("unhandled statement")

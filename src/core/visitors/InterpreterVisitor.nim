@@ -30,7 +30,7 @@ type
   Value* = object
     valueType*: Type
     case kind: TypeKind
-    of typeUndefined, typeGen: discard
+    of typeUndefined, typeVar: discard
 
     of typeInt64:        int64Value:       int64
     of typeInt32:        int32Value:       int32
@@ -60,6 +60,7 @@ type
 
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
+    moduleCache: Table[string, Value]
 
   BreakException* = object of CatchableError
   ContinueException* = object of CatchableError
@@ -266,7 +267,7 @@ proc `==`*(a, b: Value): bool =
     return false
 
   case a.kind:
-  of typeUndefined, typeGen: return false
+  of typeUndefined, typeVar: return false
   of typeInt64:  return a.int64Value == b.int64Value
   of typeInt32:  return a.int32Value == b.int32Value
   of typeInt16:  return a.int16Value == b.int16Value
@@ -351,7 +352,7 @@ proc `$`*(value: Value): string =
     raise newException(ValueError, "Cannot convert pointer to string")
   of typeNul:
     raise newException(ValueError, "Cannot convert nul to string")
-  of typeUndefined, typeGen:
+  of typeUndefined, typeVar:
     raise newException(ValueError, "Cannot convert undefined to string")
   of typeTuple:
     raise newException(ValueError, "Cannot convert tuple to string")
@@ -833,19 +834,24 @@ method visitCallStatement*(visitor: InterpreterVisitor, node: CallStatement): au
 method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement): auto =
   visitor.pushScope()
 
-  visitor.visitStatement(node.moduleBlock)
+  if node.fullPath in visitor.moduleCache:
+    visitor.newSlot(node.name.lexeme, visitor.moduleCache[node.fullPath])
+    visitor.popScope()
+  else:
+    visitor.visitStatement(node.moduleBlock)
 
-  var moduleValues: OrderedTable[string, Value]
+    var moduleValues: OrderedTable[string, Value]
 
-  for name, _ in node.moduleType.symbols:
-    moduleValues[name] = visitor.getSlot(name)
-    if moduleValues[name].valueType.eq(typeFunc):
-      for olName, _ in moduleValues[name].valueType.overloads:
-        moduleValues[olName] = visitor.getSlot(olName)
+    for name, _ in node.moduleType.symbols:
+      moduleValues[name] = visitor.getSlot(name)
+      if moduleValues[name].valueType.eq(typeFunc):
+        for olName, _ in moduleValues[name].valueType.overloads:
+          moduleValues[olName] = visitor.getSlot(olName)
 
-  visitor.popScope()
+    visitor.popScope()
 
-  visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
+    visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
+    visitor.moduleCache[node.fullPath] = newModuleValue(node.moduleType, moduleValues)
 
 method visitClosureStatement*(visitor: InterpreterVisitor, node: ClosureStatement): auto =
   discard

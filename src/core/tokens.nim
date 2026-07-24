@@ -32,7 +32,7 @@ type
     tkDo, tkEnd
     tkIf, tkElif, tkElse
     tkWhile, tkFor, tkBreak, tkContinue
-    tkFunc, tkReturn
+    tkFunc, tkReturn, tkForm
     tkPub
     tkClosure
     tkAs
@@ -137,6 +137,7 @@ proc mean*(kind: TokenKind): string =
   of tkContinue:      return "keyword continue"
   of tkFunc:          return "keyword func"
   of tkReturn:        return "keyword return"
+  of tkForm:          return "keyword form"
   of tkPub:           return "keyword pub"
   of tkClosure:       return "keyword closure"
   of tkAs:            return "keyword as"
