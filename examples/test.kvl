@@ -2,4 +2,4 @@ form<T> T add(T a, T b) pub do
   return a + b
 end
 
-int x = add<int>('a', 'b')
+int x = add<int>(10)

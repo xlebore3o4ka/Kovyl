@@ -124,7 +124,7 @@ proc formToString*(node: FormStatement): string =
     .join(", ")
   return node.name.lexeme & "<" & strParams & ">(" & strArgs & ") -> " & $node.returnType
 
-proc deepCopy*(node: Expression): Expression =
+proc cloneAst*(node: Expression): Expression =
   if node == nil: return nil
   
   if node of NumberExpression:
@@ -150,55 +150,55 @@ proc deepCopy*(node: Expression): Expression =
 
   elif node of BinaryExpression:
     let n = BinaryExpression(node)
-    result = newBinaryExpression(deepCopy(n.left), n.token, deepCopy(n.right))
+    result = newBinaryExpression(cloneAst(n.left), n.token, cloneAst(n.right))
 
   elif node of UnaryExpression:
     let n = UnaryExpression(node)
-    result = newUnaryExpression(deepCopy(n.value), n.token)
+    result = newUnaryExpression(cloneAst(n.value), n.token)
   
   elif node of CastExpression:
     let n = CastExpression(node)
-    result = newCastExpression(n.token, n.returnType, deepCopy(n.value))
+    result = newCastExpression(n.token, n.returnType, cloneAst(n.value))
  
   elif node of DerefExpression:
     let n = DerefExpression(node)
-    result = newDerefExpression(n.token, deepCopy(n.value))
+    result = newDerefExpression(n.token, cloneAst(n.value))
   
   elif node of ArrayExpression:
     let n = ArrayExpression(node)
     var arr = newArrayExpression(n.token)
     for v in n.values:
-      arr.addExpr(deepCopy(v))
+      arr.addExpr(cloneAst(v))
     result = arr
  
   elif node of IndexExpression:
     let n = IndexExpression(node)
-    result = newIndexExpression(n.token, deepCopy(n.value), deepCopy(n.index))
+    result = newIndexExpression(n.token, cloneAst(n.value), cloneAst(n.index))
  
   elif node of TupleExpression:
     let n = TupleExpression(node)
     var elems = initOrderedTable[Token, Expression]()
     for k, v in n.elements:
-      elems[k] = deepCopy(v)
+      elems[k] = cloneAst(v)
     result = newTupleExpression(n.token, elems)
  
   elif node of FieldExpression:
     let n = FieldExpression(node)
-    result = newFieldExpression(deepCopy(n.value), n.token)
+    result = newFieldExpression(cloneAst(n.value), n.token)
  
   elif node of CallExpression:
     let n = CallExpression(node)
     var args: seq[Expression] = @[]
     for a in n.arguments:
-      args.add(deepCopy(a))
-    result = newCallExpression(n.token, deepCopy(n.value), args)
+      args.add(cloneAst(a))
+    result = newCallExpression(n.token, cloneAst(n.value), args)
     CallExpression(result).funcOverload = n.funcOverload
  
   elif node of SpecialExpression:
     let n = SpecialExpression(node)
     var args = initOrderedTable[Token, Expression]()
     for k, v in n.namedArgs:
-      args[k] = deepCopy(v)
+      args[k] = cloneAst(v)
     result = newSpecialExpression(n.token, n.kind, args)
   
   elif node of InstanceExpression:
@@ -210,7 +210,7 @@ proc deepCopy*(node: Expression): Expression =
       token: n.token,
       returnType: n.returnType,
       name: n.name,
-      module: deepCopy(n.module),
+      module: IdentifierExpression(cloneAst(n.module)),
       types: n.types,
       overloads: ol
     )
@@ -218,22 +218,22 @@ proc deepCopy*(node: Expression): Expression =
   result.returnType = node.returnType
   result.token = node.token
 
-proc deepCopy*(node: Statement): Statement =
+proc cloneAst*(node: Statement): Statement =
   if node == nil: return nil
   
   if node of BlockStatement:
     let n = BlockStatement(node)
     result = newBlockStatement(n.startToken, n.endToken)
     for s in n.statements:
-      BlockStatement(result).addStatement(deepCopy(s))
+      BlockStatement(result).addStatement(cloneAst(s))
  
   elif node of DeclarationStatement:
     let n = DeclarationStatement(node)
-    result = newDeclarationStatement(n.symbolType, n.name, deepCopy(n.value), n.pub)
+    result = newDeclarationStatement(n.symbolType, n.name, cloneAst(n.value), n.pub)
  
   elif node of AssignmentStatement:
     let n = AssignmentStatement(node)
-    result = newAssignmentStatement(deepCopy(n.left), deepCopy(n.value))
+    result = newAssignmentStatement(cloneAst(n.left), cloneAst(n.value))
  
   elif node of ErrorStatement:
     let n = ErrorStatement(node)
@@ -241,15 +241,15 @@ proc deepCopy*(node: Statement): Statement =
  
   elif node of BranchingStatement:
     let n = BranchingStatement(node)
-    result = newBranchingStatement(deepCopy(n.condition), deepCopy(n.ifBlock))
+    result = newBranchingStatement(cloneAst(n.condition), BlockStatement(cloneAst(n.ifBlock)))
     for el in n.elifBlocks:
-      BranchingStatement(result).addElif(deepCopy(el.cond), deepCopy(el.elifBlock))
+      BranchingStatement(result).addElif(cloneAst(el.cond), BlockStatement(cloneAst(el.elifBlock)))
     if n.elseBlock != nil:
-      BranchingStatement(result).setElse(deepCopy(n.elseBlock))
+      BranchingStatement(result).setElse(BlockStatement(cloneAst(n.elseBlock)))
 
   elif node of WhileStatement:
     let n = WhileStatement(node)
-    result = newWhileStatement(n.token, deepCopy(n.condition), deepCopy(n.whileBlock))
+    result = newWhileStatement(n.token, cloneAst(n.condition), BlockStatement(cloneAst(n.whileBlock)))
  
   elif node of BreakStatement:
     result = newBreakStatement(BreakStatement(node).token)
@@ -266,29 +266,29 @@ proc deepCopy*(node: Statement): Statement =
     var args = initOrderedTable[string, FuncArgument]()
     for k, v in n.arguments:
       args[k] = v
-    result = newFuncStatement(n.returnType, n.name, args, deepCopy(n.funcBlock), n.pub)
+    result = newFuncStatement(n.returnType, n.name, args, BlockStatement(cloneAst(n.funcBlock)), n.pub)
     FuncStatement(result).funcType = n.funcType
     FuncStatement(result).funcClosures = n.funcClosures
   
   elif node of ReturnStatement:
     let n = ReturnStatement(node)
     if n.hasValue:
-      result = newReturnStatement(n.token, true, deepCopy(n.value))
+      result = newReturnStatement(n.token, true, cloneAst(n.value))
     else:
       result = newReturnStatement(n.token, false)
  
   elif node of ForStatement:
     let n = ForStatement(node)
-    result = newForStatement(n.token, n.name, deepCopy(n.value), deepCopy(n.forBlock))
+    result = newForStatement(n.token, n.name, cloneAst(n.value), BlockStatement(cloneAst(n.forBlock)))
  
   elif node of CallStatement:
     let n = CallStatement(node)
-    result = newCallStatement(deepCopy(n.callExpression))
+    result = newCallStatement(CallExpression(cloneAst(n.callExpression)))
  
   elif node of ModuleStatement:
     let n = ModuleStatement(node)
     result = newModuleStatement(n.name, n.path)
-    ModuleStatement(result).moduleBlock = deepCopy(n.moduleBlock)
+    ModuleStatement(result).moduleBlock = BlockStatement(cloneAst(n.moduleBlock))
     ModuleStatement(result).moduleType = n.moduleType
  
   elif node of ClosureStatement:
@@ -299,7 +299,7 @@ proc deepCopy*(node: Statement): Statement =
     let n = SpecialStatement(node)
     var args = initOrderedTable[Token, Expression]()
     for k, v in n.namedArgs:
-      args[k] = deepCopy(v)
+      args[k] = cloneAst(v)
     result = newSpecialStatement(n.token, n.kind, args)
  
   elif node of FormStatement:
@@ -307,11 +307,11 @@ proc deepCopy*(node: Statement): Statement =
     var args = initOrderedTable[string, FuncArgument]()
     for k, v in n.arguments:
       args[k] = v
-    result = newFormStatement(n.returnType, n.name, args, deepCopy(n.formBlock), n.formParams, n.pub)
+    result = newFormStatement(n.returnType, n.name, args, BlockStatement(cloneAst(n.formBlock)), n.formParams, n.pub)
 
-proc recursivMonomorphization*(node: Statement, typeMap: Table[string, Type])
+proc recursiveMonomorphization*(node: Statement, typeMap: Table[string, Type])
 
-proc recursivMonomorphization*(node: Expression, typeMap: Table[string, Type]) =
+proc recursiveMonomorphization*(node: Expression, typeMap: Table[string, Type]) =
   if node == nil: return
   
   if node.returnType != nil and node.returnType.kind == typeVar:
@@ -320,52 +320,52 @@ proc recursivMonomorphization*(node: Expression, typeMap: Table[string, Type]) =
   
   if node of BinaryExpression:
     let n = BinaryExpression(node)
-    recursivMonomorphization(n.left, typeMap)
-    recursivMonomorphization(n.right, typeMap)
+    recursiveMonomorphization(n.left, typeMap)
+    recursiveMonomorphization(n.right, typeMap)
   
   elif node of UnaryExpression:
     let n = UnaryExpression(node)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
   
   elif node of CastExpression:
     let n = CastExpression(node)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
     if n.returnType != nil and n.returnType.kind == typeVar and n.returnType.varName in typeMap:
       n.returnType = typeMap[n.returnType.varName]
   
   elif node of DerefExpression:
     let n = DerefExpression(node)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
   
   elif node of ArrayExpression:
     let n = ArrayExpression(node)
     for v in n.values:
-      recursivMonomorphization(v, typeMap)
+      recursiveMonomorphization(v, typeMap)
   
   elif node of IndexExpression:
     let n = IndexExpression(node)
-    recursivMonomorphization(n.value, typeMap)
-    recursivMonomorphization(n.index, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.index, typeMap)
   
   elif node of TupleExpression:
     let n = TupleExpression(node)
     for _, v in n.elements:
-      recursivMonomorphization(v, typeMap)
+      recursiveMonomorphization(v, typeMap)
   
   elif node of FieldExpression:
     let n = FieldExpression(node)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
   
   elif node of CallExpression:
     let n = CallExpression(node)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
     for a in n.arguments:
-      recursivMonomorphization(a, typeMap)
+      recursiveMonomorphization(a, typeMap)
   
   elif node of SpecialExpression:
     let n = SpecialExpression(node)
     for _, v in n.namedArgs:
-      recursivMonomorphization(v, typeMap)
+      recursiveMonomorphization(v, typeMap)
   
   elif node of InstanceExpression:
     let n = InstanceExpression(node)
@@ -373,42 +373,42 @@ proc recursivMonomorphization*(node: Expression, typeMap: Table[string, Type]) =
       if t.kind == typeVar and t.varName in typeMap:
         n.types[i] = typeMap[t.varName]
     for _, v in n.overloads:
-      recursivMonomorphization(v, typeMap)
+      recursiveMonomorphization(v, typeMap)
 
-proc recursivMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
+proc recursiveMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
   if node == nil: return
   
   if node of BlockStatement:
     let n = BlockStatement(node)
     for s in n.statements:
-      recursivMonomorphization(s, typeMap)
+      recursiveMonomorphization(s, typeMap)
   
   elif node of DeclarationStatement:
     let n = DeclarationStatement(node)
     if n.symbolType != nil:
       for varName, replacement in typeMap:
         n.symbolType = substituteTypeVar(n.symbolType, varName, replacement)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
   
   elif node of AssignmentStatement:
     let n = AssignmentStatement(node)
-    recursivMonomorphization(n.left, typeMap)
-    recursivMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.left, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
   
   elif node of BranchingStatement:
     let n = BranchingStatement(node)
-    recursivMonomorphization(n.condition, typeMap)
-    recursivMonomorphization(n.ifBlock, typeMap)
+    recursiveMonomorphization(n.condition, typeMap)
+    recursiveMonomorphization(n.ifBlock, typeMap)
     for el in n.elifBlocks:
-      recursivMonomorphization(el.cond, typeMap)
-      recursivMonomorphization(el.elifBlock, typeMap)
+      recursiveMonomorphization(el.cond, typeMap)
+      recursiveMonomorphization(el.elifBlock, typeMap)
     if n.elseBlock != nil:
-      recursivMonomorphization(n.elseBlock, typeMap)
+      recursiveMonomorphization(n.elseBlock, typeMap)
   
   elif node of WhileStatement:
     let n = WhileStatement(node)
-    recursivMonomorphization(n.condition, typeMap)
-    recursivMonomorphization(n.whileBlock, typeMap)
+    recursiveMonomorphization(n.condition, typeMap)
+    recursiveMonomorphization(n.whileBlock, typeMap)
   
   elif node of FuncStatement:
     var n = FuncStatement(node)
@@ -419,25 +419,25 @@ proc recursivMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
       if arg.expectedType != nil:
         for varName, replacement in typeMap:
           arg.expectedType = substituteTypeVar(arg.expectedType, varName, replacement)
-    recursivMonomorphization(n.funcBlock, typeMap)
+    recursiveMonomorphization(n.funcBlock, typeMap)
   
   elif node of ReturnStatement:
     let n = ReturnStatement(node)
     if n.hasValue:
-      recursivMonomorphization(n.value, typeMap)
+      recursiveMonomorphization(n.value, typeMap)
   
   elif node of ForStatement:
     let n = ForStatement(node)
-    recursivMonomorphization(n.value, typeMap)
-    recursivMonomorphization(n.forBlock, typeMap)
+    recursiveMonomorphization(n.value, typeMap)
+    recursiveMonomorphization(n.forBlock, typeMap)
   
   elif node of CallStatement:
     let n = CallStatement(node)
-    recursivMonomorphization(n.callExpression, typeMap)
+    recursiveMonomorphization(n.callExpression, typeMap)
   
   elif node of ModuleStatement:
     let n = ModuleStatement(node)
-    recursivMonomorphization(n.moduleBlock, typeMap)
+    recursiveMonomorphization(n.moduleBlock, typeMap)
   
   elif node of FormStatement:
     var n = FormStatement(node)
@@ -448,4 +448,4 @@ proc recursivMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
       if arg.expectedType != nil:
         for varName, replacement in typeMap:
           arg.expectedType = substituteTypeVar(arg.expectedType, varName, replacement)
-    recursivMonomorphization(n.formBlock, typeMap)
+    recursiveMonomorphization(n.formBlock, typeMap)

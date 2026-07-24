@@ -467,12 +467,38 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
 proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types: seq[Type]): FuncStatement =
   var typeMap: Table[string, Type]
-  for i in 0..types.len:
+
+  for i in 0..<types.len:
     typeMap[form.formParams[i].lexeme] = types[i]
-  info("type mapping has been created")
-  recursivMonomorphization(deepCopy(form.formBlock), typeMap)
-  info("the recursive monomorphization of the copy is complete")
-  form.returnType
+
+  var newArguments = initOrderedTable[string, FuncArgument]()
+  for key, arg in form.arguments:
+    var newArg = arg
+    for varName, replacement in typeMap:
+      newArg.expectedType = substituteTypeVar(newArg.expectedType, varName, replacement)
+    newArguments[key] = newArg
+
+  var newReturnType = form.returnType
+  for varName, replacement in typeMap:
+    newReturnType = substituteTypeVar(newReturnType, varName, replacement)
+
+  let clonedBody = BlockStatement(cloneAst(form.formBlock))
+  recursiveMonomorphization(clonedBody, typeMap)
+
+  var argumentTypes = initOrderedTable[string, Type]()
+  var index = 0
+  for _, arg in newArguments.pairs:
+    argumentTypes[$index] = arg.expectedType
+    index.inc
+
+  result = newFuncStatement(
+    returnType = newReturnType,
+    name = form.name,
+    arguments = newArguments,
+    funcBlock = clonedBody,
+    pub = form.pub
+  )
+  result.funcType = getFuncType(argumentTypes, newReturnType, form.name.lexeme & $getFuncType(argumentTypes, newReturnType))
 
 method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: InstanceExpression): auto =
   info("visiting InstanceExpression")
@@ -490,7 +516,7 @@ method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: Instance
       info("suitable form has been found. Monomorphization...")
       let funcStatement = visitor.monomorphizeForm(form, node.types)
       if funcStatement != nil:
-        info("the function was successfully generated and cached")
+        info("the function was successfully generated and cached: ", funcStatement.name.lexeme, funcStatement.funcType)
         node.overloads[funcStatement.name.lexeme] = funcStatement
         if node.returnType.neq getUndefinedType():
           node.returnType.overloads[funcStatement.name.lexeme] = funcStatement.funcType
