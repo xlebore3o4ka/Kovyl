@@ -202,7 +202,7 @@ proc getSpecialStmtKind*(token: Token): SpecialStmtKind =
 # EXPRESSIONS
 
 proc newInstanceExpression*(name: Token, types: seq[Type]): InstanceExpression =
-  InstanceExpression(name: name, types: types, returnType: getUndefinedType())
+  InstanceExpression(name: name, token: name, types: types, returnType: getUndefinedType())
 
 proc newCallExpression*(token: Token, value: Expression, arguments: seq[Expression]): CallExpression =
   CallExpression(token: token, value: value, arguments: arguments, returnType: getUndefinedType())

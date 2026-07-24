@@ -87,8 +87,9 @@ proc newError*(
               kind: ErrorKind, file: string, line: Positive, col: Positive, 
               pos: Natural, len: Positive, 
               args: seq[(string, string)] = @[]) =
+
   var msg = kind.message()
-  
+
   errors.add(CompileError(
     kind: kind, file: file, line: line, col: col,
     pos: pos, len: len, args: args, message: msg
@@ -108,4 +109,5 @@ proc newError*(
 proc newError*(
               kind: ErrorKind, token: Token, 
               args: seq[(string, string)] = @[]) {.inline.} =
+  
   newError(kind, token.file, token.line, token.column, token.offset, token.lexeme.len, args)
