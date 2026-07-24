@@ -452,14 +452,16 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
       warn("No matching overloads found for function ", varType.funcName)
 
     let funcName = node.value.token
-    var avaiableOverloadFormatted = "- " & funcName.lexeme & $varType
+    var avaiableOverloadFormatted: string = "- " & funcName.lexeme & $varType
 
-    for name, _ in varType.overloads.pairs:
-      avaiableOverloadFormatted &= "\n- " & name
+    if node.value of InstanceExpression:
+      if funcName.lexeme in visitor.formTable:
+        for form in visitor.formTable[funcName.lexeme]:
+          avaiableOverloadFormatted &= "\n- " & formToString(form)
 
-    if funcName.lexeme in visitor.formTable:
-      for form in visitor.formTable[funcName.lexeme]:
-        avaiableOverloadFormatted &= "\n- " & formToString(form)
+    else:
+      for name, _ in varType.overloads.pairs:
+        avaiableOverloadFormatted &= "\n- " & name & $funcType
 
     newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
 
@@ -473,7 +475,10 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
 
   var newArguments = initOrderedTable[string, FuncArgument]()
   for key, arg in form.arguments:
-    var newArg = arg
+    var newArg = FuncArgument(
+        origin: arg.origin,
+        expectedType: arg.expectedType
+    )
     for varName, replacement in typeMap:
       newArg.expectedType = substituteTypeVar(newArg.expectedType, varName, replacement)
     newArguments[key] = newArg
@@ -964,7 +969,7 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
     info("not found")
   
   if not error:
-    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(node)
+    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(FormStatement(cloneAst(node)))
     info(node.name.lexeme, " was added or overloaded to the form table")
 
   info("exiting FormStatement")

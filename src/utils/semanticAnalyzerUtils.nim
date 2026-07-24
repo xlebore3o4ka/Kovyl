@@ -265,7 +265,10 @@ proc cloneAst*(node: Statement): Statement =
     let n = FuncStatement(node)
     var args = initOrderedTable[string, FuncArgument]()
     for k, v in n.arguments:
-      args[k] = v
+      args[k] = FuncArgument(
+        origin: v.origin,
+        expectedType: v.expectedType
+      )
     result = newFuncStatement(n.returnType, n.name, args, BlockStatement(cloneAst(n.funcBlock)), n.pub)
     FuncStatement(result).funcType = n.funcType
     FuncStatement(result).funcClosures = n.funcClosures
