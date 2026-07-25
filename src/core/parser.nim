@@ -12,7 +12,8 @@ const TOKEN_TYPE_KINDS = {
   tkBool, 
   tkChar, tkTuple,
   tkString,
-  tkIdentifier
+  tkIdentifier,
+  tkNul
 }
   
 proc newParser*(text, file: string): Parser =
@@ -55,6 +56,7 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkBool:   result = getBoolType()
   of tkChar:   result = getCharType()
   of tkString: result = getVecType(getCharType())
+  of tkNul:    result = getUndefinedType()
   of tkTuple:
     discard self.expectToken(tkLBracket)
     var elements = initOrderedTable[string, Type]()
@@ -120,12 +122,15 @@ proc parseType(self: var Parser, token: Token): Type =
           break
 
         let typ = self.parseType(tok)
+
         let name = $index
 
         elements[name] = typ
         if self.lexer.peekToken().kind == tkRParen: break
 
         discard self.expectToken(tkComma)
+
+        index += 1
 
       discard self.expectToken(tkRParen)
 
