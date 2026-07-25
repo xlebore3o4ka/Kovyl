@@ -134,6 +134,7 @@ const keywordsTokens = {
   "bool": tkBool,
   "char": tkChar,
   "string": tkString,
+  "tuple": tkTuple,
   "module": tkModule,
   "nul": tkNul,
   "true": tkTrue,

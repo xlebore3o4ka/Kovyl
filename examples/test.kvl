@@ -1,0 +1,33 @@
+module panics = "std/panics"
+
+string outOfBounds = panics.registerPanic("outOfBounds")
+
+form[T] push(T@ vec, T val) do
+  int size = len: vec
+  resize:(vec, size + 1)
+  vec[size] = val
+end
+
+form[T] T pop(T@ vec) do
+  int size = len: vec
+  if size == 0 do
+    panic:(outOfBounds, "")
+  end
+  T result = vec[size - 1]
+  resize:(vec, size - 1)
+  return result
+end
+
+int@ stack = vec:int[]
+push$[int](stack, 10)
+push$[int](stack, 20)
+push$[int](stack, 30)
+int(int@) x = pop$[int]
+int b = pop$[int](stack)
+int a = pop$[int](stack)
+push$[int](stack, a + b)
+int b1 = pop$[int](stack)
+int a1 = pop$[int](stack)
+push$[int](stack, a1 * b1)
+
+print:fmt:stack[0]  # 500

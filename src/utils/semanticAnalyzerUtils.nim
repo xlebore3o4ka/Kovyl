@@ -122,7 +122,7 @@ proc formToString*(node: FormStatement): string =
   let strArgs = node.arguments.values.toSeq
     .mapIt($it.expectedType)
     .join(", ")
-  return node.name.lexeme & "<" & strParams & ">(" & strArgs & ") -> " & $node.returnType
+  return node.name.lexeme & "$[" & strParams & "](" & strArgs & ") -> " & $node.returnType
 
 proc cloneAst*(node: Expression): Expression =
   if node == nil: return nil

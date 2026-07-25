@@ -10,7 +10,7 @@ const TOKEN_TYPE_KINDS = {
   tkInt64, tkInt32, tkInt16, tkInt8, 
   tkUint64, tkUint32, tkUint16, tkUint8, 
   tkBool, 
-  tkChar, tkLParen,
+  tkChar, tkTuple,
   tkString,
   tkIdentifier
 }
@@ -55,11 +55,12 @@ proc parseType(self: var Parser, token: Token): Type =
   of tkBool:   result = getBoolType()
   of tkChar:   result = getCharType()
   of tkString: result = getVecType(getCharType())
-  of tkLParen:
+  of tkTuple:
+    discard self.expectToken(tkLBracket)
     var elements = initOrderedTable[string, Type]()
     var index = 0
 
-    while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
+    while self.lexer.peekToken().kind notin {tkRBracket, tkEOF}:
       let tok = self.lexer.nextToken()
       if tok.kind notin TOKEN_TYPE_KINDS:
         result = getUndefinedType()
@@ -80,11 +81,11 @@ proc parseType(self: var Parser, token: Token): Type =
         index += 1
 
       elements[name] = typ
-      if self.lexer.peekToken().kind == tkRParen: break
+      if self.lexer.peekToken().kind == tkRBracket: break
 
       discard self.expectToken(tkComma)
 
-    discard self.expectToken(tkRParen)
+    discard self.expectToken(tkRBracket)
 
     if elements.len == 0:
       result = getUndefinedType()
@@ -92,18 +93,6 @@ proc parseType(self: var Parser, token: Token): Type =
       result = elements["0"]
     else:
       result = getTupleType(elements)
-
-    if self.lexer.peekToken().kind == tkArrow:
-      discard self.lexer.nextToken()
-      let returnType = self.parseType(self.lexer.nextToken())
-      if result.eq getUndefinedType():
-        result = getFuncType(initOrderedTable[string, Type](), returnType)
-      else:
-        for name, typ in elements.pairs:
-          if not isValidUint[uint64](name):
-            newError(errFuncNamedArguments, token)
-            return getUndefinedType()
-        result = getFuncType(elements, returnType)
   of tkIdentifier:
     if self.isType(token):
       result = getVarType(token.lexeme)
@@ -113,11 +102,41 @@ proc parseType(self: var Parser, token: Token): Type =
   else: 
     self.newError(errUnknownType, token, @{"@0": token.lexeme})
     return getUndefinedType()
-  while self.lexer.peekToken().kind in {tkStar, tkLBracket, tkAt}:
+  while self.lexer.peekToken().kind in {tkStar, tkLBracket, tkLParen, tkAt}:
     let token = self.lexer.nextToken()
 
     if token.kind == tkStar:
       result = getPtrType(result)
+
+    elif token.kind == tkLParen:
+      let returnType = result
+      var elements = initOrderedTable[string, Type]()
+      var index = 0
+
+      while self.lexer.peekToken().kind notin {tkRParen, tkEOF}:
+        let tok = self.lexer.nextToken()
+        if tok.kind notin TOKEN_TYPE_KINDS:
+          result = getUndefinedType()
+          break
+
+        let typ = self.parseType(tok)
+        let name = $index
+
+        elements[name] = typ
+        if self.lexer.peekToken().kind == tkRParen: break
+
+        discard self.expectToken(tkComma)
+
+      discard self.expectToken(tkRParen)
+
+      if elements.len == 0:
+        result = getFuncType(initOrderedTable[string, Type](), returnType)
+      else:
+        for name, typ in elements.pairs:
+          if not isValidUint[uint64](name):
+            newError(errFuncNamedArguments, token)
+            return getUndefinedType()
+        result = getFuncType(elements, returnType)
 
     elif token.kind == tkLBracket:
       let token = self.lexer.nextToken()
@@ -674,7 +693,7 @@ proc parseForm(self: var Parser): Statement =
   while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
     blockStmt.addStatement(self.parseStmt())
 
-  for _, _ in arguments:
+  for _ in formParams:
     discard self.allowedTypeVars.pop()
 
   blockStmt.endToken = self.expectToken(tkEnd)
@@ -684,7 +703,7 @@ proc parseForm(self: var Parser): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if self.isType(self.lexer.peekToken()):
+  if self.isType(token):
     return self.parseSymbolDecl()
 
   elif token.kind in {tkIdentifier, tkDollar}:

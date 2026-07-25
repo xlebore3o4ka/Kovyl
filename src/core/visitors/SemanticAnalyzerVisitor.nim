@@ -358,6 +358,113 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
 
   info("exiting FieldExpression")
 
+proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, Type) =
+  info("node is not first definded function")
+  info("Creating a function type from arguments and context...")
+
+  var arguments: OrderedTable[string, Type]
+  for i, expr in node.arguments:
+    visitor.visitExpression(expr)
+    arguments[$i] = expr.returnType
+
+  let funcType = getFuncType(arguments, visitor.expectedContextType)
+  info("created type: ", funcType)
+
+  block checkOverloads:
+    info("checking overloads...")
+    if varType.overloads.len == 0:
+      warn("no overload was found")
+      return (false, funcType)
+
+    for _, overload in varType.overloads.pairs:
+      info("checking overload ", overload, " equals ", funcType, "...")
+      if funcType == overload:
+        info("perfect overload hit found")
+        node.setType(overload.returnType)
+        node.value.setType(overload)
+        return (true, funcType)
+      else:
+        var argsMatch = true
+        if funcType.arguments.len == overload.arguments.len:
+          for key in funcType.arguments.keys:
+            let argType = funcType.arguments[key]
+            let overloadArgType = overload.arguments[key]
+            
+            if argType.kind == typeArray and overloadArgType.kind == typeArray:
+              if argType.arrBase != overloadArgType.arrBase:
+                argsMatch = false
+                break
+              if argType.length < overloadArgType.length:
+                continue
+              elif argType.length > overloadArgType.length:
+                argsMatch = false
+                break
+            elif argType != overloadArgType:
+              argsMatch = false
+              break
+        else:
+          argsMatch = false
+        
+        if argsMatch:
+          info("overload found with compatible arguments")
+          node.setType(overload.returnType)
+          node.value.setType(overload)
+          return (true, funcType)
+
+    warn("No matching overloads found for function ", varType.funcName)
+    return (false, funcType)
+
+proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, bool, Type) =
+  block checkDefault:
+    info("checking node == first definded function...")
+    if node.arguments.len != varType.arguments.len:
+      warn("node arguments len != first definded function arguments len")
+      return (false, false, getUndefinedType())
+
+    if visitor.expectedContextType.neq varType.returnType:
+      warn("expected context type != first definded function return type")
+      let (found, funcType) = checkOverloads(visitor, node, varType)
+      if found:
+        return (false, true, funcType)
+
+    for i, expr in node.arguments:
+      let index = $i
+      var expected = node.value.returnType.arguments[index]
+
+      visitor.visitExpecting(expr, expected)
+
+      if expected.kind.eq(typeArray) and expr.returnType.kind.eq(typeArray):
+        if expected.arrBase.neq expr.returnType.arrBase:
+          return (false, false, getUndefinedType())
+        if expected.length < expr.returnType.length:
+          return (false, false, getUndefinedType())
+        elif expected.length > expr.returnType.length:
+          expr.returnType = expected
+          info("Array size promoted from ", expr.returnType.length, " to ", expected.length)
+
+      if expr.returnType != expected:
+        warn("argument types != first definded function argument types")
+        return (false, false, getUndefinedType())
+
+    info("node is first definded function")
+    node.setType(node.value.returnType.returnType)
+    return (true, false, getUndefinedType())
+
+proc reportNoOverloadFound(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type, funcType: Type) =
+  let funcName = node.value.token
+  var avaiableOverloadFormatted: string = "- " & funcName.lexeme & $varType
+
+  if node.value of InstanceExpression:
+    if funcName.lexeme in visitor.formTable:
+      for entry in visitor.formTable[funcName.lexeme]:
+        let form = entry.form
+        avaiableOverloadFormatted &= "\n- " & formToString(form)
+  else:
+    for name, _ in varType.overloads.pairs:
+      avaiableOverloadFormatted &= "\n- " & name & $funcType
+
+  newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
+
 method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpression): auto =
   info("visiting CallExpression")
 
@@ -371,106 +478,17 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
       error = true
       break checkAll
 
-    block checkDefault:
-      info("checking node == first definded function...")
-      if node.arguments.len != varType.arguments.len:
-        warn("node arguments len != first definded function arguments len")
-        break checkDefault
+    let (isFirst, isOverload, overloadType) = checkFirstDefinedFunction(visitor, node, varType)
+    if isFirst:
+      break checkAll
+    elif isOverload:
+      node.setType(overloadType)
 
-      if visitor.expectedContextType.neq varType.returnType:
-        warn("expected context type != first definded function return type")
-
-      for i, expr in node.arguments:
-        let index = $i
-        var expected = node.value.returnType.arguments[index]
-
-        visitor.visitExpecting(expr, expected)
-
-        if expected.kind.eq(typeArray) and expr.returnType.kind.eq(typeArray):
-          if expected.arrBase.neq expr.returnType.arrBase:
-            break checkDefault
-          if expected.length < expr.returnType.length:
-            break checkDefault
-          elif expected.length > expr.returnType.length:
-            expr.returnType = expected
-            info("Array size promoted from ", expr.returnType.length, " to ", expected.length)
-
-        if expr.returnType != expected:
-          warn("argument types != first definded function argument types")
-          break checkDefault
-
-      info("node is first definded function")
-      node.setType(node.value.returnType.returnType)
+    let (found, funcType) = checkOverloads(visitor, node, varType)
+    if found:
       break checkAll
 
-    info("node is not first definded function")
-    info("Creating a function type from arguments and context...")
-
-    var arguments: OrderedTable[string, Type]
-    for i, expr in node.arguments:
-      visitor.visitExpression(expr)
-      arguments[$i] = expr.returnType
-
-    let funcType = getFuncType(arguments, visitor.expectedContextType)
-    info("created type: ", funcType)
-
-    block checkOverloads:
-      info("checking overloads...")
-      if varType.overloads.len == 0:
-        warn("no overload was found")
-        break checkOverloads
-
-      for _, overload in varType.overloads.pairs:
-        info("checking overload ", overload, " equals ", funcType, "...")
-        if funcType == overload:
-          info("perfect overload hit found")
-          node.setType(overload.returnType)
-          node.value.setType(overload)
-          break checkAll
-        else:
-          var argsMatch = true
-          if funcType.arguments.len == overload.arguments.len:
-            for key in funcType.arguments.keys:
-              let argType = funcType.arguments[key]
-              let overloadArgType = overload.arguments[key]
-              
-              if argType.kind == typeArray and overloadArgType.kind == typeArray:
-                if argType.arrBase != overloadArgType.arrBase:
-                  argsMatch = false
-                  break
-                if argType.length < overloadArgType.length:
-                  continue
-                elif argType.length > overloadArgType.length:
-                  argsMatch = false
-                  break
-              elif argType != overloadArgType:
-                argsMatch = false
-                break
-          else:
-            argsMatch = false
-          
-          if argsMatch:
-            info("overload found with compatible arguments")
-            node.setType(overload.returnType)
-            node.value.setType(overload)
-            break checkAll
-
-      warn("No matching overloads found for function ", varType.funcName)
-
-    let funcName = node.value.token
-    var avaiableOverloadFormatted: string = "- " & funcName.lexeme & $varType
-
-    if node.value of InstanceExpression:
-      if funcName.lexeme in visitor.formTable:
-        for entry in visitor.formTable[funcName.lexeme]:
-          let form = entry.form
-          avaiableOverloadFormatted &= "\n- " & formToString(form)
-
-    else:
-      for name, _ in varType.overloads.pairs:
-        avaiableOverloadFormatted &= "\n- " & name & $funcType
-
-    newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
+    reportNoOverloadFound(visitor, node, varType, funcType)
 
   info("exiting CallExpression")
 
@@ -588,12 +606,15 @@ method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: Instance
       break
 
     if not foundAtLeastOne:
-      var avaiableOverloadFormatted: string
-      for n, entry in visitor.formTable[node.name.lexeme]:
-        if n != 0: avaiableOverloadFormatted &= "\n"
-        avaiableOverloadFormatted &= "- " & formToString(entry.form)
+      if visitor.formTable[node.name.lexeme].len == 0:
+        newError(errMonomorphizationError, node.name, @{"@0": node.name.lexeme, "@1": "(" & node.types.mapIt($it).join(", ") & ")"})
+      else:
+        var avaiableOverloadFormatted: string
+        for n, entry in visitor.formTable[node.name.lexeme]:
+          if n != 0: avaiableOverloadFormatted &= "\n"
+          avaiableOverloadFormatted &= "- " & formToString(entry.form)
 
-      newError(errFormResolution, node.name, @{"@0": node.name.lexeme, "@1": "<" & node.types.mapIt($it).join(", ") & ">", "@2": avaiableOverloadFormatted})
+        newError(errFormResolution, node.name, @{"@0": node.name.lexeme, "@1": "$[" & node.types.mapIt($it).join(", ") & "]", "@2": avaiableOverloadFormatted})
 
   # TODO: modules
   else:
@@ -1050,12 +1071,12 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
 
     visitor.visitFuncStatement(funcNode)
 
-    visitor.currentScope.symbolTable.del(node.name.lexeme)
-    discard visitor.symbolScopeStack[node.name.lexeme].pop()
-
     if errorsCount != errors.errors.len:
       discard visitor.formTable[node.name.lexeme].pop()
       info(node.name.lexeme, " was removed from the form table")
+    else:
+      visitor.currentScope.symbolTable.del(funcNode.name.lexeme)
+      discard visitor.symbolScopeStack[funcNode.name.lexeme].pop()
 
 # SPECIALS
 

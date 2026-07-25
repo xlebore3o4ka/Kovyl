@@ -701,6 +701,12 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
 
     # TODO: stacktrace
 
+method visitInstanceExpression*(visitor: InterpreterVisitor, node: InstanceExpression): Value {.base.} =
+  let name = node.returnType.funcName
+  let funcStatement = node.overloads[name]
+  visitor.visitFuncStatement(funcStatement)
+  return visitor.getSlot(name)
+
 # STATEMENTS
 
 method visitBlockStatement*(visitor: InterpreterVisitor, node: BlockStatement): auto =
@@ -1090,6 +1096,8 @@ method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.
     return visitor.visitFieldExpression(FieldExpression(node))
   elif node of CallExpression:
     return visitor.visitCallExpression(CallExpression(node))
+  elif node of InstanceExpression:
+    return visitor.visitInstanceExpression(InstanceExpression(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled expression"
 
@@ -1125,5 +1133,6 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitModuleStatement(ModuleStatement(node))
   elif node of ClosureStatement:
     visitor.visitClosureStatement(ClosureStatement(node))
+  elif node of FormStatement: discard
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"
