@@ -18,6 +18,10 @@ type
     of false: parent: Scope
     of true: discard
 
+  FormEntry = ref object
+    form: FormStatement
+    instances: Table[string, FuncStatement]
+
   SemanticAnalyzerVisitor* = ref object of Visitor
     stdLibPath*: string
 
@@ -29,9 +33,9 @@ type
     funcStack: seq[FuncStatement]
     moduleCache: Table[string, Type]
 
-    formTable: Table[string, seq[FormStatement]]
+    formTable: Table[string, seq[FormEntry]]
 
-var logger = newFileLogger("kovyl.log", fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
+var logger = newFileLogger("KOVYLsemanticAnalyzer.log", fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ", mode = fmWrite)
 
 proc semanticAnalyzerLogging*(enabled: bool) =
   if enabled:
@@ -458,7 +462,8 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
     if node.value of InstanceExpression:
       if funcName.lexeme in visitor.formTable:
-        for form in visitor.formTable[funcName.lexeme]:
+        for entry in visitor.formTable[funcName.lexeme]:
+          let form = entry.form
           avaiableOverloadFormatted &= "\n- " & formToString(form)
 
     else:
@@ -489,6 +494,10 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
   for varName, replacement in typeMap:
     newReturnType = substituteTypeVar(newReturnType, varName, replacement)
 
+  for key, arg in newArguments.pairs:
+    info("monomorphized arg ", key, ": ", arg.expectedType)
+  info("monomorphized return: ", newReturnType)
+
   let clonedBody = BlockStatement(cloneAst(form.formBlock))
   recursiveMonomorphization(clonedBody, typeMap)
 
@@ -500,7 +509,7 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
 
   result = newFuncStatement(
     returnType = newReturnType,
-    name = form.name,
+    name = form.name.newFrom(lexeme = form.name.lexeme),
     arguments = newArguments,
     funcBlock = clonedBody,
     pub = form.pub
@@ -514,37 +523,75 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
   if errorsCount != errors.errors.len:
     return nil
 
+proc instantiationFingerprint(types: seq[Type]): string =
+  types.mapIt(typeFingerprint(it)).join("|")
+
 method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: InstanceExpression): auto =
   info("visiting InstanceExpression")
 
   if node.name.lexeme in visitor.formTable:
     info("forms of ", node.name.lexeme, " was found in the table. Comparison")
 
+    let typeKey = instantiationFingerprint(node.types)
+
     var foundAtLeastOne = false
-    for form in visitor.formTable[node.name.lexeme]:
+    for entry in visitor.formTable[node.name.lexeme]:
+      let form = entry.form
       info("- with ", formToString(form))
       if form.formParams.len != node.types.len:
         info("param length mismatch")
         continue
       foundAtLeastOne = true
+
+      if typeKey in entry.instances:
+        let cached = entry.instances[typeKey]
+        if cached == nil:
+          info("cached error for ", typeKey)
+          continue
+        info("cache hit for ", typeKey)
+        node.overloads[cached.name.lexeme] = cached
+        if node.returnType.neq getUndefinedType():
+          node.returnType.overloads[cached.name.lexeme] = cached.funcType
+          info("The function was overloaded (cached)")
+        else:
+          node.setType(cached.funcType)
+        break
+
       info("suitable form has been found. Monomorphization...")
       let funcStatement = visitor.monomorphizeForm(form, node.types)
-      if funcStatement != nil:
-        info("the function was successfully generated and cached: ", funcStatement.name.lexeme, funcStatement.funcType)
-        node.overloads[funcStatement.name.lexeme] = funcStatement
-        if node.returnType.neq getUndefinedType():
-          node.returnType.overloads[funcStatement.name.lexeme] = funcStatement.funcType
-          info("The function was overloaded")
-        else:
-          node.setType(funcStatement.funcType)
-      else:
+
+      if funcStatement == nil:
+        entry.instances[typeKey] = nil
         newError(errMonomorphizationError, node.name, @{"@0": node.name.lexeme, "@1": "(" & node.types.mapIt($it).join(", ") & ")"})
+        continue
+
+      if visitor.symbolExists(funcStatement.name.lexeme):
+        visitor.currentScope.symbolTable.del(funcStatement.name.lexeme)
+        if funcStatement.name.lexeme in visitor.symbolScopeStack and visitor.symbolScopeStack[funcStatement.name.lexeme].len > 0:
+          discard visitor.symbolScopeStack[funcStatement.name.lexeme].pop()
+
+      visitor.visitFuncStatement(funcStatement)
+
+      visitor.currentScope.symbolTable.del(funcStatement.name.lexeme)
+      if funcStatement.name.lexeme in visitor.symbolScopeStack and visitor.symbolScopeStack[funcStatement.name.lexeme].len > 0:
+        discard visitor.symbolScopeStack[funcStatement.name.lexeme].pop()
+
+      entry.instances[typeKey] = funcStatement
+
+      info("the function was successfully generated and cached: ", funcStatement.name.lexeme, funcStatement.funcType)
+      node.overloads[funcStatement.name.lexeme] = funcStatement
+      if node.returnType.neq getUndefinedType():
+        node.returnType.overloads[funcStatement.name.lexeme] = funcStatement.funcType
+        info("The function was overloaded")
+      else:
+        node.setType(funcStatement.funcType)
+      break
 
     if not foundAtLeastOne:
       var avaiableOverloadFormatted: string
-      for n, form in visitor.formTable[node.name.lexeme]:
+      for n, entry in visitor.formTable[node.name.lexeme]:
         if n != 0: avaiableOverloadFormatted &= "\n"
-        avaiableOverloadFormatted &= "- " & formToString(form)
+        avaiableOverloadFormatted &= "- " & formToString(entry.form)
 
       newError(errFormResolution, node.name, @{"@0": node.name.lexeme, "@1": "<" & node.types.mapIt($it).join(", ") & ">", "@2": avaiableOverloadFormatted})
 
@@ -951,7 +998,8 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
   info("finding form overloads...")
   if node.name.lexeme in visitor.formTable:
     info("equality check self signature ", formToString(node))
-    for form in visitor.formTable[node.name.lexeme]:
+    for entry in visitor.formTable[node.name.lexeme]:
+      let form = entry.form
       info("- with ", formToString(form))
       if node.formParams.len != form.formParams.len: info("form params length mismatch"); continue
       if node.arguments.len  != form.arguments.len:  info("arguments length mismatch");   continue
@@ -982,8 +1030,6 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
   if not error:
     let form = FormStatement(cloneAst(node))
 
-    var errorsCount = errors.errors.len
-
     var funcArgs = initOrderedTable[string, FuncArgument]()
     for k, v in form.arguments:
       funcArgs[k] = FuncArgument(origin: v.origin, expectedType: v.expectedType)
@@ -996,20 +1042,20 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
       pub = form.pub
     )
 
-    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(form)
+    let entry = FormEntry(form: form, instances: initTable[string, FuncStatement]())
+    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormEntry]()).add(entry)
     info(node.name.lexeme, " was added or overloaded to the form table")
+
+    var errorsCount = errors.errors.len
 
     visitor.visitFuncStatement(funcNode)
 
-    if visitor.symbolExistsInCurrentScope(node.name.lexeme):
-      visitor.currentScope.symbolTable.del(node.name.lexeme)
-      discard visitor.symbolScopeStack[node.name.lexeme].pop()
+    visitor.currentScope.symbolTable.del(node.name.lexeme)
+    discard visitor.symbolScopeStack[node.name.lexeme].pop()
 
     if errorsCount != errors.errors.len:
       discard visitor.formTable[node.name.lexeme].pop()
       info(node.name.lexeme, " was removed from the form table")
-
-  info("exiting FormStatement")
 
 # SPECIALS
 

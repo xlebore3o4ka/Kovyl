@@ -162,12 +162,39 @@ proc eq*(a: Type, b: Type): bool =
 proc neq*(a: Type | TypeKind, b: Type | TypeKind): bool {.inline.} =
   return not (a.eq b)
 
+proc cacheEq*(a: Type, b: Type): bool =
+  if a == nil or b == nil: return a == b
+  if a.kind != b.kind: return false
+  case a.kind
+  of typePtr: return cacheEq(a.ptrBase, b.ptrBase)
+  of typeVec: return cacheEq(a.vecBase, b.vecBase)
+  of typeArray: return cacheEq(a.arrBase, b.arrBase) and a.length == b.length
+  of typeTuple:
+    if a.elements.len != b.elements.len: return false
+    for key in a.elements.keys:
+      if key notin b.elements: return false
+      if not cacheEq(a.elements[key], b.elements[key]): return false
+    return true
+  of typeFunc:
+    if not cacheEq(a.returnType, b.returnType): return false
+    if a.arguments.len != b.arguments.len: return false
+    for key in a.arguments.keys:
+      if key notin b.arguments: return false
+      if not cacheEq(a.arguments[key], b.arguments[key]): return false
+    return true
+  of typeModule:
+    return a.modulePath == b.modulePath
+  of typeVar:
+    return a.varName == b.varName
+  else:
+    return true
+
 proc getPtrType*(baseType: Type): Type =
   if baseType.kind == typeUndefined:
     return baseType
 
   for t in ptrTypes:
-    if t.ptrBase.eq baseType:
+    if t.ptrBase.cacheEq(baseType):
       return t
   
   result = Type(kind: typePtr, ptrBase: baseType)
@@ -178,7 +205,7 @@ proc getVecType*(baseType: Type): Type =
     return baseType
 
   for t in vecTypes:
-    if t.vecBase.eq(baseType) and t.kind != typeVar and baseType.kind != typeVar:
+    if t.vecBase.cacheEq(baseType):
       return t
   
   result = Type(kind: typeVec, vecBase: baseType)
@@ -189,7 +216,7 @@ proc getArrayType*(baseType: Type, length: Natural): Type =
     return baseType
 
   for t in arrayTypes:
-    if t.arrBase.eq(baseType) and t.length == length and t.kind != typeVar and baseType.kind != typeVar:
+    if t.arrBase.cacheEq(baseType):
       return t
   
   result = Type(kind: typeArray, arrBase: baseType, length: length)
@@ -266,3 +293,50 @@ proc substituteTypeVar*(t: Type, varName: string, replacement: Type): Type =
   
   else:
     return t
+
+proc typeFingerprint*(t: Type): string =
+  if t == nil: return "nul"
+  
+  case t.kind
+  of typeUndefined:  "undef"
+  of typeNul:        "nul"
+  of typeBool:       "bool"
+  of typeChar:       "char"
+  of typeInt8:       "i8"
+  of typeInt16:      "i16"
+  of typeInt32:      "i32"
+  of typeInt64:      "i64"
+  of typeUInt8:      "u8"
+  of typeUInt16:     "u16"
+  of typeUInt32:     "u32"
+  of typeUInt64:     "u64"
+  
+  of typeVar:
+    "var(" & t.varName & ")"
+  
+  of typePtr:
+    "ptr(" & typeFingerprint(t.ptrBase) & ")"
+  
+  of typeVec:
+    "vec(" & typeFingerprint(t.vecBase) & ")"
+  
+  of typeArray:
+    "arr(" & typeFingerprint(t.arrBase) & "," & $t.length & ")"
+  
+  of typeTuple:
+    var parts: seq[string]
+    for key, val in t.elements:
+      parts.add(key & ":" & typeFingerprint(val))
+    "tup(" & parts.join(",") & ")"
+  
+  of typeFunc:
+    var argParts: seq[string]
+    for key, val in t.arguments:
+      argParts.add(key & ":" & typeFingerprint(val))
+    "func(" & argParts.join(",") & "->" & typeFingerprint(t.returnType) & ")"
+  
+  of typeModule:
+    var symParts: seq[string]
+    for key, val in t.symbols:
+      symParts.add(key & ":" & typeFingerprint(val))
+    "mod(" & symParts.join(",") & ")"

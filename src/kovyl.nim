@@ -55,9 +55,6 @@ proc main() =
     
     stdout.write($toJson(filePath))
     
-    for error in errors.errors:
-      printError(error, shortErrors)
-    
     return
 
   stdout.writeLine("")
