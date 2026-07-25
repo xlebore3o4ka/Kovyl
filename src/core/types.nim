@@ -168,7 +168,7 @@ proc cacheEq*(a: Type, b: Type): bool =
   case a.kind
   of typePtr: return cacheEq(a.ptrBase, b.ptrBase)
   of typeVec: return cacheEq(a.vecBase, b.vecBase)
-  of typeArray: return cacheEq(a.arrBase, b.arrBase) and a.length == b.length
+  of typeArray: return cacheEq(a.arrBase, b.arrBase)
   of typeTuple:
     if a.elements.len != b.elements.len: return false
     for key in a.elements.keys:
@@ -216,7 +216,7 @@ proc getArrayType*(baseType: Type, length: Natural): Type =
     return baseType
 
   for t in arrayTypes:
-    if t.arrBase.cacheEq(baseType):
+    if t.arrBase.cacheEq(baseType) and t.length == length:
       return t
   
   result = Type(kind: typeArray, arrBase: baseType, length: length)

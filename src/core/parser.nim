@@ -4,7 +4,7 @@ import std/[tables, strutils, sets]
 type Parser* = object
   file: string
   lexer: Lexer
-  isTypeVarAllowed: bool
+  allowedTypeVars: seq[string]
 
 const TOKEN_TYPE_KINDS = {
   tkInt64, tkInt32, tkInt16, tkInt8, 
@@ -36,6 +36,11 @@ proc expectToken*(self: var Parser, expected: TokenKind): Token =
   return token
 
 proc parseExpr(self: var Parser): Expression
+
+proc isType(self: var Parser, token: Token): bool =
+  result = token.kind in TOKEN_TYPE_KINDS
+  if token.kind == tkIdentifier:
+    result = token.lexeme in self.allowedTypeVars
 
 proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
@@ -100,7 +105,11 @@ proc parseType(self: var Parser, token: Token): Type =
             return getUndefinedType()
         result = getFuncType(elements, returnType)
   of tkIdentifier:
-    result = getVarType(token.lexeme)
+    if self.isType(token):
+      result = getVarType(token.lexeme)
+    else:
+      self.newError(errUnknownType, token, @{"@0": token.lexeme})
+      return getUndefinedType()
   else: 
     self.newError(errUnknownType, token, @{"@0": token.lexeme})
     return getUndefinedType()
@@ -238,15 +247,16 @@ proc parsePrimary(self: var Parser): Expression =
       self.lexer.rollback(rd)
       result = self.parseSpecialExpr(token.newFrom(lexeme = "vec"))
 
-    elif self.lexer.peekToken().kind == tkLT:
+    elif self.lexer.peekToken().kind == tkDollar:
       discard self.lexer.nextToken()
+      discard self.expectToken(tkLBracket)
       var types = @[self.parseType()]
 
       while self.lexer.peekToken().kind == tkComma:
         discard self.lexer.nextToken()
         types.add(self.parseType())
 
-      discard self.expectToken(tkGT)
+      discard self.expectToken(tkRBracket)
 
       return newInstanceExpression(token, types)
 
@@ -279,7 +289,7 @@ proc parsePrimary(self: var Parser): Expression =
     
     return arrayExpr
 
-  elif token.kind in TOKEN_TYPE_KINDS:
+  elif self.isType(token):
     return newTypeExpression(token, self.parseType(token))
 
   self.newError(errExpression, token, @{"@0": token.mean()})
@@ -527,7 +537,7 @@ proc parseFunc(self: var Parser): Statement =
   var returnType = getUndefinedType()
   let rd = self.lexer.getRollbackData()
 
-  if self.lexer.peekToken().kind in TOKEN_TYPE_KINDS:
+  if self.isType(self.lexer.peekToken()):
     let typeToken = self.lexer.nextToken()
     returnType = self.parseType(typeToken)
 
@@ -608,20 +618,24 @@ proc parseClosure(self: var Parser): Statement =
 
 proc parseForm(self: var Parser): Statement =
   discard self.lexer.nextToken()
-  discard self.expectToken(tkLT)
+  discard self.expectToken(tkLBracket)
 
-  var formParams: seq[Token] = @[self.expectToken(tkIdentifier)]
+  let tok = self.expectToken(tkIdentifier)
+  var formParams: seq[Token] = @[tok]
+  self.allowedTypeVars.add(tok.lexeme)
 
   while self.lexer.peekToken().kind == tkComma:
     discard self.lexer.nextToken()
-    formParams.add(self.expectToken(tkIdentifier))
+    let tok = self.expectToken(tkIdentifier)
+    formParams.add(tok)
+    self.allowedTypeVars.add(tok.lexeme)
 
-  discard self.expectToken(tkGT)
+  discard self.expectToken(tkRBracket)
 
   var returnType = getUndefinedType()
   let rd = self.lexer.getRollbackData()
 
-  if self.lexer.peekToken().kind in TOKEN_TYPE_KINDS:
+  if self.isType(self.lexer.peekToken()):
     let typeToken = self.lexer.nextToken()
     returnType = self.parseType(typeToken)
 
@@ -657,10 +671,11 @@ proc parseForm(self: var Parser): Statement =
 
   let blockStmt = newBlockStatement(self.expectToken(tkDo))
 
-  self.isTypeVarAllowed = true
   while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
     blockStmt.addStatement(self.parseStmt())
-  self.isTypeVarAllowed = false
+
+  for _, _ in arguments:
+    discard self.allowedTypeVars.pop()
 
   blockStmt.endToken = self.expectToken(tkEnd)
 
@@ -669,7 +684,10 @@ proc parseForm(self: var Parser): Statement =
 proc parseStmt(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
-  if token.kind in {tkIdentifier, tkDollar}:
+  if self.isType(self.lexer.peekToken()):
+    return self.parseSymbolDecl()
+
+  elif token.kind in {tkIdentifier, tkDollar}:
     let rd = self.lexer.getRollbackData()
     var left: Expression = newIdentifierExpression(self.lexer.nextToken())
 
@@ -687,16 +705,9 @@ proc parseStmt(self: var Parser): Statement =
     elif left of CallExpression:
       return newCallStatement(CallExpression(left))
 
-    elif self.isTypeVarAllowed:
-      self.lexer.rollback(rd)
-      return self.parseSymbolDecl()
-
     else:
       self.newError(errStatement, token, @{"@0": token.mean()})
       return newErrorStatement(token)
-
-  elif token.kind in TOKEN_TYPE_KINDS:
-    return self.parseSymbolDecl()
 
   elif token.kind == tkPragma:
     return self.parsePragma()

@@ -154,7 +154,7 @@ type
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead  # TODO: resized
+    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead  # TODO: resized, default
 
   SpecialExpression* = ref object of Expression  # <token>:(<args>)
     kind*: SpecialExprKind
