@@ -23,6 +23,7 @@ type
 
     errUnreachableCode, errMissingReturn, errFuncNamedArguments, errUnusedReturn
     errFuncEmptyStaticArray, errFuncResolution, errFuncSignatureUnknown, errFormResolution
+    errMonomorphizationError
 
     errModuleNotFound, errCorruptedModule
 
@@ -80,6 +81,7 @@ proc message(kind: ErrorKind): string =
   of errFuncResolution: "The signature of the function call '@0@1' does not match any of the available ones:\n@2"
   of errFormResolution: "The signature of the form monomorphize '@0@1' does not match any of the available ones:\n@2"
   of errFuncSignatureUnknown: "Function signature is unknown"
+  of errMonomorphizationError: "Failed to monomorphize form '@0' with types: @1"
   of errModuleNotFound: "Module '@0' was not found"
   of errCorruptedModule: "Module '@0' contains errors"
 

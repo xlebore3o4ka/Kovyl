@@ -4,6 +4,7 @@ import std/[tables, strutils, sets]
 type Parser* = object
   file: string
   lexer: Lexer
+  isTypeVarAllowed: bool
 
 const TOKEN_TYPE_KINDS = {
   tkInt64, tkInt32, tkInt16, tkInt8, 
@@ -656,8 +657,10 @@ proc parseForm(self: var Parser): Statement =
 
   let blockStmt = newBlockStatement(self.expectToken(tkDo))
 
+  self.isTypeVarAllowed = true
   while self.lexer.peekToken().kind notin {tkEnd, tkEOF}:
     blockStmt.addStatement(self.parseStmt())
+  self.isTypeVarAllowed = false
 
   blockStmt.endToken = self.expectToken(tkEnd)
 
@@ -683,6 +686,10 @@ proc parseStmt(self: var Parser): Statement =
 
     elif left of CallExpression:
       return newCallStatement(CallExpression(left))
+
+    elif self.isTypeVarAllowed:
+      self.lexer.rollback(rd)
+      return self.parseSymbolDecl()
 
     else:
       self.newError(errStatement, token, @{"@0": token.mean()})

@@ -31,7 +31,7 @@ type
 
     formTable: Table[string, seq[FormStatement]]
 
-var logger = newConsoleLogger(fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
+var logger = newFileLogger("kovyl.log", fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ")
 
 proc semanticAnalyzerLogging*(enabled: bool) =
   if enabled:
@@ -62,14 +62,14 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
   self.visitExpecting(left, expected)
   var arrays = false
 
-  if left.returnType.eq getVecType(getCharType()):
+  if left.returnType.eq(getVecType(getCharType())) and left.returnType.kind != typeVar:
     self.visitExpecting(right, getArrayType(left.returnType.vecBase, 0))
     arrays = true
   else:
     self.visitExpecting(right, left.returnType)
 
-  if left.returnType.neq right.returnType:
-    if right.returnType.eq getVecType(getCharType()):
+  if left.returnType.neq(right.returnType):
+    if right.returnType.eq(getVecType(getCharType())) and right.returnType.kind != typeVar:
       self.visitExpecting(left, getArrayType(right.returnType.vecBase, 0))
       arrays = true
     else:
@@ -145,6 +145,8 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
     warn("coercion failed")
     node.newBinaryTypeMismatchError()
 
+  elif left.returnType.kind.eq(right.returnType.kind) and left.returnType.kind.eq(typeVar):
+    node.setType(getBoolType())
   elif node.trySetNumber():              discard
   elif node.trySetChar():                discard
   elif node.checkEqNeq(typeChar):        node.setType(getBoolType())
@@ -505,6 +507,13 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
   )
   result.funcType = getFuncType(argumentTypes, newReturnType, form.name.lexeme & $getFuncType(argumentTypes, newReturnType))
 
+  var errorsCount = errors.errors.len
+
+  self.visitStatement(result)
+
+  if errorsCount != errors.errors.len:
+    return nil
+
 method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: InstanceExpression): auto =
   info("visiting InstanceExpression")
 
@@ -528,6 +537,8 @@ method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: Instance
           info("The function was overloaded")
         else:
           node.setType(funcStatement.funcType)
+      else:
+        newError(errMonomorphizationError, node.name, @{"@0": node.name.lexeme, "@1": "(" & node.types.mapIt($it).join(", ") & ")"})
 
     if not foundAtLeastOne:
       var avaiableOverloadFormatted: string
@@ -969,8 +980,34 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
     info("not found")
   
   if not error:
-    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(FormStatement(cloneAst(node)))
+    let form = FormStatement(cloneAst(node))
+
+    var errorsCount = errors.errors.len
+
+    var funcArgs = initOrderedTable[string, FuncArgument]()
+    for k, v in form.arguments:
+      funcArgs[k] = FuncArgument(origin: v.origin, expectedType: v.expectedType)
+
+    let funcNode = newFuncStatement(
+      returnType = form.returnType,
+      name = form.name,
+      arguments = funcArgs,
+      funcBlock = form.formBlock,
+      pub = form.pub
+    )
+
+    visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormStatement]()).add(form)
     info(node.name.lexeme, " was added or overloaded to the form table")
+
+    visitor.visitFuncStatement(funcNode)
+
+    if visitor.symbolExistsInCurrentScope(node.name.lexeme):
+      visitor.currentScope.symbolTable.del(node.name.lexeme)
+      discard visitor.symbolScopeStack[node.name.lexeme].pop()
+
+    if errorsCount != errors.errors.len:
+      discard visitor.formTable[node.name.lexeme].pop()
+      info(node.name.lexeme, " was removed from the form table")
 
   info("exiting FormStatement")
 

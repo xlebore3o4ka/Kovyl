@@ -42,7 +42,7 @@ logger.info("Language Server initialized")
 LINTER_PATH = os.path.join(
     os.path.dirname(os.path.dirname(SCRIPT_DIR)),
     'build',
-    'linter'
+    'kovyl'
 )
 if sys.platform == 'win32':
     LINTER_PATH += '.exe'
@@ -61,7 +61,7 @@ def run_linter(file_path):
     logger.info(f"Running linter on: {file_path}")
     try:
         result = subprocess.run(
-            [LINTER_PATH, file_path],  # Вызываем бинарник линтера
+            [LINTER_PATH, file_path, "-l"],
             capture_output=True,
             text=True,
             timeout=2

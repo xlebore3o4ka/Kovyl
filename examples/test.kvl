@@ -1,10 +1,22 @@
-form<T> T add(T a, T b) pub do
-  return a + b
+module panics = "std/panics"
+
+string outOfBounds = panics.registerPanic("outOfBounds")
+
+form<T> push(T@ vec, T val) do
+  int size = len: vec
+  resize:(vec, size + 1)
+  vec[size] = val
 end
 
-form<T> T add(T a) pub do
-  return a + 1
+form<T> T pop(T@ vec) do
+  int size = len: vec
+  if size == 0 do
+    panic:(outOfBounds, "")
+  end
+  T result = vec[size]
+  resize:(vec, size - 1)
+  return result
 end
 
-int x = add<int>(10, 20)
-char y = add<char>(10, 20)
+int@ myVec = v{1, 2, 3}
+int last = pop<int>(myVec)

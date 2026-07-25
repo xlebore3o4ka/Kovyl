@@ -154,6 +154,8 @@ proc eq*(a: Type, b: Type): bool =
       if key notin b.arguments: return false
       if not val.eq(b.arguments[key]): return false
     return true
+  if a.eq(typeVar) and b.kind notin {typeNul, typeUndefined}: return true
+  if b.eq(typeVar) and a.kind notin {typeNul, typeUndefined}: return true
 
   return a == b
 
@@ -176,7 +178,7 @@ proc getVecType*(baseType: Type): Type =
     return baseType
 
   for t in vecTypes:
-    if t.vecBase.eq baseType:
+    if t.vecBase.eq(baseType) and t.kind != typeVar and baseType.kind != typeVar:
       return t
   
   result = Type(kind: typeVec, vecBase: baseType)
@@ -187,7 +189,7 @@ proc getArrayType*(baseType: Type, length: Natural): Type =
     return baseType
 
   for t in arrayTypes:
-    if t.arrBase.eq(baseType) and t.length == length:
+    if t.arrBase.eq(baseType) and t.length == length and t.kind != typeVar and baseType.kind != typeVar:
       return t
   
   result = Type(kind: typeArray, arrBase: baseType, length: length)
