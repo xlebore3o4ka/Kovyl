@@ -74,14 +74,14 @@ proc getSlot*(self: InterpreterVisitor, name: string): Value =
   for i in countdown(self.environment.high, 0):
     if name in self.environment[i]:
       return self.environment[i][name]
-  warn("Undefined variable: " & name)
+  warn("Undefined slot: " & name)
 
 proc setSlot*(self: InterpreterVisitor, name: string, value: Value) =
   for i in countdown(self.environment.high, 0):
     if name in self.environment[i]:
       self.environment[i][name] = value
       return
-  warn("Undefined variable: " & name)
+  warn("Cannot set undefined slot: " & name)
 
 proc pushScope*(self: InterpreterVisitor) =
   self.environment.add(initTable[string, Value]())
@@ -792,12 +792,18 @@ method visitDefaultStatement*(visitor: InterpreterVisitor, node: DefaultStatemen
   visitor.newSlot(node.name.lexeme, newDefaultValue(node.symbolType))
 
 method visitFuncStatement*(visitor: InterpreterVisitor, node: FuncStatement): auto =
+  let funcValue = newFuncValue(node.name.lexeme, node.funcType, 
+    node.arguments, node.funcBlock, initTable[string, Value]())
+  
+  visitor.newSlot(node.name.lexeme, funcValue)
+  
   var closures: Table[string, Value]
   for name in node.funcClosures:
     closures[name] = visitor.getSlot(name)
-
-  visitor.newSlot(node.name.lexeme, newFuncValue(node.name.lexeme, node.funcType, 
-    node.arguments, node.funcBlock, closures))
+  
+  funcValue.funcValue.closures = closures
+  
+  visitor.setSlot(node.name.lexeme, funcValue)
 
 proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): auto =
   let returnValue = visitor.visitExpression(node.value)
