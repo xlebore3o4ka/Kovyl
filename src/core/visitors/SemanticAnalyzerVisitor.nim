@@ -1056,21 +1056,19 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
     visitor.log("not found")
   
   if not error:
-    let form = FormStatement(cloneAst(node))
-
     var funcArgs = initOrderedTable[string, FuncArgument]()
-    for k, v in form.arguments:
+    for k, v in node.arguments:
       funcArgs[k] = FuncArgument(origin: v.origin, expectedType: v.expectedType)
 
     let funcNode = newFuncStatement(
-      returnType = form.returnType,
-      name = form.name,
+      returnType = node.returnType,
+      name = node.name,
       arguments = funcArgs,
-      funcBlock = form.formBlock,
-      pub = form.pub
+      funcBlock = node.formBlock,
+      pub = node.pub
     )
 
-    let entry = FormEntry(form: form, instances: initTable[string, FuncStatement](), scopeDepth: visitor.currentScope.depth)
+    let entry = FormEntry(form: node, instances: initTable[string, FuncStatement](), scopeDepth: visitor.currentScope.depth)
     visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormEntry]()).add(entry)
     visitor.log(node.name.lexeme, " was added or overloaded to the form table")
 
@@ -1090,7 +1088,7 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
         discard visitor.symbolScopeStack[node.name.lexeme].pop()
 
       for name in funcNode.funcClosures:
-        form.closures[name] = visitor.getSymbol(name).symbolType
+        node.closures[name] = visitor.getSymbol(name).symbolType
 
 # SPECIALS
 
