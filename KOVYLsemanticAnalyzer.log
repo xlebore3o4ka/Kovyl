@@ -1,10 +1,17 @@
 KOVYL [SemanticAnalyzer] INFO: SemanticAnalyzerVisitor initialized
 KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: visiting ModuleStatement
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: vectors -> false
+KOVYL [SemanticAnalyzer] INFO: search for the std/vectors module... (full path: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl)
+KOVYL [SemanticAnalyzer] INFO: found module std/vectors on the path /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: semantic analysis of the std/vectors module...
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ModuleStatement
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: panics -> false
 KOVYL [SemanticAnalyzer] INFO: search for the std/panics module... (full path: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/panics.kvl)
 KOVYL [SemanticAnalyzer] INFO: found module std/panics on the path /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/panics.kvl
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
 KOVYL [SemanticAnalyzer] INFO: semantic analysis of the std/panics module...
 KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
@@ -14,7 +21,7 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: uint64
 KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: id -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: id of type uint64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Symbol created: id of type uint64 at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
 KOVYL [SemanticAnalyzer] INFO: Checking that all paths in the function 'registerPanic' block end with the return expression
@@ -22,21 +29,21 @@ KOVYL [SemanticAnalyzer] INFO: ...true
 KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: registerPanic -> false
 KOVYL [SemanticAnalyzer] INFO: New function type is set as: (char[64]) -> char@
-KOVYL [SemanticAnalyzer] INFO: Public symbol created: registerPanic of type (char[64]) -> char@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: name of type char[64] at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: registerPanic of type (char[64]) -> char@ at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (2 -> 3)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: name of type char[64] at the depth of the scope: 3
 KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
 KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
 KOVYL [SemanticAnalyzer] INFO: closing symbol id...
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: id -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 2 (current: 3)
 KOVYL [SemanticAnalyzer] INFO: symbol id added to function registerPanic closures
 KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
 KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: id -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 2 (current: 3)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: uint64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: uint64
@@ -45,7 +52,7 @@ KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: uint64
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: id -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 2 (current: 3)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: uint64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: uint64
@@ -99,7 +106,7 @@ KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char@
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: name -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: name of type char[64] at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: got symbol: name of type char[64] at the depth of the scope: 3 (current: 3)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[64]
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char@
@@ -128,7 +135,7 @@ KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: id -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: got symbol: id of type uint64 at the depth of the scope: 2 (current: 3)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: uint64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
@@ -163,14 +170,14 @@ KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
 KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: Symbol removed: name
-KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Scope popped (3 -> 2)
 KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: registerPanic -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: (char[64]) -> char@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
@@ -209,14 +216,14 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: userError -> false
-KOVYL [SemanticAnalyzer] INFO: Public symbol created: userError of type char@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: userError of type char@ at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: registerPanic -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: (char[64]) -> char@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
@@ -257,14 +264,14 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: valueError -> false
-KOVYL [SemanticAnalyzer] INFO: Public symbol created: valueError of type char@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: valueError of type char@ at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: registerPanic -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: (char[64]) -> char@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
@@ -309,35 +316,16 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: zeroDivision -> false
-KOVYL [SemanticAnalyzer] INFO: Public symbol created: zeroDivision of type char@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: zeroDivision of type char@ at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: creating a module type...
-KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: registerPanic
-KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: userError
-KOVYL [SemanticAnalyzer] INFO: Private symbol was skipped: id
-KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: valueError
-KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: zeroDivision
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: registerPanic
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: userError
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: id
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: valueError
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: zeroDivision
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: panics of type module 'panics.kvl' at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting ModuleStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: field registerPanic is correct
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: registerPanic -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: registerPanic of type (char[64]) -> char@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: (char[64]) -> char@
-KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[64]
 KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
@@ -378,8 +366,25 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
 KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: outOfBounds -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: outOfBounds of type char@ at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: outOfBounds of type char@ at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: creating a module type...
+KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: registerPanic
+KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: userError
+KOVYL [SemanticAnalyzer] INFO: Private symbol was skipped: id
+KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: valueError
+KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: outOfBounds
+KOVYL [SemanticAnalyzer] INFO: Public symbol added to the module type: zeroDivision
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: registerPanic
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: userError
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: id
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: valueError
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: outOfBounds
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: zeroDivision
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: panics of type module 'panics.kvl' at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: exiting ModuleStatement
 KOVYL [SemanticAnalyzer] INFO: visiting FormStatement
 KOVYL [SemanticAnalyzer] INFO: finding form overloads...
 KOVYL [SemanticAnalyzer] INFO: not found
@@ -388,10 +393,10 @@ KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
 KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> false
 KOVYL [SemanticAnalyzer] INFO: New function type is set as: (T@, T) -> ()
-KOVYL [SemanticAnalyzer] INFO: Symbol created: push of type (T@, T) -> () at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type T@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: Symbol created: val of type T at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: push of type (T@, T) -> () at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type T@ at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: Symbol created: val of type T at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
@@ -402,7 +407,7 @@ KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
@@ -413,7 +418,7 @@ KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
 KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
@@ -424,7 +429,7 @@ KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
@@ -432,7 +437,7 @@ KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
@@ -453,13 +458,13 @@ KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
@@ -467,7 +472,7 @@ KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: val -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: val of type T at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: val of type T at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
@@ -476,7 +481,7 @@ KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
 KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
 KOVYL [SemanticAnalyzer] INFO: Symbol removed: val
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
 KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
 KOVYL [SemanticAnalyzer] INFO: visiting FormStatement
 KOVYL [SemanticAnalyzer] INFO: finding form overloads...
@@ -488,10 +493,17 @@ KOVYL [SemanticAnalyzer] INFO: ...true
 KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
 KOVYL [SemanticAnalyzer] INFO: New function type is set as: (T@) -> T
-KOVYL [SemanticAnalyzer] INFO: Symbol created: pop of type (T@) -> T at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type T@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (T@) -> T at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type T@ at the depth of the scope: 2
 KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
@@ -501,13 +513,444 @@ KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
 KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
 KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: T@
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (2 -> 3)
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 3)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 1 (current: 3)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Scope popped (3 -> 2)
+KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
+KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T[]
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
+KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: result -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type T at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ReturnStatement
+KOVYL [SemanticAnalyzer] INFO: Checking func level -> 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: result -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: result of type T at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: result
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: visiting FormStatement
+KOVYL [SemanticAnalyzer] INFO: finding form overloads...
+KOVYL [SemanticAnalyzer] INFO: equality check self signature pop$[T](T@) -> undefined
+KOVYL [SemanticAnalyzer] INFO: - with pop$[T](T@) -> T
+KOVYL [SemanticAnalyzer] INFO: no matches found
+KOVYL [SemanticAnalyzer] INFO: pop was added or overloaded to the form table
+KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
+KOVYL [SemanticAnalyzer] INFO: New function type is set as: (T@) -> ()
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (T@) -> () at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type T@ at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: T@
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 2
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (2 -> 3)
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 3)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 1 (current: 3)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Scope popped (3 -> 2)
+KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 2 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: creating a module type...
+KOVYL [SemanticAnalyzer] INFO: Private symbol was skipped: panics
+KOVYL [SemanticAnalyzer] INFO: Public form added to the module type: pop
+KOVYL [SemanticAnalyzer] INFO: Public form added to the module type: pop
+KOVYL [SemanticAnalyzer] INFO: Public form added to the module type: push
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: panics
+KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vectors of type module 'vectors.kvl' at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: exiting ModuleStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ModuleStatement
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: panics -> false
+KOVYL [SemanticAnalyzer] INFO: search for the std/panics module... (full path: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/panics.kvl)
+KOVYL [SemanticAnalyzer] INFO: found module std/panics in the module cache
+KOVYL [SemanticAnalyzer] INFO: Symbol created: panics of type module 'panics.kvl' at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: exiting ModuleStatement
+KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
+KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
+KOVYL [SemanticAnalyzer] INFO: visiting InstanceExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vectors -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vectors of type module 'vectors.kvl' at the depth of the scope: 0 (current: 0)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'vectors.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: - with pop$[T](T@) -> undefined
+KOVYL [SemanticAnalyzer] INFO: suitable form has been found. Monomorphization...
+KOVYL [SemanticAnalyzer] INFO: monomorphized arg 0: int64@
+KOVYL [SemanticAnalyzer] INFO: monomorphized return: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
+KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> ()
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (int64@) -> () at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
@@ -543,11 +986,15 @@ KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
 KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: outOfBounds -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: outOfBounds of type char@ at the depth of the scope: 0 (current: 2)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
 KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
@@ -561,48 +1008,451 @@ KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
 KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[1]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
 KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
 KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[1]
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
 KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
 KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
 KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
 KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
-KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T[]
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
 KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
 KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
 KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: T
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
+KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
+KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
+KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
+KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> ()
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (int64@) -> () at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
+KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
+KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: the function was successfully generated and cached: pop(int64@) -> ()
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> ()
+KOVYL [SemanticAnalyzer] INFO: - with pop$[T](T@) -> T
+KOVYL [SemanticAnalyzer] INFO: suitable form has been found. Monomorphization...
+KOVYL [SemanticAnalyzer] INFO: monomorphized arg 0: int64@
+KOVYL [SemanticAnalyzer] INFO: monomorphized return: int64
+KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: Checking that all paths in the function 'pop' block end with the return expression
+KOVYL [SemanticAnalyzer] INFO: ...true
+KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
+KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> int64
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (int64@) -> int64 at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64[]
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: result -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type T at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type int64 at the depth of the scope: 1
 KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
 KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
 KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
@@ -613,8 +1463,8 @@ KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
 KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type T@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: T@
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
 KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
@@ -639,11 +1489,11 @@ KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
 KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
 KOVYL [SemanticAnalyzer] INFO: visiting ReturnStatement
 KOVYL [SemanticAnalyzer] INFO: Checking func level -> 1
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: T
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: checking symbol existence: result -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: result of type T at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: T
+KOVYL [SemanticAnalyzer] INFO: got symbol: result of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
 KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
@@ -653,7 +1503,233 @@ KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
 KOVYL [SemanticAnalyzer] INFO: Symbol removed: result
 KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
 KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
+KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: Checking that all paths in the function 'pop' block end with the return expression
+KOVYL [SemanticAnalyzer] INFO: ...true
+KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
+KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> int64
+KOVYL [SemanticAnalyzer] INFO: Public symbol created: pop of type (int64@) -> int64 at the depth of the scope: 0
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
+KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ClosureStatement
+KOVYL [SemanticAnalyzer] INFO: checking function level -> 1
+KOVYL [SemanticAnalyzer] INFO: closing symbol panics...
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: symbol panics added to function pop closures
+KOVYL [SemanticAnalyzer] INFO: exiting ClosureStatement
 KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: panics -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: panics of type module 'panics.kvl' at the depth of the scope: 0 (current: 2)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: module 'panics.kvl'
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: field outOfBounds is correct
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
+KOVYL [SemanticAnalyzer] INFO: exiting FieldExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
+KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[21]
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
+KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
+KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64[]
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: result -> false
+KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type int64 at the depth of the scope: 1
+KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
+KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
+KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
+KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
+KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
+KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
+KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
+KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
+KOVYL [SemanticAnalyzer] INFO: visiting ReturnStatement
+KOVYL [SemanticAnalyzer] INFO: Checking func level -> 1
+KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: checking symbol existence: result -> true
+KOVYL [SemanticAnalyzer] INFO: got symbol: result of type int64 at the depth of the scope: 1 (current: 1)
+KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
+KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
+KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
+KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
+KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
+KOVYL [SemanticAnalyzer] INFO: Symbol removed: result
+KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
+KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
+KOVYL [SemanticAnalyzer] INFO: the function was successfully generated and cached: pop(int64@) -> int64
+KOVYL [SemanticAnalyzer] INFO: The function was overloaded
+KOVYL [SemanticAnalyzer] INFO: exiting InstanceExpression
+KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
 KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
 KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
 KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skVec special
@@ -670,886 +1746,8 @@ KOVYL [SemanticAnalyzer] INFO: adding argument with key: @ and expression type: 
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
 KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
 KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: stack -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: stack of type int64@ at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: visiting InstanceExpression
-KOVYL [SemanticAnalyzer] INFO: forms of push was found in the table. Comparison
-KOVYL [SemanticAnalyzer] INFO: - with push$[T](T@, T) -> undefined
-KOVYL [SemanticAnalyzer] INFO: suitable form has been found. Monomorphization...
-KOVYL [SemanticAnalyzer] INFO: monomorphized arg 0: int64@
-KOVYL [SemanticAnalyzer] INFO: monomorphized arg 1: int64
-KOVYL [SemanticAnalyzer] INFO: monomorphized return: undefined
-KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> false
-KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Symbol created: push of type (int64@, int64) -> () at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: Symbol created: val of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@, int64) -> ()[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: val -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: val of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: val
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
-KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> false
-KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Symbol created: push of type (int64@, int64) -> () at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: Symbol created: val of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@, int64) -> ()[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: val -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: val of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: val
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
-KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: the function was successfully generated and cached: push(int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting InstanceExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: push -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: push of type (int64@, int64) -> () at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: visiting InstanceExpression
-KOVYL [SemanticAnalyzer] INFO: forms of pop was found in the table. Comparison
-KOVYL [SemanticAnalyzer] INFO: - with pop$[T](T@) -> T
-KOVYL [SemanticAnalyzer] INFO: suitable form has been found. Monomorphization...
-KOVYL [SemanticAnalyzer] INFO: monomorphized arg 0: int64@
-KOVYL [SemanticAnalyzer] INFO: monomorphized return: int64
-KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: Checking that all paths in the function 'pop' block end with the return expression
-KOVYL [SemanticAnalyzer] INFO: ...true
-KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
-KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Symbol created: pop of type (int64@) -> int64 at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 2)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: outOfBounds -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: outOfBounds of type char@ at the depth of the scope: 0 (current: 2)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
-KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
-KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[1]
-KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[1]
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
-KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: result -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: visiting ReturnStatement
-KOVYL [SemanticAnalyzer] INFO: Checking func level -> 1
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: result -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: result of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: result
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
-KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: visiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: Checking that all paths in the function 'pop' block end with the return expression
-KOVYL [SemanticAnalyzer] INFO: ...true
-KOVYL [SemanticAnalyzer] INFO: Checking function overloads...
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> false
-KOVYL [SemanticAnalyzer] INFO: New function type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Symbol created: pop of type (int64@) -> int64 at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (0 -> 1)
-KOVYL [SemanticAnalyzer] INFO: Symbol created: vec of type int64@ at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skLen special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: T@ | T[]...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: int64@
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: size -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: size of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting BranchingStatement
-KOVYL [SemanticAnalyzer] INFO: Scope pushed (1 -> 2)
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 2)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: bool
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: bool
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: visiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPanic special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: outOfBounds -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: outOfBounds of type char@ at the depth of the scope: 0 (current: 2)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char[] | char@...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
-KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: type was derived from the array elements as char
-KOVYL [SemanticAnalyzer] INFO: visiting ArrayExpression values...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char[1]
-KOVYL [SemanticAnalyzer] INFO: exiting ArrayExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: char[] | char@...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: char[1]
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Scope popped (2 -> 1)
-KOVYL [SemanticAnalyzer] INFO: exiting BranchingStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64[]
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IndexExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: result -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: result of type int64 at the depth of the scope: 1
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skResize special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: vec -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: vec of type int64@ at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: size -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: size of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 1 and types: int64...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 1...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 1
-KOVYL [SemanticAnalyzer] INFO: argument '1' has correct type: int64
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: visiting ReturnStatement
-KOVYL [SemanticAnalyzer] INFO: Checking func level -> 1
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: result -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: result of type int64 at the depth of the scope: 1 (current: 1)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting ReturnStatement
-KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: vec
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: size
-KOVYL [SemanticAnalyzer] INFO: Symbol removed: result
-KOVYL [SemanticAnalyzer] INFO: Scope popped (1 -> 0)
-KOVYL [SemanticAnalyzer] INFO: exiting FuncStatement
-KOVYL [SemanticAnalyzer] INFO: the function was successfully generated and cached: pop(int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting InstanceExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: pop -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: pop of type (int64@) -> int64 at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting DeclarationStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DefaultStatement
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: a -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: a of type int64 at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting DefaultStatement
-KOVYL [SemanticAnalyzer] INFO: visiting DefaultStatement
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence in current scope: b -> false
-KOVYL [SemanticAnalyzer] INFO: Symbol created: b of type int64 at the depth of the scope: 0
-KOVYL [SemanticAnalyzer] INFO: exiting DefaultStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: push of type (int64@, int64) -> () at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
 KOVYL [SemanticAnalyzer] INFO: node is first definded function
 KOVYL [SemanticAnalyzer] INFO: Return type is set as: undefined
 KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
 KOVYL [SemanticAnalyzer] INFO: exiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: push of type (int64@, int64) -> () at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: exiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: push of type (int64@, int64) -> () at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting NumberExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: exiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: b -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: b of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: pop of type (int64@) -> int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: a -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: a of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: pop of type (int64@) -> int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: push of type (int64@, int64) -> () at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: a -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: a of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: b -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: b of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: exiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: b -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: b of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: pop of type (int64@) -> int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: a -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: a of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: pop of type (int64@) -> int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting AssignmentStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: push -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: push of type (int64@, int64) -> () at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@, int64) -> ()
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: attempt to coerce types
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: a -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: a of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: b -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: b of type int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: int64
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting BinaryExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: undefined
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: exiting CallStatement
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialStatement
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skPrint special
-KOVYL [SemanticAnalyzer] INFO: checking for unexpected arguments in special
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char@
-KOVYL [SemanticAnalyzer] INFO: visiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Semantic analysis of skFmt special
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: char[]
-KOVYL [SemanticAnalyzer] INFO: visiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: pop -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: pop of type (int64@) -> int64 at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: (int64@) -> int64
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking node == first definded function...
-KOVYL [SemanticAnalyzer] WARN: expected context type != first definded function return type
-KOVYL [SemanticAnalyzer] INFO: node is not first definded function
-KOVYL [SemanticAnalyzer] INFO: Creating a function type from arguments and context...
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: created type: (int64@) -> char[]
-KOVYL [SemanticAnalyzer] INFO: checking overloads...
-KOVYL [SemanticAnalyzer] WARN: no overload was found
-KOVYL [SemanticAnalyzer] INFO: Expected context type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: visiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: checking symbol existence: stack -> true
-KOVYL [SemanticAnalyzer] INFO: got symbol: stack of type int64@ at the depth of the scope: 0 (current: 0)
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64@
-KOVYL [SemanticAnalyzer] INFO: exiting IdentifierExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char[]
-KOVYL [SemanticAnalyzer] INFO: node is first definded function
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: int64
-KOVYL [SemanticAnalyzer] INFO: exiting CallExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: char@
-KOVYL [SemanticAnalyzer] INFO: checking if argument exists with key: sep...
-KOVYL [SemanticAnalyzer] INFO: argument does not exist with key: sep
-KOVYL [SemanticAnalyzer] INFO: checking if argument exists with key: repr...
-KOVYL [SemanticAnalyzer] INFO: argument does not exist with key: repr
-KOVYL [SemanticAnalyzer] INFO: Return type is set as: char@
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialExpression
-KOVYL [SemanticAnalyzer] INFO: Expected context type revert to: undefined
-KOVYL [SemanticAnalyzer] INFO: expecting argument with key: 0 and types: char@...
-KOVYL [SemanticAnalyzer] INFO: getting argument with key: 0...
-KOVYL [SemanticAnalyzer] INFO: argument found for key: 0
-KOVYL [SemanticAnalyzer] INFO: argument '0' has correct type: char@
-KOVYL [SemanticAnalyzer] INFO: checking if argument exists with key: term...
-KOVYL [SemanticAnalyzer] INFO: argument does not exist with key: term
-KOVYL [SemanticAnalyzer] INFO: checking if argument exists with key: free...
-KOVYL [SemanticAnalyzer] INFO: argument does not exist with key: free
-KOVYL [SemanticAnalyzer] INFO: exiting SpecialStatement
 KOVYL [SemanticAnalyzer] INFO: exiting BlockStatement

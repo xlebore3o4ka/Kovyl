@@ -61,6 +61,7 @@ type
   InterpreterVisitor* = ref object of Visitor
     environment: seq[Table[string, Value]]
     moduleCache: Table[string, Value]
+    formClosures: Table[string, Table[string, Value]]
 
   BreakException* = object of CatchableError
   ContinueException* = object of CatchableError
@@ -661,6 +662,7 @@ method visitTupleExpression*(visitor: InterpreterVisitor, node: TupleExpression)
 
 method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression): Value {.base.} =
   let value = visitor.visitExpression(node.value)
+
   if value.valueType.eq typeModule:
     result = value.moduleValues[node.token.lexeme]
     if node.returnType.eq(typeFunc) and node.returnType.funcName != result.valueType.funcName:
@@ -705,7 +707,13 @@ method visitInstanceExpression*(visitor: InterpreterVisitor, node: InstanceExpre
   let name = node.returnType.funcName
   let funcStatement = node.overloads[name]
   visitor.visitFuncStatement(funcStatement)
-  return visitor.getSlot(name)
+  let funcValue = visitor.getSlot(name)
+
+  if node.name.lexeme in visitor.formClosures:
+    for name, value in visitor.formClosures[node.name.lexeme]:
+      funcValue.funcValue.closures[name] = value
+
+  return funcValue
 
 # STATEMENTS
 
@@ -865,8 +873,12 @@ method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement)
     visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
     visitor.moduleCache[node.fullPath] = newModuleValue(node.moduleType, moduleValues)
 
-method visitClosureStatement*(visitor: InterpreterVisitor, node: ClosureStatement): auto =
-  discard
+method visitFormStatement*(visitor: InterpreterVisitor, node: FormStatement): auto =
+  if node.name.lexeme notin visitor.formClosures:
+    visitor.formClosures[node.name.lexeme] = initTable[string, Value]()
+
+  for name in node.closures:
+    visitor.formClosures[node.name.lexeme][name] = visitor.getSlot(name)
 
 # SPECIALS
 
@@ -1131,8 +1143,8 @@ method visitStatement*(visitor: InterpreterVisitor, node: Statement) =
     visitor.visitCallStatement(CallStatement(node))
   elif node of ModuleStatement:
     visitor.visitModuleStatement(ModuleStatement(node))
-  elif node of ClosureStatement:
-    visitor.visitClosureStatement(ClosureStatement(node))
-  elif node of FormStatement: discard
+  elif node of ClosureStatement: discard
+  elif node of FormStatement: 
+    visitor.visitFormStatement(FormStatement(node))
   else:
     warn "[InterpreterVisitor] WARNING: unhandled statement"

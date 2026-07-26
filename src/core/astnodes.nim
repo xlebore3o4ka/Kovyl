@@ -54,7 +54,7 @@ type
     funcOverload*: Natural = 0
 
   InstanceExpression* = ref object of Expression  # [module.]<name>< <types>, ... >
-    module*: IdentifierExpression
+    module*: Expression
     name*: Token
     types*: seq[Type]
     overloads*: OrderedTable[string, FuncStatement]
@@ -148,6 +148,7 @@ type
     name*: Token
     arguments*: OrderedTable[string, FuncArgument]
     formBlock*: BlockStatement
+    closures*: seq[string]
     pub*: bool
 
   # SPECIALS

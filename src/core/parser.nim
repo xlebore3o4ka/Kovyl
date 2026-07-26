@@ -341,6 +341,22 @@ proc parsePostfix(self: var Parser): Expression =
           "@1": token.mean()})
         field = field.newFrom(kind = tkInvalid)
 
+      if self.lexer.peekToken().kind == tkDollar:
+        discard self.lexer.nextToken()
+        discard self.expectToken(tkLBracket)
+        var types = @[self.parseType()]
+
+        while self.lexer.peekToken().kind == tkComma:
+          discard self.lexer.nextToken()
+          types.add(self.parseType())
+
+        discard self.expectToken(tkRBracket)
+
+        let module = result
+        result = newInstanceExpression(field, types)
+        InstanceExpression(result).module = module
+        continue
+
       result = newFieldExpression(result, field)
 
     elif token.kind == tkLParen:

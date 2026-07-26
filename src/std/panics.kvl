@@ -14,3 +14,4 @@ end
 string userError    = registerPanic("userError")    pub  # Use it whenever you want
 string valueError   = registerPanic("valueError")   pub  # Use it when the value is incorrect or cannot be created
 string zeroDivision = registerPanic("zeroDivision") pub  # Use it when you suspect division by zero
+string outOfBounds  = registerPanic("outOfBounds")  pub  # Use it when something goes beyond the boundaries
