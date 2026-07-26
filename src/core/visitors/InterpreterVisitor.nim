@@ -876,8 +876,9 @@ method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement)
 method visitFormStatement*(visitor: InterpreterVisitor, node: FormStatement): auto =
   if node.name.lexeme notin visitor.formClosures:
     visitor.formClosures[node.name.lexeme] = initTable[string, Value]()
+    echo node.name.lexeme
 
-  for name in node.closures:
+  for name, _ in node.closures:
     visitor.formClosures[node.name.lexeme][name] = visitor.getSlot(name)
 
 # SPECIALS

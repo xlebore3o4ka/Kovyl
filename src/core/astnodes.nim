@@ -148,7 +148,7 @@ type
     name*: Token
     arguments*: OrderedTable[string, FuncArgument]
     formBlock*: BlockStatement
-    closures*: seq[string]
+    closures*: Table[string, Type]
     pub*: bool
 
   # SPECIALS
@@ -328,4 +328,3 @@ proc newDeclarationStatement*(
 
 proc newDefaultStatement*(symbolType: Type, name: Token, pub: bool): DefaultStatement {.inline.} =
   DefaultStatement(name: name, symbolType: symbolType, pub: pub)
-  

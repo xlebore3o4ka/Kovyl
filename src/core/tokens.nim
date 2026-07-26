@@ -94,7 +94,7 @@ proc mean*(kind: TokenKind): string =
   of tkArrow:         return "arrow operator '->'"
   of tkDollar:        return "dollar operator '$'"
   of tkDot:           return "dot operator '.'"
-  of tkAt:           return "at operator '@'"
+  of tkAt:            return "at operator '@'"
   of tkHash:          return "hash operator '#'"
   of tkPragma:        return "pragma operator '#!'"
 

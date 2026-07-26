@@ -1,5 +1,5 @@
 import ../core/[astnodes, types, errors, tokens]
-import std/[strutils, logging, sequtils, tables]
+import std/[strutils, sequtils, tables]
 
 proc isNumber*(t: Type): bool {.inline.} =
   t.kind in {typeInt64, typeInt32, typeInt16, typeInt8, typeUint64, typeUint32, typeUint16, typeUint8}
@@ -33,10 +33,6 @@ proc inferNumberType*(node: NumberExpression, expected: Type): Type =
   newError(errSize, node.token, @{"@0": number, "@1": $expected})
   return getInt64Type()
 
-proc setType*(expr: Expression, returnType: Type) {.inline.} =
-  expr.returnType = returnType
-  info("Return type is set as: ", $returnType)
-
 proc checkEqNeq*(node: BinaryExpression, expected: TypeKind): bool {.inline.} =
   if node.token.kind notin {tkEq, tkNeq}: return false
   node.left.returnType.kind.eq(expected) and node.right.returnType.kind.eq(expected)
@@ -57,22 +53,6 @@ proc checkEqNeqStrings*(node: BinaryExpression): bool {.inline.} =
 proc checkAndOr*(node: BinaryExpression): bool {.inline.} =
   if node.token.kind notin {tkAnd, tkOr}: return false
   node.left.returnType.kind.eq(typeBool) and node.right.returnType.kind.eq(typeBool)
-
-proc trySetNumber*(node: BinaryExpression): bool {.inline.} =
-  if node.left.returnType.isNumber and node.right.returnType.eq node.left.returnType: 
-    if node.token.kind in {tkPlus, tkMinus, tkStar, tkSlash, tkPercent}: 
-      node.setType(node.left.returnType); return true
-    elif node.token.kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}: 
-      node.setType(getBoolType()); return true
-  return false
-
-proc trySetChar*(node: BinaryExpression): bool {.inline.} =
-  if node.left.returnType.eq(typeChar) and node.right.returnType.eq node.left.returnType: 
-    if node.token.kind in {tkPlus, tkMinus, tkStar, tkSlash, tkPercent}: 
-      node.setType(node.left.returnType); return true
-    elif node.token.kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}: 
-      node.setType(getBoolType()); return true
-  return false
 
 proc newBinaryTypeMismatchError*(node: BinaryExpression) {.inline.} =
   newError(errBinaryTypeMismatch, node.token, @{"@0": node.token.lexeme, "@1": $node.left.returnType, 
@@ -452,3 +432,43 @@ proc recursiveMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
         for varName, replacement in typeMap:
           arg.expectedType = substituteTypeVar(arg.expectedType, varName, replacement)
     recursiveMonomorphization(n.formBlock, typeMap)
+
+
+proc kind*(node: Expression): string =
+  if   node of ErrorExpression:      return "E.Error      "
+  elif node of NumberExpression:     return "E.Number     "
+  elif node of BoolExpression:       return "E.Bool       "
+  elif node of BinaryExpression:     return "E.Binary     "
+  elif node of UnaryExpression:      return "E.Unary      "
+  elif node of IdentifierExpression: return "E.Identifier "
+  elif node of CastExpression:       return "E.Cast       "
+  elif node of DerefExpression:      return "E.Deref      "
+  elif node of CharExpression:       return "E.Char       "
+  elif node of ArrayExpression:      return "E.Array      "
+  elif node of IndexExpression:      return "E.Index      "
+  elif node of NulExpression:        return "E.Nul        "
+  elif node of TypeExpression:       return "E.Type       "
+  elif node of TupleExpression:      return "E.Tuple      "
+  elif node of FieldExpression:      return "E.Field      "
+  elif node of CallExpression:       return "E.Call       "
+  elif node of InstanceExpression:   return "E.Instance   "
+  elif node of SpecialExpression:    return "E.Special    "
+
+proc kind*(node: Statement): string =
+  if   node of ErrorStatement:       return "S.Error      "
+  elif node of DeclarationStatement: return "S.Declaration"
+  elif node of BlockStatement:       return "S.Block      "
+  elif node of AssignmentStatement:  return "S.Assignment "
+  elif node of BranchingStatement:   return "S.Branching  "
+  elif node of WhileStatement:       return "S.While      "
+  elif node of BreakStatement:       return "S.Break      "
+  elif node of ContinueStatement:    return "S.Continue   "
+  elif node of DefaultStatement:     return "S.Default    "
+  elif node of FuncStatement:        return "S.Func       "
+  elif node of ReturnStatement:      return "S.Return     "
+  elif node of ForStatement:         return "S.For        "
+  elif node of CallStatement:        return "S.Call       "
+  elif node of ModuleStatement:      return "S.Module     "
+  elif node of ClosureStatement:     return "S.Closure    "
+  elif node of FormStatement:        return "S.Form       "
+  elif node of SpecialStatement:     return "S.Special    "

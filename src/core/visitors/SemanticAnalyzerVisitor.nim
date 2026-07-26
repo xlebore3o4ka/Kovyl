@@ -37,7 +37,45 @@ type
     formTable: Table[string, seq[FormEntry]]
     moduleFormTable: Table[string, Table[string, seq[FormEntry]]]
 
-var logger = newFileLogger("KOVYLsemanticAnalyzer.log", fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ", mode = fmWrite)
+    nodeStack: seq[string]
+
+proc log(self: SemanticAnalyzerVisitor, args: varargs[string, `$`]) =
+  let prefix = $self.currentScope.depth
+  let indent = prefix.alignLeft(4)
+  
+  let stackIndent = "| ".repeat(self.nodeStack.len - 1)
+  let mainPart = indent & " " & $self.nodeStack[^1] & " " & stackIndent & args.join("")
+  
+  const LOG_WIDTH = 150
+  
+  if self.expectedContextType != getUndefinedType():
+    let contextType = " [" & $self.expectedContextType & "]"
+    let padding = max(1, LOG_WIDTH - mainPart.len - contextType.len)
+    info(mainPart, " ".repeat(padding), contextType)
+  else:
+    info(mainPart)
+
+proc setType(expr: Expression, returnType: Type, self: SemanticAnalyzerVisitor) {.inline.} =
+  expr.returnType = returnType
+  self.log("Return type is set as: ", $returnType)
+
+proc trySetNumber*(node: BinaryExpression, visitor: SemanticAnalyzerVisitor): bool {.inline.} =
+  if node.left.returnType.isNumber and node.right.returnType.eq node.left.returnType: 
+    if node.token.kind in {tkPlus, tkMinus, tkStar, tkSlash, tkPercent}: 
+      node.setType(node.left.returnType, visitor); return true
+    elif node.token.kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}: 
+      node.setType(getBoolType(), visitor); return true
+  return false
+
+proc trySetChar*(node: BinaryExpression, visitor: SemanticAnalyzerVisitor): bool {.inline.} =
+  if node.left.returnType.eq(typeChar) and node.right.returnType.eq node.left.returnType: 
+    if node.token.kind in {tkPlus, tkMinus, tkStar, tkSlash, tkPercent}: 
+      node.setType(node.left.returnType, visitor); return true
+    elif node.token.kind in {tkGT, tkLT, tkGTE, tkLTE, tkEQ, tkNEQ}: 
+      node.setType(getBoolType(), visitor); return true
+  return false
+
+var logger = newFileLogger("KOVYLsemanticAnalyzer.log.kovyl", fmtStr = "KOVYL [SemanticAnalyzer] $levelname: ", mode = fmWrite)
 
 proc semanticAnalyzerLogging*(enabled: bool) =
   if enabled:
@@ -58,13 +96,11 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) {.base
 proc visitExpecting(self: SemanticAnalyzerVisitor, expr: Expression, expected: Type) =
   let context = self.expectedContextType
   self.expectedContextType = expected
-  info("Expected context type is set as: ", $expected)
   self.visitExpression(expr)
   self.expectedContextType = context
-  info("Expected context type revert to: ", $context)
 
 proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, expected: Type): bool =
-  info("attempt to coerce types")
+  self.log("attempt to coerce types")
   self.visitExpecting(left, expected)
   var arrays = false
 
@@ -86,64 +122,56 @@ proc coerce(self: SemanticAnalyzerVisitor, left: Expression, right: Expression, 
 proc newSymbol(self: SemanticAnalyzerVisitor, name: Token, symbolType: Type, pub: bool) =
   self.currentScope.symbolTable[name.lexeme] = Symbol(token: name, symbolType: symbolType, pub: pub)
   self.symbolScopeStack.mgetOrPut(name.lexeme, @[]).add(self.currentScope)
-  info((if pub: "Public s" else: "S") & "ymbol created: ", name.lexeme, " of type ", $symbolType, 
+  self.log((if pub: "Public s" else: "S") & "ymbol created: ", name.lexeme, " of type ", $symbolType, 
     " at the depth of the scope: ", $self.currentScope.depth)
 
 proc pushScope(self: SemanticAnalyzerVisitor) =
   let depth = self.currentScope.depth
   self.currentScope = Scope(isGlobal: false, symbolTable: initTable[string, Symbol](), 
     parent: self.currentScope, depth: depth + 1)
-  info("Scope pushed (", depth, " -> ", self.currentScope.depth, ")")
+  self.log("Scope pushed (", depth, " -> ", self.currentScope.depth, ")")
 
 proc popScope(self: SemanticAnalyzerVisitor) =
   let scope = self.currentScope
   for name in scope.symbolTable.keys:
     discard self.symbolScopeStack[name].pop()
-    info("Symbol removed: ", name)
+    self.log("Symbol removed: ", name)
   self.currentScope = scope.parent
-  info("Scope popped (", scope.depth, " -> ", self.currentScope.depth, ")")
+  self.log("Scope popped (", scope.depth, " -> ", self.currentScope.depth, ")")
 
 proc getSymbol(self: SemanticAnalyzerVisitor, name: string): Symbol =
   let scope = self.symbolScopeStack[name][^1]
   result = scope.symbolTable[name]
-  info("got symbol: " & result.token.lexeme & " of type " & $result.symbolType, 
+  self.log("got symbol: " & result.token.lexeme & " of type " & $result.symbolType, 
     " at the depth of the scope: ", $scope.depth, " (current: ", $self.currentScope.depth, ")")
 
 proc symbolExists(self: SemanticAnalyzerVisitor, name: string): bool =
   let exists = name in self.symbolScopeStack and self.symbolScopeStack[name].len > 0
-  info("checking symbol existence: " & name & " -> " & $exists)
+  self.log("checking symbol existence: " & name & " -> " & $exists)
   return exists
 
 proc symbolExistsInCurrentScope(self: SemanticAnalyzerVisitor, name: string): bool =
   let exists = name in self.currentScope.symbolTable
-  info("checking symbol existence in current scope: " & name & " -> " & $exists)
+  self.log("checking symbol existence in current scope: " & name & " -> " & $exists)
   return exists
 
 proc overload(self: SemanticAnalyzerVisitor, name: string, overloadType: Type) =
   let scope = self.symbolScopeStack[name][^1]
   scope.symbolTable[name].symbolType.overloads[name & $overloadType] = overloadType
-  info("Function ", name, " overloaded as ", overloadType)
+  self.log("Function ", name, " overloaded as ", overloadType)
 
 # EXPRESSIONS
 
 method visitNumberExpression*(visitor: SemanticAnalyzerVisitor, node: NumberExpression): auto =
-  info("visiting NumberExpression")
-  node.setType(inferNumberType(node, visitor.expectedContextType))
-  info("exiting NumberExpression")
+  node.setType(inferNumberType(node, visitor.expectedContextType), visitor)
 
 method visitNulExpression*(visitor: SemanticAnalyzerVisitor, node: NulExpression): auto =
-  info("visiting NulExpression")
-
   if visitor.expectedContextType.kind in {typePtr, typeVec}:
-    node.setType(visitor.expectedContextType)
+    node.setType(visitor.expectedContextType, visitor)
   else:
     warn("Nul in non-pointer context")
 
-  info("exiting NulExpression")
-
 method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpression): auto =
-  info("visiting BinaryExpression")
-
   let left = node.left
   let right = node.right
 
@@ -152,33 +180,26 @@ method visitBinaryExpression*(visitor: SemanticAnalyzerVisitor, node: BinaryExpr
     node.newBinaryTypeMismatchError()
 
   elif left.returnType.kind.eq(right.returnType.kind) and left.returnType.kind.eq(typeVar):
-    node.setType(getBoolType())
-  elif node.trySetNumber():              discard
-  elif node.trySetChar():                discard
-  elif node.checkEqNeq(typeChar):        node.setType(getBoolType())
-  elif node.checkEqNeq(typeArray):       node.setType(getBoolType())
-  elif node.checkEqNeq(typeVec):         node.setType(getBoolType())
-  elif node.checkEqNeq(typePtr):         node.setType(getBoolType())
-  elif node.checkEqNeq(typeTuple):       node.setType(getBoolType())
-  elif node.checkAndOr():                node.setType(getBoolType())
-  elif node.checkEqNeqStrings():         node.setType(getBoolType())
+    node.setType(getBoolType(), visitor)
+  elif node.trySetNumber(visitor):              discard
+  elif node.trySetChar(visitor):                discard
+  elif node.checkEqNeq(typeChar):        node.setType(getBoolType(), visitor)
+  elif node.checkEqNeq(typeArray):       node.setType(getBoolType(), visitor)
+  elif node.checkEqNeq(typeVec):         node.setType(getBoolType(), visitor)
+  elif node.checkEqNeq(typePtr):         node.setType(getBoolType(), visitor)
+  elif node.checkEqNeq(typeTuple):       node.setType(getBoolType(), visitor)
+  elif node.checkAndOr():                node.setType(getBoolType(), visitor)
+  elif node.checkEqNeqStrings():         node.setType(getBoolType(), visitor)
   else:                                  node.newBinaryTypeMismatchError()
 
-  info("exiting BinaryExpression")
-
 method visitUnaryExpression*(visitor: SemanticAnalyzerVisitor, node: UnaryExpression): auto =
-  info("visiting UnaryExpression")
-
   visitor.visitExpression(node.value)
 
-  if   node.checkPlusMinus(): node.setType(node.value.returnType)
-  elif node.checkNot():       node.setType(getBoolType())
+  if   node.checkPlusMinus(): node.setType(node.value.returnType, visitor)
+  elif node.checkNot():       node.setType(getBoolType(), visitor)
   else:                       node.newUnaryTypeMismatchError()
 
-  info("exiting UnaryExpression")
-
 method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: IdentifierExpression): auto =
-  info("visiting IdentifierExpression")
   var error = false
 
   if not visitor.symbolExists(node.token.lexeme):
@@ -186,28 +207,21 @@ method visitIdentifierExpression*(visitor: SemanticAnalyzerVisitor, node: Identi
     error = true
 
   if not error:
-    node.setType(visitor.getSymbol(node.token.lexeme).symbolType)
-
-  info("exiting IdentifierExpression")
+    node.setType(visitor.getSymbol(node.token.lexeme).symbolType, visitor)
 
 method visitCastExpression*(visitor: SemanticAnalyzerVisitor, node: CastExpression): auto =
-  info("visiting CastExpression")
-
   let valueType = node.value.returnType
   let to = node.returnType
 
   let illegal = valueType.kind in {typePtr, typeVec, typeBool} or to.kind in {typePtr, typeVec, typeBool} 
 
-  info("Type conversion attempt (", valueType, " -> ", to, ") -> ", not illegal)
+  visitor.log("Type conversion attempt (", valueType, " -> ", to, ") -> ", not illegal)
 
   if illegal:
     newError(errCannotCast, node.token, @{"@0": $valueType, "@1": $to})
     node.returnType = getUndefinedType()
 
-  info("exiting CastExpression")
-
 method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpression): auto =
-  info("visiting DerefExpression")
   var error = false
 
   visitor.visitExpecting(node.value, getPtrType(visitor.expectedContextType))
@@ -216,13 +230,9 @@ method visitDerefExpression*(visitor: SemanticAnalyzerVisitor, node: DerefExpres
     error = true
 
   if not error:
-    node.setType(node.value.returnType.ptrBase)
-
-  info("exiting DerefExpression")
+    node.setType(node.value.returnType.ptrBase, visitor)
 
 method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpression): auto =
-  info("visiting ArrayExpression")
-
   var expected = getUndefinedType()
   var derived = getUndefinedType()
   var error = false
@@ -232,12 +242,12 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
     if not expr.returnType.eq(getUndefinedType()) and not expr.returnType.eq(getNulType()):
       derived = expr.returnType
       break
-  info("type was derived from the array elements as ", derived)
+  visitor.log("type was derived from the array elements as ", derived)
 
   if visitor.expectedContextType.eq typeArray:
     expected = visitor.expectedContextType.arrBase
   else:
-    info("non-array context")
+    visitor.log("non-array context")
 
   if expected.eq(typeArray) and derived.eq(typeArray):
     if expected.length > derived.length:
@@ -245,7 +255,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
   if expected != derived:
     expected = derived
 
-  info("visiting ArrayExpression values...")
+  visitor.log("visiting ArrayExpression values...")
   for expr in node.values:
     visitor.visitExpecting(expr, expected)
 
@@ -255,7 +265,7 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
         error = true
         break
       expr.returnType = getArrayType(expr.returnType.arrBase, expected.length)
-      info("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
+      visitor.log("The size of the static array '" & expr.token.lexeme & "' has been determined to " & $expected.length)
 
     elif expected.neq(getUndefinedType()) and expr.returnType.neq expected:
       newError(errTypeMismatch, expr.token, @{"@0": $expected, "@1": $expr.returnType})
@@ -263,12 +273,9 @@ method visitArrayExpression*(visitor: SemanticAnalyzerVisitor, node: ArrayExpres
       break
 
   if not error:
-    node.setType(getArrayType(expected, node.values.len))
-
-  info("exiting ArrayExpression")
+    node.setType(getArrayType(expected, node.values.len), visitor)
 
 method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpression): auto =
-  info("visiting IndexExpression")
   var error = false
 
   visitor.visitExpecting(node.value, getArrayType(visitor.expectedContextType, 0))
@@ -285,14 +292,10 @@ method visitIndexExpression*(visitor: SemanticAnalyzerVisitor, node: IndexExpres
 
   if not error:
     node.setType(
-      if node.value.returnType.kind.eq typeVec:   node.value.returnType.vecBase
-      else:                                       node.value.returnType.arrBase
-    )
-
-  info("exiting IndexExpression")
+      (if node.value.returnType.kind.eq typeVec:   node.value.returnType.vecBase
+       else:                                       node.value.returnType.arrBase), visitor)
 
 method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpression): auto =
-  info("visiting TupleExpression")
   var error = false
 
   if visitor.expectedContextType.neq typeTuple:
@@ -304,7 +307,7 @@ method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpres
       visitor.visitExpecting(expr, getUndefinedType())
       elementTypes[nameToken.lexeme] = expr.returnType
 
-    node.setType(getTupleType(elementTypes))
+    node.setType(getTupleType(elementTypes), visitor)
 
   else:
     let expected = visitor.expectedContextType.elements
@@ -330,12 +333,9 @@ method visitTupleExpression*(visitor: SemanticAnalyzerVisitor, node: TupleExpres
         continue
 
     if not error:
-      node.setType(visitor.expectedContextType)
-
-  info("exiting TupleExpression")
+      node.setType(visitor.expectedContextType, visitor)
 
 method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpression): auto =
-  info("visiting FieldExpression")
   visitor.visitExpression(node.value)
   
   let returnType = node.value.returnType
@@ -355,14 +355,12 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
       newError(errHasNoField, node.token, @{"@0": $returnType, "@1": node.token.lexeme})
       break analysis
 
-    info("field ", node.token.lexeme, " is correct")
-    node.setType(fields[node.token.lexeme])
-
-  info("exiting FieldExpression")
+    visitor.log("field ", node.token.lexeme, " is correct")
+    node.setType(fields[node.token.lexeme], visitor)
 
 proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, Type) =
-  info("node is not first definded function")
-  info("Creating a function type from arguments and context...")
+  visitor.log("node is not first definded function")
+  visitor.log("Creating a function type from arguments and context...")
 
   var arguments: OrderedTable[string, Type]
   for i, expr in node.arguments:
@@ -370,20 +368,20 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
     arguments[$i] = expr.returnType
 
   let funcType = getFuncType(arguments, visitor.expectedContextType)
-  info("created type: ", funcType)
+  visitor.log("created type: ", funcType)
 
   block checkOverloads:
-    info("checking overloads...")
+    visitor.log("checking overloads...")
     if varType.overloads.len == 0:
       warn("no overload was found")
       return (false, funcType)
 
     for _, overload in varType.overloads.pairs:
-      info("checking overload ", overload, " equals ", funcType, "...")
+      visitor.log("checking overload ", overload, " equals ", funcType, "...")
       if funcType == overload:
-        info("perfect overload hit found")
-        node.setType(overload.returnType)
-        node.value.setType(overload)
+        visitor.log("perfect overload hit found")
+        node.setType(overload.returnType, visitor)
+        node.value.setType(overload, visitor)
         return (true, funcType)
       else:
         var argsMatch = true
@@ -408,9 +406,9 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
           argsMatch = false
         
         if argsMatch:
-          info("overload found with compatible arguments")
-          node.setType(overload.returnType)
-          node.value.setType(overload)
+          visitor.log("overload found with compatible arguments")
+          node.setType(overload.returnType, visitor)
+          node.value.setType(overload, visitor)
           return (true, funcType)
 
     warn("No matching overloads found for function ", varType.funcName)
@@ -418,7 +416,7 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
 
 proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, bool, Type) =
   block checkDefault:
-    info("checking node == first definded function...")
+    visitor.log("checking node == first definded function...")
     if node.arguments.len != varType.arguments.len:
       warn("node arguments len != first definded function arguments len")
       return (false, false, getUndefinedType())
@@ -442,14 +440,14 @@ proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpre
           return (false, false, getUndefinedType())
         elif expected.length > expr.returnType.length:
           expr.returnType = expected
-          info("Array size promoted from ", expr.returnType.length, " to ", expected.length)
+          visitor.log("Array size promoted from ", expr.returnType.length, " to ", expected.length)
 
       if expr.returnType != expected:
         warn("argument types != first definded function argument types")
         return (false, false, getUndefinedType())
 
-    info("node is first definded function")
-    node.setType(node.value.returnType.returnType)
+    visitor.log("node is first definded function")
+    node.setType(node.value.returnType.returnType, visitor)
     return (true, false, getUndefinedType())
 
 proc reportNoOverloadFound(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type, funcType: Type) =
@@ -468,7 +466,7 @@ proc reportNoOverloadFound(visitor: SemanticAnalyzerVisitor, node: CallExpressio
   newError(errFuncResolution, funcName, @{"@0": funcName.lexeme, "@1": $funcType, "@2": avaiableOverloadFormatted})
 
 method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpression): auto =
-  info("visiting CallExpression")
+  visitor.log("visiting CallExpression")
 
   visitor.visitExpression(node.value)
   var error = false
@@ -484,7 +482,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
     if isFirst:
       break checkAll
     elif isOverload:
-      node.setType(overloadType)
+      node.setType(overloadType, visitor)
 
     let (found, funcType) = checkOverloads(visitor, node, varType)
     if found:
@@ -492,7 +490,7 @@ method visitCallExpression*(visitor: SemanticAnalyzerVisitor, node: CallExpressi
 
     reportNoOverloadFound(visitor, node, varType, funcType)
 
-  info("exiting CallExpression")
+  visitor.log("exiting CallExpression")
 
 proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types: seq[Type]): FuncStatement =
   var typeMap: Table[string, Type]
@@ -515,8 +513,8 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
     newReturnType = substituteTypeVar(newReturnType, varName, replacement)
 
   for key, arg in newArguments.pairs:
-    info("monomorphized arg ", key, ": ", arg.expectedType)
-  info("monomorphized return: ", newReturnType)
+    self.log("monomorphized arg ", key, ": ", arg.expectedType)
+  self.log("monomorphized return: ", newReturnType)
 
   let clonedBody = BlockStatement(cloneAst(form.formBlock))
   recursiveMonomorphization(clonedBody, typeMap)
@@ -538,7 +536,15 @@ proc monomorphizeForm(self: SemanticAnalyzerVisitor, form: FormStatement, types:
 
   var errorsCount = errors.errors.len
 
-  self.visitStatement(result)
+  self.pushScope()
+
+  result.funcClosures = form.closures.keys.toSeq
+  for name, typ in form.closures:
+    self.newSymbol(form.name.newFrom(lexeme = name), typ, false)
+
+  self.visitFuncStatement(result)
+
+  self.popScope()
 
   if errorsCount != errors.errors.len:
     return nil
@@ -556,10 +562,10 @@ proc processFormResolution(
 
   for entry in formEntries:
     let form = entry.form
-    info("- with ", formToString(form))
+    visitor.log("- with ", formToString(form))
     
     if form.formParams.len != node.types.len:
-      info("param length mismatch")
+      visitor.log("param length mismatch")
       continue
     
     foundAtLeastOne = true
@@ -567,18 +573,18 @@ proc processFormResolution(
     if typeKey in entry.instances:
       let cached = entry.instances[typeKey]
       if cached == nil:
-        info("cached error for ", typeKey)
+        visitor.log("cached error for ", typeKey)
         continue
-      info("cache hit for ", typeKey)
+      visitor.log("cache hit for ", typeKey)
       node.overloads[cached.name.lexeme] = cached
       if node.returnType.neq(getUndefinedType()):
         node.returnType.overloads[cached.name.lexeme] = cached.funcType
-        info("The function was overloaded (cached)")
+        visitor.log("The function was overloaded (cached)")
       else:
-        node.setType(cached.funcType)
+        node.setType(cached.funcType, visitor)
       continue
 
-    info("suitable form has been found. Monomorphization...")
+    visitor.log("suitable form has been found. Monomorphization...")
     let funcStatement = visitor.monomorphizeForm(form, node.types)
 
     if funcStatement == nil:
@@ -591,6 +597,9 @@ proc processFormResolution(
       if funcStatement.name.lexeme in visitor.symbolScopeStack and visitor.symbolScopeStack[funcStatement.name.lexeme].len > 0:
         discard visitor.symbolScopeStack[funcStatement.name.lexeme].pop()
 
+    funcStatement.funcClosures = form.closures.keys.toSeq
+    for name, typ in form.closures:
+      visitor.newSymbol(form.name.newFrom(lexeme = name), typ, false)
     visitor.visitFuncStatement(funcStatement)
 
     visitor.currentScope.symbolTable.del(funcStatement.name.lexeme)
@@ -599,13 +608,13 @@ proc processFormResolution(
 
     entry.instances[typeKey] = funcStatement
 
-    info("the function was successfully generated and cached: ", funcStatement.name.lexeme, funcStatement.funcType)
+    visitor.log("the function was successfully generated and cached: ", funcStatement.name.lexeme, funcStatement.funcType)
     node.overloads[funcStatement.name.lexeme] = funcStatement
     if node.returnType.neq(getUndefinedType()):
       node.returnType.overloads[funcStatement.name.lexeme] = funcStatement.funcType
-      info("The function was overloaded")
+      visitor.log("The function was overloaded")
     else:
-      node.setType(funcStatement.funcType)
+      node.setType(funcStatement.funcType, visitor)
 
   if not foundAtLeastOne:
     if formEntries.len == 0:
@@ -620,7 +629,7 @@ proc processFormResolution(
   return foundAtLeastOne
 
 method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: InstanceExpression): auto =
-  info("visiting InstanceExpression")
+  visitor.log("visiting InstanceExpression")
   
   block analysis:
     if node.module != nil:
@@ -639,19 +648,17 @@ method visitInstanceExpression*(visitor: SemanticAnalyzerVisitor, node: Instance
         newError(errHasNoField, node.module.token, @{"@0": node.module.token.lexeme, "@1": node.name.lexeme})
 
     elif node.name.lexeme in visitor.formTable:
-      info("forms of ", node.name.lexeme, " was found in the table. Comparison")
+      visitor.log("forms of ", node.name.lexeme, " was found in the table. Comparison")
       discard processFormResolution(visitor, node, visitor.formTable[node.name.lexeme])
 
     else:
       newError(errUndeclaredSymbol, node.name, @{"@0": node.name.lexeme})
 
-  info("exiting InstanceExpression")
+  visitor.log("exiting InstanceExpression")
 
 # STATEMENTS
 
 method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: DeclarationStatement): auto =
-  info("visiting DeclarationStatement")
-
   var error = false
 
   var expected = node.symbolType
@@ -663,7 +670,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
   if expected.kind.eq(typeArray) and valueType.kind.eq typeArray:
     if expected.length == 0 and valueType.length != 0:
       expected = getArrayType(expected.arrBase, valueType.length)
-      info("The size of the static array '" & node.name.lexeme & "' has been determined to " & $valueType.length)
+      visitor.log("The size of the static array '" & node.name.lexeme & "' has been determined to " & $valueType.length)
     elif expected.length == 0 and valueType.length == 0:
       newError(errEmptyStaticArray, node.value.token)
       error = true
@@ -676,7 +683,7 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
       error = true
     elif expected.length > valueType.length:
       valueType = getArrayType(expected.arrBase, expected.length)
-      info("The size of the static array '" & node.value.token.lexeme & "' has been determined to " & $valueType.length)
+      visitor.log("The size of the static array '" & node.value.token.lexeme & "' has been determined to " & $valueType.length)
 
   elif expected.neq valueType:
     newError(errTypeMismatch, node.name, @{"@0": $expected, "@1": $valueType})
@@ -691,10 +698,8 @@ method visitDeclarationStatement*(visitor: SemanticAnalyzerVisitor, node: Declar
   if not error:
     visitor.newSymbol(node.name, node.value.returnType, node.pub)
 
-  info("exiting DeclarationStatement")
-
 method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStatement): auto =
-  info("visiting BlockStatement")
+  visitor.log("do")
 
   var isCodeUnreachable: bool
   var returnToken: Token
@@ -710,11 +715,9 @@ method visitBlockStatement*(visitor: SemanticAnalyzerVisitor, node: BlockStateme
       isCodeUnreachable = true
       returnToken = ReturnStatement(stmt).token
 
-  info("exiting BlockStatement")
+  visitor.log("end")
 
 method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: AssignmentStatement): auto =
-  info("visiting AssignmentStatement")
-
   visitor.visitExpression(node.left)
   visitor.visitExpecting(node.value, node.left.returnType)
   
@@ -723,17 +726,13 @@ method visitAssignmentStatement*(visitor: SemanticAnalyzerVisitor, node: Assignm
       newError(errSize, node.value.token, @{"@0": $node.value.returnType, "@1": $node.left.returnType})
     else:
       node.value.returnType = getArrayType(node.value.returnType.arrBase, node.left.returnType.length)
-      info("The size of the static array '" & node.left.token.lexeme & 
+      visitor.log("The size of the static array '" & node.left.token.lexeme & 
         "' has been determined to " & $node.value.returnType.length)
 
   elif node.left.returnType.neq node.value.returnType:
     newError(errTypeMismatch, node.left.token, @{"@0": $node.left.returnType, "@1": $node.value.returnType})
 
-  info("exiting AssignmentStatement")
-
 method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: BranchingStatement): auto =
-  info("visiting BranchingStatement")
-  
   visitor.pushScope()
   visitor.visitExpecting(node.condition, getBoolType())
   if node.condition.returnType.neq(getBoolType()):
@@ -755,32 +754,20 @@ method visitBranchingStatement*(visitor: SemanticAnalyzerVisitor, node: Branchin
     visitor.pushScope()
     visitor.visitStatement(node.elseBlock)
     visitor.popScope()
-  
-  info("exiting BranchingStatement")
 
 method visitBreakStatement*(visitor: SemanticAnalyzerVisitor, node: BreakStatement): auto =
-  info("visiting BreakStatement")
-
-  info("Checking loop level -> ", visitor.loopLevel)
+  visitor.log("Checking loop level -> ", visitor.loopLevel)
   if visitor.loopLevel == 0:
     newError(errForbiddenLocation, node.token)
-
-  info("exiting BreakStatement")
 
 method visitContinueStatement*(visitor: SemanticAnalyzerVisitor, node: ContinueStatement): auto =
-  info("visiting ContinueStatement")
-
-  info("Checking loop level -> ", visitor.loopLevel)
+  visitor.log("Checking loop level -> ", visitor.loopLevel)
   if visitor.loopLevel == 0:
     newError(errForbiddenLocation, node.token)
 
-  info("exiting ContinueStatement")
-
 method visitWhileStatement*(visitor: SemanticAnalyzerVisitor, node: WhileStatement): auto =
-  info("visiting WhileStatement")
-  
   visitor.loopLevel.inc
-  info("Incrementing loop level: ", visitor.loopLevel - 1, " -> ", visitor.loopLevel)
+  visitor.log("Incrementing loop level: ", visitor.loopLevel - 1, " -> ", visitor.loopLevel)
   visitor.pushScope()
   
   visitor.visitExpecting(node.condition, getBoolType())
@@ -791,13 +778,9 @@ method visitWhileStatement*(visitor: SemanticAnalyzerVisitor, node: WhileStateme
   
   visitor.popScope()
   visitor.loopLevel.dec
-  info("Decrementing loop level: ", visitor.loopLevel + 1, " -> ", visitor.loopLevel)
-  
-  info("exiting WhileStatement")
+  visitor.log("Decrementing loop level: ", visitor.loopLevel + 1, " -> ", visitor.loopLevel)
 
 method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultStatement): auto =
-  info("visiting DefaultStatement")
-
   if visitor.symbolExistsInCurrentScope(node.name.lexeme):
     let existing = visitor.getSymbol(node.name.lexeme)
     newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": existing.token.file,
@@ -812,10 +795,8 @@ method visitDefaultStatement*(visitor: SemanticAnalyzerVisitor, node: DefaultSta
   else:
     visitor.newSymbol(node.name, node.symbolType, node.pub)
 
-  info("exiting DefaultStatement")
-
 method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement): auto =
-  info("visiting FuncStatement")
+  visitor.log("visiting FuncStatement")
 
   var error = false
 
@@ -834,16 +815,16 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
   let funcType = getFuncType(argumentTypes, node.returnType, node.name.lexeme)
 
   if node.returnType.neq getUndefinedType():
-    info("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
+    visitor.log("Checking that all paths in the function '", node.name.lexeme, "' block end with the return expression")
     if not blockEndsWithReturn(node.funcBlock):
       warn("...false")
       newError(errMissingReturn, node.name, @{"@0": node.name.lexeme})
       error = true
     else:
-      info("...true")
+      visitor.log("...true")
 
   if not error:
-    info("Checking function overloads...")
+    visitor.log("Checking function overloads...")
     if visitor.symbolExists(node.name.lexeme):
       var funcSymbol = visitor.getSymbol(node.name.lexeme)
       error = false
@@ -866,7 +847,7 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
         node.name.lexeme &= $funcType
 
     else:
-      info("New function type is set as: ", funcType)
+      visitor.log("New function type is set as: ", funcType)
       node.funcType = funcType
       visitor.newSymbol(node.name, funcType, node.pub)
 
@@ -882,12 +863,10 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
 
     visitor.popScope()
 
-  info("exiting FuncStatement")
+  visitor.log("exiting FuncStatement")
 
 method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnStatement): auto =
-  info("visiting ReturnStatement")
-
-  info("Checking func level -> ", visitor.funcStack.len)
+  visitor.log("Checking func level -> ", visitor.funcStack.len)
   if visitor.funcStack.len == 0:
     newError(errForbiddenLocation, node.token)
 
@@ -900,11 +879,7 @@ method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnState
       newError(errTypeMismatch, node.value.token, @{"@0": $visitor.funcStack[^1].returnType, 
         "@1": $node.value.returnType})
 
-  info("exiting ReturnStatement")
-
 method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement): auto =
-  info("visiting ForStatement")
-
   visitor.pushScope()
 
   visitor.visitExpression(node.value)
@@ -924,21 +899,15 @@ method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement):
 
   visitor.popScope()
 
-  info("exiting ForStatement")
-
 method visitCallStatement*(visitor: SemanticAnalyzerVisitor, node: CallStatement): auto =
-  info("visiting CallStatement")
-
   visitor.visitExpression(node.callExpression)
   let funcExpr = node.callExpression
 
   if funcExpr.returnType.neq getUndefinedType():
     newError(errUnusedReturn, funcExpr.value.token, @{"@0": funcExpr.value.token.lexeme})
 
-  info("exiting CallStatement")
-
 method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleStatement): auto =
-  info("visiting ModuleStatement")
+  visitor.log("visiting ModuleStatement")
 
   block analysis:
     if visitor.symbolExistsInCurrentScope(node.name.lexeme):
@@ -957,10 +926,10 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
       else: joinPath(dir, modulePath) & ".kvl"
     )
 
-    info("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
+    visitor.log("search for the ", node.path.lexeme, " module... (full path: ", fullPath, ")")
 
     if fullPath in visitor.moduleCache:
-      info("found module ", node.path.lexeme, " in the module cache")
+      visitor.log("found module ", node.path.lexeme, " in the module cache")
       node.moduleType = visitor.moduleCache[fullPath]
       node.fullPath = fullPath
       visitor.newSymbol(node.name, node.moduleType, false)
@@ -971,7 +940,7 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
       newError(errModuleNotFound, node.path, @{"@0": node.path.lexeme})
       break analysis
 
-    info("found module ", node.path.lexeme, " on the path ", fullPath)
+    visitor.log("found module ", node.path.lexeme, " on the path ", fullPath)
 
     let text = readFile(fullPath)
 
@@ -982,31 +951,31 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
       newError(errCorruptedModule, node.name, @{"@0": node.path.lexeme})
 
     visitor.pushScope()
-    info("semantic analysis of the ", node.path.lexeme, " module...")
+    visitor.log("semantic analysis of the ", node.path.lexeme, " module...")
     visitor.visitStatement(node.moduleBlock)
 
-    info("creating a module type...")
+    visitor.log("creating a module type...")
 
     var symbols: OrderedTable[string, Type]
     for name, symbol in visitor.currentScope.symbolTable.pairs:
       if symbol.pub:
-        info("Public symbol added to the module type: ", name)
+        visitor.log("Public symbol added to the module type: ", name)
         symbols[name] = symbol.symbolType
       else:
-        info("Private symbol was skipped: ", name)
+        visitor.log("Private symbol was skipped: ", name)
 
     for name, overloads in visitor.formTable.mpairs:
       var i = overloads.high
       while i >= 0:
         if overloads[i].scopeDepth == visitor.currentScope.depth:
           if overloads[i].form.pub:
-            info("Public form added to the module type: ", name)
+            visitor.log("Public form added to the module type: ", name)
             visitor.moduleFormTable
               .mgetOrPut(fullPath, initTable[string, seq[FormEntry]]())
               .mgetOrPut(overloads[i].form.name.lexeme, newSeq[FormEntry]())
               .add(overloads[i])
           else:
-            info("Private form was skipped: ", name)
+            visitor.log("Private form was skipped: ", name)
           overloads.delete(i)
         dec(i)
 
@@ -1020,12 +989,10 @@ method visitModuleStatement*(visitor: SemanticAnalyzerVisitor, node: ModuleState
       visitor.moduleCache[fullPath] = node.moduleType
       node.fullPath = fullPath
 
-  info("exiting ModuleStatement")
+  visitor.log("exiting ModuleStatement")
 
 method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureStatement): auto =
-  info("visiting ClosureStatement")
-
-  info("checking function level -> ", visitor.funcStack.len)
+  visitor.log("checking function level -> ", visitor.funcStack.len)
   if visitor.funcStack.len == 0:
     newError(errForbiddenLocation, node.token)
 
@@ -1033,48 +1000,48 @@ method visitClosureStatement*(visitor: SemanticAnalyzerVisitor, node: ClosureSta
     var error = false
 
     for name in node.names:
-      info("closing symbol ", name.lexeme, "...")
-      if not visitor.symbolExists(name.lexeme):
+      visitor.log("closing symbol ", name.lexeme, "...")
+      if name.lexeme in visitor.funcStack[^1].funcClosures:
+        visitor.log("already closed")
+      elif not visitor.symbolExists(name.lexeme):
         newError(errUndeclaredSymbol, name, @{"@0": name.lexeme})
         error = true
       else:
         let symbol = visitor.getSymbol(name.lexeme)
         visitor.funcStack[^1].funcClosures.add(name.lexeme)
-        info("symbol ", name.lexeme, " added to function ", visitor.funcStack[^1].name.lexeme, " closures")
+        visitor.log("symbol ", name.lexeme, " added to function ", visitor.funcStack[^1].name.lexeme, " closures")
 
         if symbol.symbolType.eq typeFunc:
-          info("closing ", name.lexeme, " overloads...")
+          visitor.log("closing ", name.lexeme, " overloads...")
           for name, overload in symbol.symbolType.overloads.pairs:
             visitor.funcStack[^1].funcClosures.add(name)
-            info("overload ", name, " added to function ", 
+            visitor.log("overload ", name, " added to function ", 
               visitor.funcStack[^1].name.lexeme, " closures")
 
-  info("exiting ClosureStatement")
-
 method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement): auto =
-  info("visiting FormStatement")
+  visitor.log("visiting FormStatement")
 
   var error = false
 
-  info("finding form overloads...")
+  visitor.log("finding form overloads...")
   if node.name.lexeme in visitor.formTable:
-    info("equality check self signature ", formToString(node))
+    visitor.log("equality check self signature ", formToString(node))
     for entry in visitor.formTable[node.name.lexeme]:
       let form = entry.form
-      info("- with ", formToString(form))
-      if node.formParams.len != form.formParams.len: info("form params length mismatch"); continue
-      if node.arguments.len  != form.arguments.len:  info("arguments length mismatch");   continue
+      visitor.log("- with ", formToString(form))
+      if node.formParams.len != form.formParams.len: visitor.log("form params length mismatch"); continue
+      if node.arguments.len  != form.arguments.len:  visitor.log("arguments length mismatch");   continue
       var cont = false
       for index in 0..<node.formParams.len:
         if node.formParams[index].lexeme != form.formParams[index].lexeme: 
-          info("param mismatch")
+          visitor.log("param mismatch")
           cont = true
           break
       if cont: continue
       if node.returnType.neq(form.returnType): continue
       for index in 0..<node.arguments.len:
         if node.arguments[$index].expectedType.neq form.arguments[$index].expectedType: 
-          info("argument mismatch")
+          visitor.log("argument mismatch")
           cont = true
           break
       if cont: continue
@@ -1083,10 +1050,10 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
       newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": form.name.file, "@2": $form.name.line, "@3": $form.name.column})
       break
     if not error:
-      info("no matches found")
+      visitor.log("no matches found")
       
   else:
-    info("not found")
+    visitor.log("not found")
   
   if not error:
     let form = FormStatement(cloneAst(node))
@@ -1105,7 +1072,7 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
 
     let entry = FormEntry(form: form, instances: initTable[string, FuncStatement](), scopeDepth: visitor.currentScope.depth)
     visitor.formTable.mgetOrPut(node.name.lexeme, newSeq[FormEntry]()).add(entry)
-    info(node.name.lexeme, " was added or overloaded to the form table")
+    visitor.log(node.name.lexeme, " was added or overloaded to the form table")
 
     var errorsCount = errors.errors.len
 
@@ -1113,7 +1080,7 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
 
     if errorsCount != errors.errors.len:
       discard visitor.formTable[node.name.lexeme].pop()
-      info(node.name.lexeme, " was removed from the form table")
+      visitor.log(node.name.lexeme, " was removed from the form table")
     else:
       if funcNode.name.lexeme in visitor.currentScope.symbolTable:
         visitor.currentScope.symbolTable.del(funcNode.name.lexeme)
@@ -1121,12 +1088,14 @@ method visitFormStatement*(visitor: SemanticAnalyzerVisitor, node: FormStatement
       elif node.name.lexeme in visitor.currentScope.symbolTable:
         visitor.currentScope.symbolTable.del(node.name.lexeme)
         discard visitor.symbolScopeStack[node.name.lexeme].pop()
-      node.closures = funcNode.funcClosures
+
+      for name in funcNode.funcClosures:
+        form.closures[name] = visitor.getSymbol(name).symbolType
 
 # SPECIALS
 
-proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string]) =
-  info("checking for unexpected arguments in special")
+proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[string], visitor: SemanticAnalyzerVisitor) =
+  visitor.log("checking for unexpected arguments in special")
 
   for token, _ in self.namedArgs.pairs:
     let key = token.lexeme
@@ -1138,35 +1107,35 @@ proc checkUnexpected(self: SpecialExpression | SpecialStatement, expected: seq[s
         warn("unexpected argument found: ", key)
         newError(errUnexpectedArgument, token, @{"@0": key})
 
-proc get(self: SpecialExpression | SpecialStatement, key: string): Expression =
-  info("getting argument with key: ", key, "...")
+proc get(self: SpecialExpression | SpecialStatement, key: string, visitor: SemanticAnalyzerVisitor): Expression =
+  visitor.log("getting argument with key: ", key, "...")
   for token, expr in self.namedArgs.pairs:
     let k = if token.kind == tkNumber: token.lexeme else: token.lexeme
     if k == key:
-      info("argument found for key: ", key)
+      visitor.log("argument found for key: ", key)
       return expr
   warn("argument not found for key: ", key)
   newError(errMissingArgument, self.token, @{"@0": key})
   return newErrorExpression(self.token)
 
-proc add(self: SpecialExpression | SpecialStatement, key: string, expr: Expression) =
-  info("adding argument with key: ", key, " and expression type: ", $expr.returnType)
+proc add(self: SpecialExpression | SpecialStatement, key: string, expr: Expression, visitor: SemanticAnalyzerVisitor) =
+  visitor.log("adding argument with key: ", key, " and expression type: ", $expr.returnType)
   let token = tkIdentifier.newToken(key, self.token.file, self.token.line, self.token.column, self.token.offset)
   self.namedArgs[token] = expr
 
-proc has(self: SpecialExpression | SpecialStatement, key: string): bool =
-  info("checking if argument exists with key: ", key, "...")
+proc has(self: SpecialExpression | SpecialStatement, key: string, visitor: SemanticAnalyzerVisitor): bool =
+  visitor.log("checking if argument exists with key: ", key, "...")
   for token, _ in self.namedArgs.pairs:
     let k = token.lexeme
     if k == key:
-      info("argument exists with key: ", key)
+      visitor.log("argument exists with key: ", key)
       return true
-  info("argument does not exist with key: ", key)
+  visitor.log("argument does not exist with key: ", key)
   return false
 
-proc expect(self: SpecialExpression | SpecialStatement, key: string, types: varargs[Type]): bool =
-  info("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
-  let expr = self.get(key)
+proc expect(self: SpecialExpression | SpecialStatement, key: string, visitor: SemanticAnalyzerVisitor, types: varargs[Type]): bool =
+  visitor.log("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
+  let expr = self.get(key, visitor)
   if expr of ErrorExpression:
     warn("argument is error expression")
     return false
@@ -1184,12 +1153,12 @@ proc expect(self: SpecialExpression | SpecialStatement, key: string, types: vara
     newError(errTypeMismatch, expr.token, @{"@0": expectedTypes, "@1": $expr.returnType})
     return false
   
-  info("argument '", key, "' has correct type: ", $expr.returnType)
+  visitor.log("argument '", key, "' has correct type: ", $expr.returnType)
   return true
 
-proc expect(self: SpecialExpression | SpecialStatement, key: string, types: varargs[TypeKind]): bool =
-  info("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
-  let expr = self.get(key)
+proc expect(self: SpecialExpression | SpecialStatement, key: string, visitor: SemanticAnalyzerVisitor, types: varargs[TypeKind]): bool =
+  visitor.log("expecting argument with key: ", key, " and types: ", types.mapIt($it).join(" | "), "...")
+  let expr = self.get(key, visitor)
   if expr of ErrorExpression:
     warn("argument is error expression")
     return false
@@ -1207,18 +1176,18 @@ proc expect(self: SpecialExpression | SpecialStatement, key: string, types: vara
     newError(errTypeMismatch, expr.token, @{"@0": expectedTypes, "@1": $expr.returnType})
     return false
   
-  info("argument '", key, "' has correct type: ", $expr.returnType)
+  visitor.log("argument '", key, "' has correct type: ", $expr.returnType)
   return true
 
 method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialExpression): auto =
-  info("visiting SpecialExpression")
+  visitor.log("visiting SpecialExpression")
 
   block analysis:
     case node.kind:
     of skNew: 
-      info("Semantic analysis of skNew special")
-      node.checkUnexpected(expected = @["0"])
-      let expr = node.get("0")
+      visitor.log("Semantic analysis of skNew special")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let expr = node.get("0", visitor)
 
       if visitor.expectedContextType.eq typePtr:
         visitor.visitExpecting(expr, visitor.expectedContextType.ptrBase)
@@ -1226,12 +1195,12 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         warn("non-ptr context")
         visitor.visitExpression(expr)
 
-      node.setType(getPtrType(expr.returnType))
+      node.setType(getPtrType(expr.returnType), visitor)
 
     of skVec: 
-      info("Semantic analysis of skVec special")
-      node.checkUnexpected(expected = @["0"])
-      let expr = node.get("0")
+      visitor.log("Semantic analysis of skVec special")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let expr = node.get("0", visitor)
 
       var expected = getUndefinedType()
       if visitor.expectedContextType.kind.eq typeVec:
@@ -1240,25 +1209,25 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         warn("non-array context")
 
       visitor.visitExpecting(expr, expected)
-      if not node.expect("0", typeArray): break analysis
+      if not node.expect("0", visitor, typeArray): break analysis
 
       if expr of TypeExpression:
-        node.add("@", newBoolExpression(expr.token.newFrom(kind = tkTrue)))
+        node.add("@", newBoolExpression(expr.token.newFrom(kind = tkTrue)), visitor)
 
-      node.setType(getVecType(expr.returnType.arrBase))
+      node.setType(getVecType(expr.returnType.arrBase), visitor)
 
     of skLen:
-      info("Semantic analysis of skLen special")
-      node.checkUnexpected(expected = @["0"])
-      let expr = node.get("0")
+      visitor.log("Semantic analysis of skLen special")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let expr = node.get("0", visitor)
 
       visitor.visitExpression(expr)
-      if not node.expect("0", typeVec, typeArray): break analysis
+      if not node.expect("0", visitor, typeVec, typeArray): break analysis
 
-      node.setType(getInt64Type())
+      node.setType(getInt64Type(), visitor)
 
     of skFmt:
-      info("Semantic analysis of skFmt special")
+      visitor.log("Semantic analysis of skFmt special")
       for key, expr in node.namedArgs.pairs:
         if key.kind == tkIdentifier and key.lexeme != "sep" and key.lexeme != "repr":
           warn("unexpected named argument found: ", key.lexeme)
@@ -1272,18 +1241,18 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         if expr.returnType.kind in {typeArray, typeVec, typePtr, typeNul, typeUndefined}:
           newError(errTypeMismatch, expr.token, @{"@0": "formatted type", "@1": $expr.returnType})
 
-      if node.has("sep"):
-        visitor.visitExpecting(node.get("sep"), getArrayType(getCharType(), 0))
-        if not node.expect("sep", getArrayType(getCharType(), 0)): break analysis
+      if node.has("sep", visitor):
+        visitor.visitExpecting(node.get("sep", visitor), getArrayType(getCharType(), 0))
+        if not node.expect("sep", visitor, getArrayType(getCharType(), 0)): break analysis
 
-      if node.has("repr"):
-        visitor.visitExpecting(node.get("repr"), getBoolType())
-        if not node.expect("repr", getBoolType()): break analysis
+      if node.has("repr", visitor):
+        visitor.visitExpecting(node.get("repr", visitor), getBoolType())
+        if not node.expect("repr", visitor, getBoolType()): break analysis
 
-      node.setType(getVecType(getCharType()))
+      node.setType(getVecType(getCharType()), visitor)
 
     of skTake:
-      info("Semantic analysis of skTake special")
+      visitor.log("Semantic analysis of skTake special")
       if visitor.expectedContextType.kind.neq(typeArray):
         newError(errUnknownSize, node.token)
         break analysis
@@ -1291,24 +1260,24 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         newError(errEmptyStaticArray, node.token)
         break analysis
 
-      node.checkUnexpected(expected = @["0"])
-      let expr = node.get("0")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let expr = node.get("0", visitor)
 
       visitor.visitExpecting(expr, getVecType(visitor.expectedContextType.arrBase))
-      if not node.expect("0", typeVec): break analysis
+      if not node.expect("0", visitor, typeVec): break analysis
 
       node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
-        lexeme = $visitor.expectedContextType.length)))
+        lexeme = $visitor.expectedContextType.length)), visitor)
 
-      node.setType(getArrayType(expr.returnType.vecBase, visitor.expectedContextType.length))
+      node.setType(getArrayType(expr.returnType.vecBase, visitor.expectedContextType.length), visitor)
 
     of skTakeof:
-      info("Semantic analysis of skTakeof special")
-      node.checkUnexpected(expected = @["0", "1"])
-      let typ = node.get("0")
+      visitor.log("Semantic analysis of skTakeof special")
+      node.checkUnexpected(expected = @["0", "1"], visitor)
+      let typ = node.get("0", visitor)
 
       visitor.visitExpression(typ)
-      if not node.expect("0", typeArray): break analysis
+      if not node.expect("0", visitor, typeArray): break analysis
 
       elif not (typ of TypeExpression):
         newError(errTypeMismatch, typ.token, @{"@0": "type annotation", "@1": "Expression"})
@@ -1318,71 +1287,71 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
         newError(errEmptyStaticArray, node.token)
         break analysis
 
-      let expr = node.get("1")
+      let expr = node.get("1", visitor)
 
       visitor.visitExpecting(expr, getVecType(typ.returnType.arrBase))
-      if not node.expect("1", typeVec): break analysis
+      if not node.expect("1", visitor, typeVec): break analysis
 
       node.add("length", newNumberExpression(node.token.newFrom(kind = tkNumber,
-        lexeme = $typ.returnType.length)))
+        lexeme = $typ.returnType.length)), visitor)
 
-      node.setType(getArrayType(typ.returnType.arrBase, typ.returnType.length))
+      node.setType(getArrayType(typ.returnType.arrBase, typ.returnType.length), visitor)
 
     of skRead:
-      info("Semantic analysis of skRead special")
-      node.setType(getVecType(getCharType()))
+      visitor.log("Semantic analysis of skRead special")
+      node.setType(getVecType(getCharType()), visitor)
 
     else:
       warn("Unhandled special expression: ", node.kind)
 
-  info("exiting SpecialExpression")
+  visitor.log("exiting SpecialExpression")
 
 method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialStatement): auto =
-  info("visiting SpecialStatement")
+  visitor.log("visiting SpecialStatement")
 
   block analysis:
     case node.kind:
     of skPrint:
-      info("Semantic analysis of skPrint special")
-      node.checkUnexpected(expected = @["0", "term", "free"])
-      let expr = node.get("0")
+      visitor.log("Semantic analysis of skPrint special")
+      node.checkUnexpected(expected = @["0", "term", "free"], visitor)
+      let expr = node.get("0", visitor)
 
       visitor.visitExpecting(expr, getVecType(getCharType()))
-      if not node.expect("0", getVecType(getCharType())): break analysis
+      if not node.expect("0", visitor, getVecType(getCharType())): break analysis
 
-      if node.has("term"):
-        visitor.visitExpecting(node.get("term"), getArrayType(getCharType(), 0))
-        if not node.expect("term", getArrayType(getCharType(), 0)): break analysis
+      if node.has("term", visitor):
+        visitor.visitExpecting(node.get("term", visitor), getArrayType(getCharType(), 0))
+        if not node.expect("term", visitor, getArrayType(getCharType(), 0)): break analysis
 
-      if node.has("free"):
-        visitor.visitExpecting(node.get("free"), getBoolType())
-        if not node.expect("free", getBoolType()): break analysis
+      if node.has("free", visitor):
+        visitor.visitExpecting(node.get("free", visitor), getBoolType())
+        if not node.expect("free", visitor, getBoolType()): break analysis
 
     of skFree:
-      info("Semantic analysis of skFree special")
-      node.checkUnexpected(expected = @["0"])
-      let expr = node.get("0")
+      visitor.log("Semantic analysis of skFree special")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let expr = node.get("0", visitor)
 
       visitor.visitExpression(expr)
-      if not node.expect("0", typeVec, typePtr): break analysis
+      if not node.expect("0", visitor, typeVec, typePtr): break analysis
 
     of skAssert:
-      info("Semantic analysis of skAssert special")
-      node.checkUnexpected(expected = @["0", "1"])
-      let cond = node.get("0")
+      visitor.log("Semantic analysis of skAssert special")
+      node.checkUnexpected(expected = @["0", "1"], visitor)
+      let cond = node.get("0", visitor)
 
       visitor.visitExpecting(cond, getBoolType())
-      if not node.expect("0", getBoolType()): break analysis
+      if not node.expect("0", visitor, getBoolType()): break analysis
 
-      if node.has("1"):
-        visitor.visitExpecting(node.get("1"), getArrayType(getCharType(), 0))
-        if not node.expect("1", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
+      if node.has("1", visitor):
+        visitor.visitExpecting(node.get("1", visitor), getArrayType(getCharType(), 0))
+        if not node.expect("1", visitor, getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
 
     of skResize:
-      info("Semantic analysis of skResize special")
-      node.checkUnexpected(expected = @["0", "1"])
-      let value = node.get("0")
-      let size = node.get("1")
+      visitor.log("Semantic analysis of skResize special")
+      node.checkUnexpected(expected = @["0", "1"], visitor)
+      let value = node.get("0", visitor)
+      let size = node.get("1", visitor)
       
       visitor.visitExpression(value)
       if value.returnType.neq typeVec: 
@@ -1390,28 +1359,30 @@ method visitSpecialStatement*(visitor: SemanticAnalyzerVisitor, node: SpecialSta
         break analysis
 
       visitor.visitExpression(size)
-      if not node.expect("1", getInt64Type()): break analysis
+      if not node.expect("1", visitor, getInt64Type()): break analysis
 
     of skPanic:
-      info("Semantic analysis of skPanic special")
-      node.checkUnexpected(expected = @["0", "1"])
-      let panicCode = node.get("0")
-      let msg = node.get("1")
+      visitor.log("Semantic analysis of skPanic special")
+      node.checkUnexpected(expected = @["0", "1"], visitor)
+      let panicCode = node.get("0", visitor)
+      let msg = node.get("1", visitor)
 
       visitor.visitExpecting(panicCode, getArrayType(getCharType(), 0))
-      if not node.expect("0", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
+      if not node.expect("0", visitor, getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
 
       visitor.visitExpecting(msg, getArrayType(getCharType(), 0))
-      if not node.expect("1", getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
+      if not node.expect("1", visitor, getArrayType(getCharType(), 0), getVecType(getCharType())): break analysis
 
     else:
       warn("Unhandled special statement: ", node.kind)
 
-  info("exiting SpecialStatement")
+  visitor.log("exiting SpecialStatement")
 
 # GENERAL
 
 method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
+  visitor.nodeStack.add(node.kind)
+
   if node of ErrorExpression: discard
   elif node of BoolExpression: discard
   elif node of CharExpression: discard
@@ -1447,7 +1418,11 @@ method visitExpression*(visitor: SemanticAnalyzerVisitor, node: Expression) =
   else:
     warn("unhandled expression")
 
+  discard visitor.nodeStack.pop()
+
 method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
+  visitor.nodeStack.add(node.kind)
+
   if node of ErrorStatement: discard
   elif node of DeclarationStatement:
     visitor.visitDeclarationStatement(DeclarationStatement(node))
@@ -1485,3 +1460,5 @@ method visitStatement*(visitor: SemanticAnalyzerVisitor, node: Statement) =
     visitor.visitFormStatement(FormStatement(node))
   else:
     warn("unhandled statement")
+
+  discard visitor.nodeStack.pop()

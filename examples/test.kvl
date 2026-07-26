@@ -1,4 +1,3 @@
 module vectors = "std/vectors"
-module panics = "std/panics"
 
 vectors.pop$[int](vec:int[])
