@@ -1,3 +1,5 @@
 module vectors = "std/vectors"
 
-vectors.pop$[int](vec:int[])
+int@ vec = v{1, 2, 3}
+vectors.clear$[int](vec)
+print: fmt: vec[2]

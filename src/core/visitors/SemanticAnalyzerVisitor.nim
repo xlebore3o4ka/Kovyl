@@ -359,7 +359,7 @@ method visitFieldExpression*(visitor: SemanticAnalyzerVisitor, node: FieldExpres
     node.setType(fields[node.token.lexeme], visitor)
 
 proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, Type) =
-  visitor.log("node is not first definded function")
+  visitor.log("node is not first defined function")
   visitor.log("Creating a function type from arguments and context...")
 
   var arguments: OrderedTable[string, Type]
@@ -416,13 +416,13 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
 
 proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpression, varType: Type): (bool, bool, Type) =
   block checkDefault:
-    visitor.log("checking node == first definded function...")
+    visitor.log("checking node == first defined function...")
     if node.arguments.len != varType.arguments.len:
-      warn("node arguments len != first definded function arguments len")
+      warn("node arguments len != first defined function arguments len")
       return (false, false, getUndefinedType())
 
     if visitor.expectedContextType.neq varType.returnType:
-      warn("expected context type != first definded function return type")
+      warn("expected context type != first defined function return type")
       let (found, funcType) = checkOverloads(visitor, node, varType)
       if found:
         return (false, true, funcType)
@@ -443,10 +443,10 @@ proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpre
           visitor.log("Array size promoted from ", expr.returnType.length, " to ", expected.length)
 
       if expr.returnType != expected:
-        warn("argument types != first definded function argument types")
+        warn("argument types != first defined function argument types")
         return (false, false, getUndefinedType())
 
-    visitor.log("node is first definded function")
+    visitor.log("node is first defined function")
     node.setType(node.value.returnType.returnType, visitor)
     return (true, false, getUndefinedType())
 
@@ -870,14 +870,14 @@ method visitReturnStatement*(visitor: SemanticAnalyzerVisitor, node: ReturnState
   if visitor.funcStack.len == 0:
     newError(errForbiddenLocation, node.token)
 
-  if (not node.hasValue) and visitor.funcStack[^1].returnType.neq getUndefinedType():
-    newError(errExpression, node.token, @{"@0": "return without expression"})
-
-  else:
+  if node.hasValue:
     visitor.visitExpecting(node.value, visitor.funcStack[^1].returnType)
     if node.value.returnType.neq visitor.funcStack[^1].returnType:
       newError(errTypeMismatch, node.value.token, @{"@0": $visitor.funcStack[^1].returnType, 
         "@1": $node.value.returnType})
+
+  elif visitor.funcStack[^1].returnType.neq getUndefinedType():
+      newError(errExpression, node.token, @{"@0": "return without expression"})
 
 method visitForStatement*(visitor: SemanticAnalyzerVisitor, node: ForStatement): auto =
   visitor.pushScope()
@@ -1298,6 +1298,19 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
     of skRead:
       visitor.log("Semantic analysis of skRead special")
       node.setType(getVecType(getCharType()), visitor)
+
+    of skDefault:
+      visitor.log("Semantic analysis of skDefault special")
+      node.checkUnexpected(expected = @["0"], visitor)
+      let typ = node.get("0", visitor)
+
+      visitor.visitExpression(typ)
+
+      if not (typ of TypeExpression):
+        newError(errTypeMismatch, typ.token, @{"@0": "type annotation", "@1": "Expression"})
+        break analysis
+
+      node.setType(typ.returnType, visitor)
 
     else:
       warn("Unhandled special expression: ", node.kind)

@@ -129,7 +129,7 @@ end
 
 func string@ split(string str, string sep) pub do
   #/
-    Splits a string by the given separator, returning an vector of substrings
+    Splits a string by the given separator, returning a vector of substrings
   /#
   closure strLen, substring
 
@@ -174,7 +174,7 @@ end
 
 func string@ split(string str) pub do
   #/
-    Splits a string by space, returning an vector of substrings
+    Splits a string by space, returning a vector of substrings
   /#
   closure split
 

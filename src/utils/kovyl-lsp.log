@@ -13055,3 +13055,776 @@ parseInt true
 2026-07-27 00:05:50,918 - kovyl-lsp - INFO - Publishing 0 diagnostics
 2026-07-27 00:05:50,918 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/panics.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
 2026-07-27 00:05:50,918 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/panics.kvl
+2026-07-27 03:20:23,635 - kovyl-lsp - INFO - Document opened: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:20:23,635 - kovyl-lsp - INFO - ls type: <class 'pygls.lsp.server.LanguageServer'>, dir: ['text_document_publish_diagnostics', 'workspace_diagnostic_refresh', 'workspace_diagnostic_refresh_async']
+2026-07-27 03:20:23,635 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:20:23,635 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:20:23,651 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:20:23,652 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:20:23,652 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:20:23,652 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:20:23,652 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,438 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,438 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,438 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,452 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:21:22,452 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:21:22,452 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:21:22,453 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:21:22,453 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,635 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,635 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,635 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:22,650 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:21:22,650 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:21:22,650 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:21:22,650 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:21:22,650 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:26,997 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:26,997 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:26,997 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:21:27,012 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:21:27,012 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:21:27,012 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:21:27,012 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:21:27,012 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:22:55,424 - kovyl-lsp - INFO - Document opened: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:22:55,424 - kovyl-lsp - INFO - ls type: <class 'pygls.lsp.server.LanguageServer'>, dir: ['text_document_publish_diagnostics', 'workspace_diagnostic_refresh', 'workspace_diagnostic_refresh_async']
+2026-07-27 03:22:55,424 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:22:55,424 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:22:55,426 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:22:55,426 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:22:55,427 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:22:55,427 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:22:55,427 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:37,009 - kovyl-lsp - INFO - Document opened: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:37,009 - kovyl-lsp - INFO - ls type: <class 'pygls.lsp.server.LanguageServer'>, dir: ['text_document_publish_diagnostics', 'workspace_diagnostic_refresh', 'workspace_diagnostic_refresh_async']
+2026-07-27 03:23:37,009 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:37,009 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:37,011 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:23:37,011 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:23:37,011 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:23:37,011 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:23:37,011 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:39,374 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:39,374 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:39,374 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:39,376 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:23:39,376 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:23:39,376 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:23:39,376 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:23:39,376 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:42,752 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:42,752 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:42,752 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:42,754 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:23:42,754 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:23:42,754 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:23:42,755 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:23:42,755 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:45,721 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:45,722 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:45,722 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:23:45,723 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:23:45,724 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:23:45,724 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:23:45,724 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:23:45,724 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:02,693 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:02,693 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:02,693 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:02,695 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:02,695 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:24:02,695 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:02,695 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:02,695 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:04,319 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:04,319 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:04,319 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:04,321 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:04,321 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:24:04,321 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:04,322 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:04,322 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:05,177 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:05,177 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:05,177 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:05,179 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:05,179 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:24:05,179 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:05,179 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:05,179 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:51,210 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:51,210 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:51,210 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:51,212 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:51,212 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:24:51,213 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:51,213 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:51,213 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:52,310 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:52,310 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:52,310 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:52,312 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:52,312 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:24:52,313 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:52,313 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:52,313 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:24:58,055 - kovyl-lsp - INFO - Document opened: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:24:58,055 - kovyl-lsp - INFO - ls type: <class 'pygls.lsp.server.LanguageServer'>, dir: ['text_document_publish_diagnostics', 'workspace_diagnostic_refresh', 'workspace_diagnostic_refresh_async']
+2026-07-27 03:24:58,055 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:24:58,055 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:24:58,071 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:24:58,071 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:24:58,071 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:24:58,071 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:24:58,071 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:25:13,866 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:13,866 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:13,867 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:13,869 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:13,869 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:13,869 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:13,869 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:13,869 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:17,133 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:17,133 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:17,133 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:17,135 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:17,135 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:17,135 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:17,135 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:17,135 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,084 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,084 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,084 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,086 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:19,086 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:19,086 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:19,086 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:19,086 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,087 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,087 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,087 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:19,089 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:19,089 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:19,089 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:19,089 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:19,089 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:23,313 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:23,313 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:23,313 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:23,315 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:23,315 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:23,315 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:23,315 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:23,315 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:25,787 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:25,787 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:25,787 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:25,789 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:25,789 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:25,789 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:25,789 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:25,789 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:36,858 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:36,858 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:36,858 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:36,860 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:36,860 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:36,860 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:36,860 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:36,860 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:42,789 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:42,789 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:42,789 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:42,791 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:42,792 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:42,792 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:42,792 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:42,792 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:45,225 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:45,225 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:45,225 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:45,227 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:45,227 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:45,227 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:45,227 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:45,227 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:46,285 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:46,285 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:46,285 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:46,287 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:46,287 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:46,287 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:46,287 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:46,287 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:49,127 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:49,127 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:49,127 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:49,129 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:49,129 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:49,129 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:49,129 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:49,129 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:50,787 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:50,788 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:50,788 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:50,790 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:50,790 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:50,790 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:50,790 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:50,790 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,491 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,491 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,491 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,493 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:51,493 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:51,493 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:51,493 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:51,493 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,600 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,600 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,601 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:25:51,602 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:25:51,603 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:25:51,603 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:25:51,603 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:25:51,603 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:02,550 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:02,550 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:02,550 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:02,552 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:26:02,552 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:26:02,552 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:26:02,552 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:02,552 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:04,272 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:04,272 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:04,272 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:04,274 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:26:04,274 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:26:04,274 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:26:04,274 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:04,274 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:46,680 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:46,680 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:46,680 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:46,682 - kovyl-lsp - INFO - Linter returned 8 errors
+2026-07-27 03:26:46,682 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 8
+2026-07-27 03:26:46,682 - kovyl-lsp - INFO - Publishing 8 diagnostics
+2026-07-27 03:26:46,682 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected left bracket '[', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected right bracket ']', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:46,682 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:47,679 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:47,679 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:47,679 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:47,681 - kovyl-lsp - INFO - Linter returned 5 errors
+2026-07-27 03:26:47,681 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 5
+2026-07-27 03:26:47,681 - kovyl-lsp - INFO - Publishing 5 diagnostics
+2026-07-27 03:26:47,681 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:47,681 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:48,377 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:48,377 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:48,377 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:48,378 - kovyl-lsp - INFO - Linter returned 5 errors
+2026-07-27 03:26:48,378 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 5
+2026-07-27 03:26:48,378 - kovyl-lsp - INFO - Publishing 5 diagnostics
+2026-07-27 03:26:48,378 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 8}, "end": {"line": 45, "character": 9}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 8}, "end": {"line": 45, "character": 9}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 8}, "end": {"line": 45, "character": 9}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 8}, "end": {"line": 45, "character": 9}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 8}, "end": {"line": 45, "character": 9}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:48,378 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:50,851 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:50,851 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:50,851 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:26:50,852 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:26:50,852 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:26:50,852 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:26:50,852 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 11}, "end": {"line": 45, "character": 12}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 11}, "end": {"line": 45, "character": 12}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 11}, "end": {"line": 45, "character": 12}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 11}, "end": {"line": 45, "character": 12}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:26:50,852 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:27:02,014 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:27:02,015 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:27:02,015 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:27:02,017 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:27:02,017 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:27:02,017 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:27:02,017 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:27:02,017 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,230 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,230 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,230 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,231 - kovyl-lsp - INFO - Linter returned 8 errors
+2026-07-27 03:28:14,231 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 8
+2026-07-27 03:28:14,232 - kovyl-lsp - INFO - Publishing 8 diagnostics
+2026-07-27 03:28:14,232 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected left bracket '[', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected right bracket ']', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 4}, "end": {"line": 45, "character": 5}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:14,232 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,869 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,869 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,869 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:14,871 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:28:14,871 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:28:14,871 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:28:14,871 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:14,871 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:16,542 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:16,542 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:16,542 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:16,544 - kovyl-lsp - INFO - Linter returned 5 errors
+2026-07-27 03:28:16,544 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 5
+2026-07-27 03:28:16,544 - kovyl-lsp - INFO - Publishing 5 diagnostics
+2026-07-27 03:28:16,544 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 7}, "end": {"line": 45, "character": 8}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:16,544 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:20,567 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:20,568 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:20,568 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:20,569 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:28:20,569 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:28:20,569 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:28:20,569 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 15}, "end": {"line": 45, "character": 16}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 15}, "end": {"line": 45, "character": 16}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 15}, "end": {"line": 45, "character": 16}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 15}, "end": {"line": 45, "character": 16}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:20,569 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:24,903 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:24,903 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:24,903 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:24,905 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:28:24,905 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:28:24,905 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:28:24,906 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:24,906 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:36,077 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:36,077 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:36,077 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:36,080 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:28:36,080 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:28:36,080 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:28:36,080 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:36,080 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:38,983 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:38,983 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:38,983 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:28:38,984 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:28:38,984 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:28:38,984 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:28:38,984 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 13}, "end": {"line": 45, "character": 14}}, "message": "Expected left parenthesis '(', got end of file", "severity": 1, "code": "46:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 13}, "end": {"line": 45, "character": 14}}, "message": "Expected right parenthesis ')', got end of file", "severity": 1, "code": "46:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 13}, "end": {"line": 45, "character": 14}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 13}, "end": {"line": 45, "character": 14}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:28:38,985 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:12,236 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:12,236 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:12,236 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:12,237 - kovyl-lsp - INFO - Linter returned 2 errors
+2026-07-27 03:33:12,237 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 2
+2026-07-27 03:33:12,238 - kovyl-lsp - INFO - Publishing 2 diagnostics
+2026-07-27 03:33:12,238 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 45, "character": 22}, "end": {"line": 45, "character": 23}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "46:23", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 45, "character": 22}, "end": {"line": 45, "character": 23}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "46:23", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:12,238 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:14,752 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:14,752 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:14,752 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:14,754 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:33:14,754 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:33:14,754 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:33:14,754 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 46, "character": 2}, "end": {"line": 46, "character": 3}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "47:3", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:14,754 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:33,763 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:33,763 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:33,763 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:33,765 - kovyl-lsp - INFO - Linter returned 6 errors
+2026-07-27 03:33:33,765 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 6
+2026-07-27 03:33:33,765 - kovyl-lsp - INFO - Publishing 6 diagnostics
+2026-07-27 03:33:33,765 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected equal operator '=', got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected expression, got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 46, "character": 6}, "end": {"line": 46, "character": 7}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "47:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:33,765 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:35,646 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:35,646 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:35,646 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:35,647 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:33:35,647 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:33:35,648 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:33:35,648 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 46, "character": 2}, "end": {"line": 46, "character": 3}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "47:3", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:35,648 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:38,432 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:38,432 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:38,432 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:38,434 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:33:38,434 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:33:38,434 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:33:38,434 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 46, "character": 11}, "end": {"line": 46, "character": 12}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "47:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:38,434 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:40,680 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:40,680 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:40,680 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:40,681 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:33:40,681 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:33:40,682 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:33:40,682 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 47, "character": 10}, "end": {"line": 47, "character": 11}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "48:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 47, "character": 10}, "end": {"line": 47, "character": 11}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "48:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 47, "character": 10}, "end": {"line": 47, "character": 11}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "48:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:40,682 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:43,624 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:43,624 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:43,624 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:43,626 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:33:43,626 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:33:43,626 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:33:43,626 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 47, "character": 12}, "end": {"line": 47, "character": 13}}, "message": "Expected expression, got end of file", "severity": 1, "code": "48:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 47, "character": 12}, "end": {"line": 47, "character": 13}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "48:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 47, "character": 12}, "end": {"line": 47, "character": 13}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "48:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 47, "character": 12}, "end": {"line": 47, "character": 13}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "48:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:43,626 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:44,172 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:44,172 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:44,172 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:44,173 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:33:44,173 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:33:44,174 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:33:44,174 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 48, "character": 12}, "end": {"line": 48, "character": 13}}, "message": "Expected expression, got end of file", "severity": 1, "code": "49:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 12}, "end": {"line": 48, "character": 13}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "49:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 12}, "end": {"line": 48, "character": 13}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "49:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 12}, "end": {"line": 48, "character": 13}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "49:13", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:44,174 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:50,145 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:50,145 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:50,145 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:50,147 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:33:50,147 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:33:50,147 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:33:50,147 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 48, "character": 15}, "end": {"line": 48, "character": 16}}, "message": "Expected keyword do, got end of file", "severity": 1, "code": "49:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 15}, "end": {"line": 48, "character": 16}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "49:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 15}, "end": {"line": 48, "character": 16}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "49:16", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:50,147 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:51,760 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:51,761 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:51,761 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:51,762 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:33:51,762 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:33:51,762 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:33:51,762 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 50, "character": 5}, "end": {"line": 50, "character": 6}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "51:6", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:51,762 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,311 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,311 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,311 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,313 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:33:53,314 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:33:53,314 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:33:53,314 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:53,314 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,845 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,845 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,845 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:53,847 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:33:53,847 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:33:53,847 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:33:53,847 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:53,847 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:54,810 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:54,810 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:54,810 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:54,812 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:33:54,812 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:33:54,812 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:33:54,812 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:54,813 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,313 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,313 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,313 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,315 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:33:58,315 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:33:58,315 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:33:58,315 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 50, "character": 2}, "end": {"line": 50, "character": 5}}, "message": "Expected expression, got keyword end", "severity": 1, "code": "51:3", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 10}}, "message": "Unknown special statement", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 51, "character": 3}, "end": {"line": 51, "character": 4}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "52:4", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:58,315 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,941 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,941 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,941 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:33:58,942 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:33:58,942 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:33:58,942 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:33:58,942 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 10}}, "message": "Unknown special statement", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:33:58,942 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:02,975 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:02,975 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:02,975 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:02,977 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:34:02,977 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:34:02,977 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:34:02,977 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 10}}, "message": "Unknown special statement", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:34:02,977 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:05,312 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:05,312 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:05,312 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:05,314 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:34:05,314 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:34:05,314 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:34:05,314 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 10}}, "message": "Unknown special statement", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:34:05,314 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:35,533 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:35,533 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:35,533 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:35,535 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:34:35,535 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:34:35,535 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:34:35,535 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 11}}, "message": "Unknown special statement", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:34:35,535 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:37,880 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:37,880 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:37,880 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:37,882 - kovyl-lsp - INFO - Linter returned 4 errors
+2026-07-27 03:34:37,882 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 4
+2026-07-27 03:34:37,882 - kovyl-lsp - INFO - Publishing 4 diagnostics
+2026-07-27 03:34:37,882 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 8}, "end": {"line": 49, "character": 16}}, "message": "Unknown special expression", "severity": 1, "code": "50:9", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 50, "character": 2}, "end": {"line": 50, "character": 5}}, "message": "Expected right bracket ']', got keyword end", "severity": 1, "code": "51:3", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 4}, "end": {"line": 49, "character": 7}}, "message": "Expected statement, got identifier", "severity": 1, "code": "50:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 7}, "end": {"line": 49, "character": 8}}, "message": "Unclosed bracket", "severity": 1, "code": "50:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:34:37,882 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:38,801 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:38,801 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:38,801 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:34:38,802 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:34:38,802 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:34:38,802 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:34:38,802 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 13}, "end": {"line": 49, "character": 20}}, "message": "Unknown special expression", "severity": 1, "code": "50:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:34:38,802 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:43,717 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:43,717 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:43,717 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:43,719 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:37:43,719 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:37:43,719 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:37:43,719 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 13}, "end": {"line": 49, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "50:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:43,719 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:44,496 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:44,496 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:44,496 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:44,497 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:37:44,497 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:37:44,497 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:37:44,497 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 13}, "end": {"line": 49, "character": 20}}, "message": "Unknown special expression", "severity": 1, "code": "50:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:44,497 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:45,871 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:45,871 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:45,871 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:45,872 - kovyl-lsp - INFO - Linter returned 2 errors
+2026-07-27 03:37:45,872 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 2
+2026-07-27 03:37:45,872 - kovyl-lsp - INFO - Publishing 2 diagnostics
+2026-07-27 03:37:45,872 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 23}, "end": {"line": 49, "character": 24}}, "message": "Unexpected closing bracket", "severity": 1, "code": "50:24", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 13}, "end": {"line": 49, "character": 20}}, "message": "Unknown special expression", "severity": 1, "code": "50:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:45,872 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:51,328 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:51,328 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:51,328 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:51,330 - kovyl-lsp - INFO - Linter returned 2 errors
+2026-07-27 03:37:51,330 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 2
+2026-07-27 03:37:51,330 - kovyl-lsp - INFO - Publishing 2 diagnostics
+2026-07-27 03:37:51,330 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 13}, "end": {"line": 49, "character": 16}}, "message": "Undeclared symbol 'def'", "severity": 1, "code": "50:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 7}, "end": {"line": 49, "character": 8}}, "message": "Type mismatch (expected T, got undefined)", "severity": 1, "code": "50:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:51,330 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:52,303 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:52,303 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:52,303 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:52,305 - kovyl-lsp - INFO - Linter returned 2 errors
+2026-07-27 03:37:52,305 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 2
+2026-07-27 03:37:52,305 - kovyl-lsp - INFO - Publishing 2 diagnostics
+2026-07-27 03:37:52,305 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 50, "character": 13}, "end": {"line": 50, "character": 16}}, "message": "Undeclared symbol 'def'", "severity": 1, "code": "51:14", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 50, "character": 7}, "end": {"line": 50, "character": 8}}, "message": "Type mismatch (expected T, got undefined)", "severity": 1, "code": "51:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:52,305 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:57,122 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:57,122 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:57,122 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:37:57,123 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:37:57,123 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:37:57,124 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:37:57,124 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 48, "character": 10}, "end": {"line": 48, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "49:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:37:57,124 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:29,610 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:29,610 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:29,610 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:29,612 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:38:29,612 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:38:29,612 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:38:29,612 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 47, "character": 6}, "end": {"line": 47, "character": 7}}, "message": "Expected keyword do, got identifier", "severity": 1, "code": "48:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 10}, "end": {"line": 49, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "50:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 53, "character": 3}, "end": {"line": 53, "character": 4}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "54:4", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:38:29,612 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:33,582 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:33,582 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:33,582 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:33,584 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:38:33,584 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:38:33,584 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:38:33,584 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 47, "character": 6}, "end": {"line": 47, "character": 7}}, "message": "Expected keyword do, got identifier", "severity": 1, "code": "48:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 48, "character": 10}, "end": {"line": 48, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "49:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 52, "character": 3}, "end": {"line": 52, "character": 4}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "53:4", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:38:33,584 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:34,880 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:34,880 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:34,880 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:34,882 - kovyl-lsp - INFO - Linter returned 3 errors
+2026-07-27 03:38:34,882 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 3
+2026-07-27 03:38:34,882 - kovyl-lsp - INFO - Publishing 3 diagnostics
+2026-07-27 03:38:34,882 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 48, "character": 6}, "end": {"line": 48, "character": 7}}, "message": "Expected keyword do, got identifier", "severity": 1, "code": "49:7", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 49, "character": 10}, "end": {"line": 49, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "50:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}, {"range": {"start": {"line": 53, "character": 3}, "end": {"line": 53, "character": 4}}, "message": "Expected keyword end, got end of file", "severity": 1, "code": "54:4", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:38:34,882 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:38,487 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:38,487 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:38,487 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:38:38,488 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:38:38,488 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:38:38,488 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:38:38,488 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 49, "character": 10}, "end": {"line": 49, "character": 17}}, "message": "Unknown special expression", "severity": 1, "code": "50:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:38:38,488 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:58:13,266 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:13,266 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:13,266 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:13,268 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:58:13,268 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: None
+2026-07-27 03:58:13,268 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:58:13,268 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:13,268 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:16,632 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:16,632 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:16,632 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:16,633 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:16,633 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:16,633 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:16,633 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 2, "character": 5}, "end": {"line": 2, "character": 6}}, "message": "Expected identifier, got end of file", "severity": 1, "code": "3:6", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:16,634 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:18,116 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:18,116 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:18,116 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:18,117 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:18,117 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:18,117 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:18,117 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 2, "character": 11}, "end": {"line": 2, "character": 12}}, "message": "Expected expression, got end of file", "severity": 1, "code": "3:12", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:18,117 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:19,785 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:19,786 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:19,786 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:19,788 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:19,788 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:19,788 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:19,788 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 2, "character": 5}, "end": {"line": 2, "character": 8}}, "message": "Type mismatch (expected int64@, got int64[3])", "severity": 1, "code": "3:6", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:19,788 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:20,988 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:20,988 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:20,988 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:20,990 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:20,990 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:20,990 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:20,990 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 2, "character": 5}, "end": {"line": 2, "character": 8}}, "message": "Type mismatch (expected int64@, got int64[3])", "severity": 1, "code": "3:6", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:20,990 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:23,732 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:23,733 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:23,733 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:23,736 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:58:23,736 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: None
+2026-07-27 03:58:23,736 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:58:23,736 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:23,736 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:25,928 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:25,928 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:25,928 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:25,931 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:58:25,931 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: None
+2026-07-27 03:58:25,931 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:58:25,931 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:25,931 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:29,828 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:29,828 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:29,828 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:29,829 - kovyl-lsp - INFO - Linter returned 2 errors
+2026-07-27 03:58:29,829 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 2
+2026-07-27 03:58:29,829 - kovyl-lsp - INFO - Publishing 2 diagnostics
+2026-07-27 03:58:29,829 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 3, "character": 7}, "end": {"line": 3, "character": 8}}, "message": "Expected identifier | number, got dot operator '.'", "severity": 1, "code": "4:8", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}, {"range": {"start": {"line": 3, "character": 0}, "end": {"line": 3, "character": 7}}, "message": "Expected statement, got identifier", "severity": 1, "code": "4:1", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:29,829 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:31,489 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:31,489 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:31,489 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:31,490 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:31,490 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:31,490 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:31,490 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 3, "character": 0}, "end": {"line": 3, "character": 7}}, "message": "Expected statement, got identifier", "severity": 1, "code": "4:1", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:31,490 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:32,777 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:32,777 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:32,777 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:32,778 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:32,778 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:32,778 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:32,778 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 3, "character": 0}, "end": {"line": 3, "character": 7}}, "message": "Expected statement, got identifier", "severity": 1, "code": "4:1", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:32,778 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:35,692 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:35,692 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:35,692 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:35,695 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:58:35,695 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: None
+2026-07-27 03:58:35,695 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:58:35,695 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:35,695 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:38,972 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:38,972 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:38,972 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:38,973 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:38,973 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:38,973 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:38,973 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 4, "character": 0}, "end": {"line": 4, "character": 4}}, "message": "Expected statement, got identifier", "severity": 1, "code": "5:1", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:38,973 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:40,490 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:40,490 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:40,490 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:40,491 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:40,491 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:40,491 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:40,491 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 4, "character": 0}, "end": {"line": 4, "character": 4}}, "message": "Expected statement, got identifier", "severity": 1, "code": "5:1", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:40,491 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:44,246 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:44,246 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:44,246 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:44,248 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:58:44,248 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: 1
+2026-07-27 03:58:44,248 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:58:44,248 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": [{"range": {"start": {"line": 4, "character": 10}, "end": {"line": 4, "character": 11}}, "message": "Type mismatch (expected char@, got int64)", "severity": 1, "code": "5:11", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:44,249 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:51,978 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:51,978 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:51,978 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:58:51,981 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:58:51,981 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl, errors: None
+2026-07-27 03:58:51,981 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:58:51,981 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:58:51,981 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/examples/test.kvl
+2026-07-27 03:59:00,309 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:00,309 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:00,309 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:00,311 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:59:00,311 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:59:00,311 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:59:00,311 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:59:00,311 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:02,937 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:02,938 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:02,938 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:02,939 - kovyl-lsp - INFO - Linter returned 1 errors
+2026-07-27 03:59:02,939 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: 1
+2026-07-27 03:59:02,939 - kovyl-lsp - INFO - Publishing 1 diagnostics
+2026-07-27 03:59:02,939 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": [{"range": {"start": {"line": 52, "character": 4}, "end": {"line": 52, "character": 5}}, "message": "Expected statement, got identifier", "severity": 1, "code": "53:5", "source": "/home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl"}]}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:59:02,939 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:04,354 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:04,354 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:04,354 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:04,356 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:59:04,356 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 03:59:04,356 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:59:04,356 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:59:04,356 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 03:59:28,071 - kovyl-lsp - INFO - Document opened: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:59:28,072 - kovyl-lsp - INFO - ls type: <class 'pygls.lsp.server.LanguageServer'>, dir: ['text_document_publish_diagnostics', 'workspace_diagnostic_refresh', 'workspace_diagnostic_refresh_async']
+2026-07-27 03:59:28,072 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:59:28,072 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 03:59:28,086 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 03:59:28,086 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl, errors: None
+2026-07-27 03:59:28,086 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 03:59:28,087 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 03:59:28,087 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/strings.kvl
+2026-07-27 04:00:08,551 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:08,551 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:08,551 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:08,553 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 04:00:08,553 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 04:00:08,553 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 04:00:08,553 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 04:00:08,553 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:10,059 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:10,059 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:10,059 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:10,061 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 04:00:10,061 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 04:00:10,061 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 04:00:10,061 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 04:00:10,062 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:11,153 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:11,153 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:11,153 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:11,156 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 04:00:11,156 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 04:00:11,156 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 04:00:11,156 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 04:00:11,156 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:39,234 - kovyl-lsp - INFO - Document saved: file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:39,234 - kovyl-lsp - INFO - Lint requested for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:39,234 - kovyl-lsp - INFO - Running linter on: /home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl
+2026-07-27 04:00:39,237 - kovyl-lsp - INFO - Linter returned 0 errors
+2026-07-27 04:00:39,237 - kovyl-lsp - INFO - Sending diagnostics for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl, errors: None
+2026-07-27 04:00:39,237 - kovyl-lsp - INFO - Publishing 0 diagnostics
+2026-07-27 04:00:39,237 - pygls.protocol.json_rpc - INFO - Sending data: {"params": {"uri": "file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl", "diagnostics": []}, "method": "textDocument/publishDiagnostics", "jsonrpc": "2.0"}
+2026-07-27 04:00:39,237 - kovyl-lsp - INFO - Lint completed for file:///home/xlebore3o4ka/nimProjects/RawKovyl/src/std/vectors.kvl

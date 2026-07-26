@@ -66,6 +66,7 @@ type
   BreakException* = object of CatchableError
   ContinueException* = object of CatchableError
   ReturnException* = object of CatchableError
+    hasValue*: bool
     value*: Value
 
 proc newSlot*(self: InterpreterVisitor, name: string, value: Value) =
@@ -693,7 +694,8 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
     try:
       visitor.visitStatement(funcValue.body)
     except ReturnException as e:
-      result = e.value
+      if e.hasValue:
+        result = e.value
 
   finally:
     for name, _ in funcValue.closures:
@@ -820,9 +822,11 @@ method visitFuncStatement*(visitor: InterpreterVisitor, node: FuncStatement): au
   visitor.setSlot(node.name.lexeme, funcValue)
 
 proc visitReturnStatement*(visitor: InterpreterVisitor, node: ReturnStatement): auto =
-  let returnValue = visitor.visitExpression(node.value)
   var e = newException(ReturnException, "")
-  e.value = returnValue
+  e.hasValue = node.hasValue
+  if node.hasValue:
+    let returnValue = visitor.visitExpression(node.value)
+    e.value = returnValue
   raise e
 
 method visitForStatement*(visitor: InterpreterVisitor, node: ForStatement): auto =
@@ -1011,6 +1015,10 @@ method visitSpecialExpression*(visitor: InterpreterVisitor, node: SpecialExpress
     buffer.add newCharValue('\0')
 
     return newVecValue(buffer, getCharType())
+
+  of skDefault:
+    let typ = node.get("0")
+    return newDefaultValue(typ.returnType)
     
   else:
     warn("Unhandled special expression: ", node.kind)

@@ -1,12 +1,24 @@
+#/ 
+  Standard module 'vectors.kvl' 
+  - Useful for working with vectors
+/#
+
 module panics = "std/panics"
 
+
 form[T] push(T@ vec, T val) pub do
+  #/
+    Pushes the value at the end of the vector
+  /#
   int size = len: vec
   resize:(vec, size + 1)
   vec[size] = val
 end
 
 form[T] T pop(T@ vec) pub do
+  #/
+    Returns and removes the value from the end of the vector
+  /#
   closure panics
 
   int size = len: vec
@@ -19,6 +31,9 @@ form[T] T pop(T@ vec) pub do
 end
 
 form[T] pop(T@ vec) pub do
+  #/
+    Removes the value from the end of the vector
+  /#
   closure panics
 
   int size = len: vec
@@ -26,4 +41,18 @@ form[T] pop(T@ vec) pub do
     panic:(panics.outOfBounds, "vector out if bounds")
   end
   resize:(vec, size - 1)
+end
+
+form[T] clear(T@ vec) pub do
+  #/
+    Clears a vector by resetting all elements to their default values
+  /#
+  int len = len: vec
+  if len == 0 do return end
+  int i
+  T def = default: T
+  while i < len do
+    vec[i] = def
+    i = i + 1
+  end
 end

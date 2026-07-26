@@ -267,6 +267,9 @@ proc parsePrimary(self: var Parser): Expression =
     if self.lexer.peekToken().kind == tkColon:
       result = self.parseSpecialExpr(token)
 
+    elif token.lexeme in self.allowedTypeVars:
+      result = newTypeExpression(token, self.parseType(token))
+
     elif token.lexeme == "v" and self.lexer.peekToken().kind in {tkStringLiteral, tkLBrace}:
       self.lexer.rollback(rd)
       result = self.parseSpecialExpr(token.newFrom(lexeme = "vec"))

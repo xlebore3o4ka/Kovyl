@@ -155,7 +155,7 @@ type
 
   SpecialExprKind* = enum
     skExprError
-    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead  # TODO: resized, default
+    skNew, skVec, skLen, skFmt, skTake, skTakeof, skRead, skDefault  # TODO: resized
 
   SpecialExpression* = ref object of Expression  # <token>:(<args>)
     kind*: SpecialExprKind
@@ -185,6 +185,7 @@ proc getSpecialExprKind*(token: Token): SpecialExprKind =
   of "take": skTake
   of "takeof": skTakeof
   of "read": skRead
+  of "default": skDefault
   else:
     newError(errExprSpecial, token)
     return skExprError
