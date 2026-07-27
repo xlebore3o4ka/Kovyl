@@ -378,38 +378,32 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
 
     for _, overload in varType.overloads.pairs:
       visitor.log("checking overload ", overload, " equals ", funcType, "...")
-      if funcType == overload:
-        visitor.log("perfect overload hit found")
+      var argsMatch = true
+      if funcType.arguments.len == overload.arguments.len:
+        for key in funcType.arguments.keys:
+          let argType = funcType.arguments[key]
+          let overloadArgType = overload.arguments[key]
+          
+          if argType.kind == typeArray and overloadArgType.kind == typeArray:
+            if argType.arrBase != overloadArgType.arrBase:
+              argsMatch = false
+              break
+            if argType.length < overloadArgType.length:
+              continue
+            elif argType.length > overloadArgType.length:
+              argsMatch = false
+              break
+          elif argType != overloadArgType:
+            argsMatch = false
+            break
+      else:
+        argsMatch = false
+      
+      if argsMatch:
+        visitor.log("overload found with compatible arguments")
         node.setType(overload.returnType, visitor)
         node.value.setType(overload, visitor)
         return (true, funcType)
-      else:
-        var argsMatch = true
-        if funcType.arguments.len == overload.arguments.len:
-          for key in funcType.arguments.keys:
-            let argType = funcType.arguments[key]
-            let overloadArgType = overload.arguments[key]
-            
-            if argType.kind == typeArray and overloadArgType.kind == typeArray:
-              if argType.arrBase != overloadArgType.arrBase:
-                argsMatch = false
-                break
-              if argType.length < overloadArgType.length:
-                continue
-              elif argType.length > overloadArgType.length:
-                argsMatch = false
-                break
-            elif argType != overloadArgType:
-              argsMatch = false
-              break
-        else:
-          argsMatch = false
-        
-        if argsMatch:
-          visitor.log("overload found with compatible arguments")
-          node.setType(overload.returnType, visitor)
-          node.value.setType(overload, visitor)
-          return (true, funcType)
 
     warn("No matching overloads found for function ", varType.funcName)
     return (false, funcType)
@@ -829,13 +823,13 @@ method visitFuncStatement*(visitor: SemanticAnalyzerVisitor, node: FuncStatement
       var funcSymbol = visitor.getSymbol(node.name.lexeme)
       error = false
 
-      if funcSymbol.symbolType.eq funcType:
+      if funcSymbol.symbolType.arguments == funcType.arguments:
         newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
             "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
         error = true
 
       for _, overType in funcSymbol.symbolType.overloads.pairs:
-        if overType.eq funcType:
+        if overType.arguments == funcType.arguments:
           newError(errRedeclaration, node.name, @{"@0": node.name.lexeme, "@1": funcSymbol.token.file,
               "@2": $funcSymbol.token.line, "@3": $funcSymbol.token.column})
           error = true

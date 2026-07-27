@@ -15,7 +15,7 @@ form[T] push(T@ vec, T val) pub do
   vec[size] = val
 end
 
-form[T] T pop(T@ vec) pub do
+form[T] T popped(T@ vec) pub do
   #/
     Returns and removes the value from the end of the vector
   /#
@@ -25,7 +25,7 @@ form[T] T pop(T@ vec) pub do
   if size == 0 do
     panic:(panics.outOfBounds, "vector out if bounds")
   end
-  T result = vec[size - 1]
+  T result = vec[-1]
   resize:(vec, size - 1)
   return result
 end
@@ -56,3 +56,31 @@ form[T] clear(T@ vec) pub do
     i = i + 1
   end
 end
+
+func testAll() pub do
+  int@ v = vec:int[]
+  
+  push$[int](v, 10)
+  push$[int](v, 20)
+  push$[int](v, 30)
+  assert:(len:(v) == 3, "push")
+  assert:(v[0] == 10 and v[1] == 20 and v[2] == 30, "push values")
+
+  int x = popped$[int](v)
+  assert:(x == 30 and len:(v) == 2, "popped")
+  assert:(v[0] == 10 and v[1] == 20, "popped values")
+
+  pop$[int](v)
+  assert:(len:(v) == 1 and v[0] == 10, "pop without return")
+
+  # pop[int](v) 
+
+  push$[int](v, 20)
+  push$[int](v, 30)
+  clear$[int](v)
+  assert:(len:(v) == 3 and v[0] == 0 and v[1] == 0 and v[2] == 0, "clear")
+
+  print:v"All vectors tests passed!"
+end
+
+testAll()
