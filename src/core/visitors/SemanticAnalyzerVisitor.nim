@@ -1191,7 +1191,7 @@ method visitSpecialExpression*(visitor: SemanticAnalyzerVisitor, node: SpecialEx
 
     of skVec: 
       visitor.log("Semantic analysis of skVec special")
-      node.checkUnexpected(expected = @["0"], visitor)
+      node.checkUnexpected(expected = @["0", "@"], visitor)
       let expr = node.get("0", visitor)
 
       var expected = getUndefinedType()

@@ -72,6 +72,8 @@ proc newUnaryTypeMismatchError*(node: UnaryExpression) {.inline.} =
 proc blockEndsWithReturn*(node: Statement): bool =
   if node of ReturnStatement:
     return true
+  elif node of SpecialStatement and SpecialStatement(node).kind == skPanic:
+    return true
   elif node of BlockStatement:
     for stmt in BlockStatement(node).statements:
       if blockEndsWithReturn(stmt):
@@ -297,10 +299,10 @@ proc recursiveMonomorphization*(node: Statement, typeMap: Table[string, Type])
 proc recursiveMonomorphization*(node: Expression, typeMap: Table[string, Type]) =
   if node == nil: return
   
-  if node.returnType != nil and node.returnType.kind == typeVar:
-    if node.returnType.varName in typeMap:
-      node.returnType = typeMap[node.returnType.varName]
-  
+  if node.returnType != nil:
+    for name, typ in typeMap:
+      node.returnType = substituteTypeVar(node.returnType, name, typ)
+
   if node of BinaryExpression:
     let n = BinaryExpression(node)
     recursiveMonomorphization(n.left, typeMap)
@@ -432,6 +434,11 @@ proc recursiveMonomorphization*(node: Statement, typeMap: Table[string, Type]) =
         for varName, replacement in typeMap:
           arg.expectedType = substituteTypeVar(arg.expectedType, varName, replacement)
     recursiveMonomorphization(n.formBlock, typeMap)
+  
+  elif node of SpecialStatement:
+    let n = SpecialStatement(node)
+    for _, v in n.namedArgs:
+      recursiveMonomorphization(v, typeMap)
 
 
 proc kind*(node: Expression): string =

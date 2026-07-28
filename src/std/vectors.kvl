@@ -57,12 +57,192 @@ form[T] clear(T@ vec) pub do
   end
 end
 
-func testAll() pub do
-  int@ v = vec:int[]
+form[T] insert(T@ vec, int index, T val) pub do
+  #/
+    Inserts a value at the specified index, shifting elements to the right
+    Negative index wraps around: -1 = last position
+  /#
+  closure panics
+
+  int size = len: vec
+  if index < 0 do
+    index = size + index + 1
+  end
+
+  if index < 0 or index > size do
+    panic:(panics.outOfBounds, "index out of bounds")
+  end
+
+  resize:(vec, size + 1)
+
+  int i = size
+  while i > index do
+    vec[i] = vec[i - 1]
+    i = i - 1
+  end
+
+  vec[index] = val
+end
+
+form[T] remove(T@ vec, int index) pub do
+  #/
+    Removes the element at the specified index, shifting elements to the left
+  /#
+  closure panics
+
+  int size = len: vec
+  if index < 0 do
+    index = size + index
+  end
+
+  if index < 0 or index >= size do
+    panic:(panics.outOfBounds, "index out of bounds")
+  end
+
+  int i = index
+  while i < size - 1 do
+    vec[i] = vec[i + 1]
+    i = i + 1
+  end
+
+  resize:(vec, size - 1)
+end
+
+form[T] int find(T@ vec, T val) pub do
+  #/
+    Returns the index of the first occurrence of val in the vector
+    Panics if the value is not found
+  /#
+  closure panics
+
+  int size = len: vec
+  int i = 0
+  while i < size do
+    if vec[i] == val do
+      return i
+    end
+    i = i + 1
+  end
+  panic:(panics.valueError, "value not found in vector")
+end
+
+form[T] bool contains(T@ vec, T val) pub do
+  #/
+    Returns true if the vector contains the specified value
+  /#
+  int size = len: vec
+  int i = 0
+  while i < size do
+    if vec[i] == val do
+      return true
+    end
+    i = i + 1
+  end
+  return false
+end
+
+form[T] reverse(T@ vec) pub do
+  #/
+    Reverses the vector in-place
+  /#
+  int size = len: vec
+  if size <= 1 do
+    return
+  end
+
+  int left = 0
+  int right = size - 1
+  while left < right do
+    T temp = vec[left]
+    vec[left] = vec[right]
+    vec[right] = temp
+    left = left + 1
+    right = right - 1
+  end
+end
+
+form[T] T@ copy(T@ vec) pub do
+  #/
+    Returns a shallow copy of the vector
+  /#
+  int size = len: vec
+  T@ result = vec:T[]
+  resize:(result, size)
   
-  push$[int](v, 10)
-  push$[int](v, 20)
-  push$[int](v, 30)
+  int i = 0
+  while i < size do
+    result[i] = vec[i]
+    i = i + 1
+  end
+  
+  return result
+end
+
+form[T] T@ concat(T@ vec, T@ other) pub do
+  #/
+    Returns a new vector containing all elements of vec followed by all elements of other
+  /#
+  int size1 = len: vec
+  int size2 = len: other
+  int totalSize = size1 + size2
+  
+  T@ result = vec:T[]
+  resize:(result, totalSize)
+  
+  int i = 0
+  while i < size1 do
+    result[i] = vec[i]
+    i = i + 1
+  end
+  
+  int j = 0
+  while j < size2 do
+    result[size1 + j] = other[j]
+    j = j + 1
+  end
+  
+  return result
+end
+
+form[T] trim(T@ vec) pub do
+  #/
+    Removes default values from the beginning and end of the vector
+  /#
+  int size = len: vec
+  if size == 0 do
+    return
+  end
+
+  T def = default: T
+  
+  int left = 0
+  while left < size and vec[left] == def do
+    left = left + 1
+  end
+  
+  if left == size do
+    resize:(vec, 0)
+    return
+  end
+  
+  int right = size - 1
+  while right >= 0 and vec[right] == def do
+    right = right - 1
+  end
+  
+  int newSize = right - left + 1
+  int i = 0
+  while i < newSize do
+    vec[i] = vec[left + i]
+    i = i + 1
+  end
+  
+  resize:(vec, newSize)
+end
+
+func testAll() do
+  int@ v = vec:{10, 20, 30}
+
   assert:(len:(v) == 3, "push")
   assert:(v[0] == 10 and v[1] == 20 and v[2] == 30, "push values")
 
@@ -77,8 +257,122 @@ func testAll() pub do
 
   push$[int](v, 20)
   push$[int](v, 30)
+  assert:(v[0] == 10 and v[1] == 20 and v[2] == 30, "before clear")
   clear$[int](v)
-  assert:(len:(v) == 3 and v[0] == 0 and v[1] == 0 and v[2] == 0, "clear")
+  assert:(len:(v) == 3 and v[0] == 0 and v[1] == 0 and v[2] == 0, "after clear")
+
+  v = vec:{10, 20, 30}
+
+  insert$[int](v, -1, 40)
+  assert:(v[3] == 40 and len:(v) == 4, "insert negative -1")
+
+  insert$[int](v, -2, 25)
+  assert:(v[3] == 25 and len:(v) == 5, "insert negative -2")
+
+  insert$[int](v, 0, 5)
+  assert:(v[0] == 5 and len:(v) == 6, "insert at beginning")
+
+  remove$[int](v, -1)
+  assert:(len:(v) == 5 and v[4] == 25, "remove negative -1")
+
+  remove$[int](v, -3)
+  assert:(len:(v) == 4 and v[2] == 30, "remove negative -3")
+
+  # insert[int](v, -10, 0)
+  # insert[int](v, 10, 0)
+  # remove[int](v, -10)
+  # remove[int](v, 10)
+
+  v = vec:{10, 20, 30}
+
+  assert:(find$[int](v, 20) == 1, "find exists")
+  assert:(find$[int](v, 10) == 0, "find first")
+  assert:(find$[int](v, 30) == 2, "find last")
+
+  # find$[int](v, 99)
+
+  assert:(contains$[int](v, 20), "contains exists")
+  assert:(contains$[int](v, 10), "contains first")
+  assert:(contains$[int](v, 30), "contains last")
+  assert:(!contains$[int](v, 99), "contains not found")
+  assert:(!contains$[int](vec:int[], 10), "contains empty")
+
+  reverse$[int](v)
+  assert:(len:(v) == 3 and v[0] == 30 and v[1] == 20 and v[2] == 10, "reverse odd")
+
+  push$[int](v, 40)
+  reverse$[int](v)
+  assert:(len:(v) == 4 and v[0] == 40 and v[1] == 10 and v[2] == 20 and v[3] == 30, "reverse even")
+
+  int@ empty = vec:int[]
+  reverse$[int](empty)
+  assert:(len:(empty) == 0, "reverse empty")
+
+  int@ single = vec:int[]
+  push$[int](single, 42)
+  reverse$[int](single)
+  assert:(single[0] == 42 and len:(single) == 1, "reverse single")
+
+  v = vec:{10, 20, 30}
+  int@ copy = copy$[int](v)
+
+  assert:(len:(copy) == 3, "copy length")
+  assert:(copy[0] == 10 and copy[1] == 20 and copy[2] == 30, "copy values")
+
+  copy[0] = 99
+  assert:(v[0] == 10, "original unchanged")
+  assert:(copy[0] == 99, "copy modified")
+
+  v = vec:int[]
+  int@ emptyCopy = copy$[int](v)
+  assert:(len:(emptyCopy) == 0, "copy empty")
+
+  v = vec:{10, 20, 30}
+  int@ other = vec:{40, 50, 60}
+  int@ concatted = concat$[int](v, other)
+
+  assert:(len:(concatted) == 6, "concat length")
+  assert:(concatted[0] == 10 and concatted[1] == 20 and concatted[2] == 30, "concat first part")
+  assert:(concatted[3] == 40 and concatted[4] == 50 and concatted[5] == 60, "concat second part")
+
+  # Проверка что оригиналы не изменились
+  assert:(len:(v) == 3 and len:(other) == 3, "originals unchanged")
+
+  # Пустые векторы
+  v = vec:int[]
+  other = vec:{1, 2, 3}
+  concatted = concat$[int](v, other)
+  assert:(len:(concatted) == 3 and concatted[0] == 1, "concat empty with non-empty")
+
+  v = vec:{1, 2, 3}
+  other = vec:int[]
+  concatted = concat$[int](v, other)
+  assert:(len:(concatted) == 3 and concatted[0] == 1, "concat non-empty with empty")
+
+  v = vec:int[]
+  other = vec:int[]
+  concatted = concat$[int](v, other)
+  assert:(len:(concatted) == 0, "concat both empty")
+
+  v = vec:{0, 0, 10, 20, 30, 0, 0}
+  trim$[int](v)
+  assert:(len:(v) == 3 and v[0] == 10 and v[1] == 20 and v[2] == 30, "trim default values")
+
+  v = vec:{0, 0, 0}
+  trim$[int](v)
+  assert:(len:(v) == 0, "trim all default")
+
+  v = vec:{10, 20, 30}
+  trim$[int](v)
+  assert:(len:(v) == 3 and v[0] == 10 and v[2] == 30, "trim no default")
+
+  v = vec:{0, 10, 20, 0}
+  trim$[int](v)
+  assert:(len:(v) == 2 and v[0] == 10 and v[1] == 20, "trim mixed")
+
+  v = vec:int[]
+  trim$[int](v)
+  assert:(len:(v) == 0, "trim empty")
 
   print:v"All vectors tests passed!"
 end

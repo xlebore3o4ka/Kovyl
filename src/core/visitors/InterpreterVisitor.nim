@@ -394,8 +394,11 @@ method visitBoolExpression*(visitor: InterpreterVisitor, node: BoolExpression): 
   return newBoolValue(node.token.kind == tkTrue)
 
 method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpression): Value {.base.} =
-  let left = visitor.visitExpression(node.left)
-  let right = visitor.visitExpression(node.right)
+  var left: Value
+  var right: Value
+  if node.token.kind notin {tkAnd, tkOr}:
+    left = visitor.visitExpression(node.left)
+    right = visitor.visitExpression(node.right)
 
   case node.token.kind
   of tkPlus:
@@ -513,10 +516,10 @@ method visitBinaryExpression*(visitor: InterpreterVisitor, node: BinaryExpressio
     return newBoolValue(left != right)
 
   of tkAnd:
-    return newBoolValue(left.boolValue and right.boolValue)
+    return newBoolValue(visitor.visitExpression(node.left).boolValue and visitor.visitExpression(node.right).boolValue)
 
   of tkOr:
-    return newBoolValue(left.boolValue or right.boolValue)
+    return newBoolValue(visitor.visitExpression(node.left).boolValue or visitor.visitExpression(node.right).boolValue)
 
   else:
     warn("BinaryExpression invalid operator")
