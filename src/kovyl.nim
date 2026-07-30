@@ -14,6 +14,7 @@ proc main() =
   var showAST = false
   var debug = false
   var lintMode = false
+  var nativeStackTrace = false
   var filePath = ""
 
   let stdPath = getCurrentDir() / "src/std"
@@ -27,11 +28,13 @@ proc main() =
       debug = true
     elif arg == "-l":
       lintMode = true
+    elif arg == "-b":
+      nativeStackTrace = true
     else:
       filePath = arg
   
   if filePath.len == 0:
-    stderr.writeLine("Usage: ", getAppFilename(), " [-s] [-a] [-d] [-l] <file>")
+    stderr.writeLine("Usage: ", getAppFilename(), " [-s] [-a] [-d] [-l] [-nst] <file>")
     quit(1)
   
   if not fileExists(filePath):
@@ -79,8 +82,20 @@ proc main() =
       semanticAnalyzerLogging(false)
       interpreterVisitorLogging(true)
       
-    let interpreter = newInterpreterVisitor()
-    interpreter.visitStatement(blockStatement)
+    let interpreter = newInterpreterVisitor(filePath)
+    try:
+      interpreter.visitStatement(blockStatement)
+    except Exception as e:
+      if nativeStackTrace:
+        raise e
+      else:
+        printStackTrace(interpreter.stacktrace)
+        if e of RuntimeError:
+          stderr.writeLine("Error: ", e.msg, " [", RuntimeError(e[]).kind, "]")
+        elif e of Panic:
+          stderr.writeLine("Panic: ", e.msg, " [", RuntimeError(e[]).kind, "]")
+        else:
+          stderr.writeLine("Fatal: ", e.msg)
 
     if debug:
       echo "\n[KOVYL] INFO: Running successful!"

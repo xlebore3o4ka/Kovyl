@@ -385,7 +385,7 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
           let overloadArgType = overload.arguments[key]
           
           if argType.kind == typeArray and overloadArgType.kind == typeArray:
-            if argType.arrBase != overloadArgType.arrBase:
+            if argType.arrBase.neq overloadArgType.arrBase:
               argsMatch = false
               break
             if argType.length < overloadArgType.length:
@@ -393,7 +393,7 @@ proc checkOverloads(visitor: SemanticAnalyzerVisitor, node: CallExpression, varT
             elif argType.length > overloadArgType.length:
               argsMatch = false
               break
-          elif argType != overloadArgType:
+          elif argType.neq overloadArgType:
             argsMatch = false
             break
       else:
@@ -436,7 +436,7 @@ proc checkFirstDefinedFunction(visitor: SemanticAnalyzerVisitor, node: CallExpre
           expr.returnType = expected
           visitor.log("Array size promoted from ", expr.returnType.length, " to ", expected.length)
 
-      if expr.returnType != expected:
+      if expr.returnType.neq expected:
         warn("argument types != first defined function argument types")
         return (false, false, getUndefinedType())
 

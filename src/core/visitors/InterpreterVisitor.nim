@@ -1,5 +1,5 @@
 import visitor
-import std/[strutils, logging, tables]
+import std/[strutils, logging, tables, sequtils]
 import ../[astnodes, types, tokens]
 
 type
@@ -12,7 +12,7 @@ type
     errInvalidConversion
 
   RuntimeError* = object of CatchableError
-    kind: ErrorKind
+    kind*: ErrorKind
 
   Panic* = object of CatchableError
     code: string
@@ -62,6 +62,7 @@ type
     environment: seq[Table[string, Value]]
     moduleCache: Table[string, Value]
     formClosures: Table[string, Table[string, Value]]
+    stacktrace*: seq[tuple[token: Token, funcname: string]]
 
   BreakException* = object of CatchableError
   ContinueException* = object of CatchableError
@@ -212,9 +213,10 @@ proc stringValue*(v: Value): string =
   else:
     raise newException(ValueError, "not an array")
 
-proc newInterpreterVisitor*(): InterpreterVisitor =
+proc newInterpreterVisitor*(file: string): InterpreterVisitor =
   result = InterpreterVisitor()
   result.pushScope()
+  result.stacktrace.add((token: newToken(tkDo, "", file, 1, 1, 0), funcname: "runtime"))
 
 method visitExpression*(visitor: InterpreterVisitor, node: Expression): Value {.base.}
 method visitStatement*(visitor: InterpreterVisitor, node: Statement) {.base.}
@@ -675,14 +677,15 @@ method visitFieldExpression*(visitor: InterpreterVisitor, node: FieldExpression)
   return value.tupleValue[node.token.lexeme]
 
 method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): Value {.base.} =
-  # TODO: stacktrace
   visitor.pushScope()
+  visitor.stacktrace.add((token: node.value.token, funcname: node.value.returnType.funcName))
 
-  let funcValue = visitor.visitExpression(node.value).funcValue
+  let funcExpr = visitor.visitExpression(node.value)
+
+  let funcValue = funcExpr.funcValue
   result = newDefaultValue(getUndefinedType())
 
   try:
-
     for index, expr in node.arguments:
       var value = visitor.visitExpression(expr)
 
@@ -700,13 +703,13 @@ method visitCallExpression*(visitor: InterpreterVisitor, node: CallExpression): 
       if e.hasValue:
         result = e.value
 
+    discard visitor.stacktrace.pop()
+
   finally:
     for name, _ in funcValue.closures:
       funcValue.closures[name] = visitor.getSlot(name)
 
     visitor.popScope()
-
-    # TODO: stacktrace
 
 method visitInstanceExpression*(visitor: InterpreterVisitor, node: InstanceExpression): Value {.base.} =
   let name = node.returnType.funcName
@@ -860,6 +863,7 @@ method visitCallStatement*(visitor: InterpreterVisitor, node: CallStatement): au
 
 method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement): auto =
   visitor.pushScope()
+  visitor.stacktrace.add((token: node.name, funcname: $node.moduleType))
 
   if node.fullPath in visitor.moduleCache:
     visitor.newSlot(node.name.lexeme, visitor.moduleCache[node.fullPath])
@@ -879,6 +883,7 @@ method visitModuleStatement*(visitor: InterpreterVisitor, node: ModuleStatement)
 
     visitor.newSlot(node.name.lexeme, newModuleValue(node.moduleType, moduleValues))
     visitor.moduleCache[node.fullPath] = newModuleValue(node.moduleType, moduleValues)
+    discard visitor.stacktrace.pop()
 
 method visitFormStatement*(visitor: InterpreterVisitor, node: FormStatement): auto =
   if node.name.lexeme notin visitor.formClosures:

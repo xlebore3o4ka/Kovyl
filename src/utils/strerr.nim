@@ -1,4 +1,4 @@
-import ../core/errors
+import ../core/[errors, tokens]
 import std/[strutils, strformat, os, json]
 
 proc getSourceLine(file: string, line: Natural): string =
@@ -37,3 +37,17 @@ proc toJson*(filePath: string): JsonNode =
       "pos": error.pos,
       "file": filePath
     })
+
+proc printStackTrace*(stacktrace: seq[tuple[token: Token, funcname: string]]) =
+  var maxLen = 0
+  for entry in stacktrace:
+    let filename = entry.token.file.splitPath.tail
+    let prefix = filename & "(" & $entry.token.line & ":" & $entry.token.column & ")"
+    if prefix.len > maxLen:
+      maxLen = prefix.len
+
+  for entry in stacktrace:
+    let filename = entry.token.file.splitPath.tail
+    let prefix = filename & "(" & $entry.token.line & ":" & $entry.token.column & ")"
+    let spaces = if prefix.len >= maxLen: 3 else: maxLen - prefix.len + 3
+    echo prefix & repeat(' ', spaces) & entry.funcname
