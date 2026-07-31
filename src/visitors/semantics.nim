@@ -140,6 +140,28 @@ proc visitAssignmentStatement(ctx: Context, node: AssignmentStatement) =
   if node.left.exprType.neq node.right.exprType:
     newError(errTypeMismatch, node.token, node.left.exprType, node.right.exprType)
 
+proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
+  ctx.visit(node.condition)
+  if not node.condition.exprType.eq(getBoolType()):
+    newError(errTypeMismatch, node.condition.token, node.condition.exprType, getBoolType())
+  
+  ctx.pushScope()
+  ctx.visit(node.ifBlock)
+  ctx.popScope()
+  
+  for elifBranch in node.elifBranches:
+    ctx.visit(elifBranch.cond)
+    if not elifBranch.cond.exprType.eq(getBoolType()):
+      newError(errTypeMismatch, elifBranch.cond.token, elifBranch.cond.exprType, getBoolType())
+    ctx.pushScope()
+    ctx.visit(elifBranch.elifBlock)
+    ctx.popScope()
+  
+  if node.elseBlock != nil:
+    ctx.pushScope()
+    ctx.visit(node.elseBlock)
+    ctx.popScope()
+
 proc visit(ctx: Context, node: Expression) =
   case node.kind:
   of exprNumber: visitNumberExpression(ctx, NumberExpression(node))
@@ -154,6 +176,7 @@ proc visit(ctx: Context, node: Statement) =
   of stmtBlock: visitBlockStatement(ctx, BlockStatement(node))
   of stmtDeclaration: visitDeclarationStatement(ctx, DeclarationStatement(node))
   of stmtAssignment: visitAssignmentStatement(ctx, AssignmentStatement(node))
+  of stmtBranching: visitBranchingStatement(ctx, BranchingStatement(node))
   else: discard
 
 proc checkSemantics*(node: Statement) =

@@ -162,7 +162,7 @@ constructors:
     NodeKind* = enum
       exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent
 
-      stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment
+      stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment, stmtBranching
 
     Expression* = ref object of RootObj
       kind*: NodeKind
@@ -201,7 +201,7 @@ constructors:
     InvalidStatement* {.kovynode: stmtInvalid.} = ref object of Statement
 
     BlockStatement* {.kovynode: stmtBlock.} = ref object of Statement
-      ## do <stmt> <stmt> ... <endToken>
+      ## do [<stmt>]* <endToken>
       ## endToken = token
       statements*: seq[Statement]
 
@@ -217,3 +217,11 @@ constructors:
       ## "=" = token
       left*: Expression
       right*: Expression
+
+    BranchingStatement* {.kovynode: stmtBranching.} = ref object of Statement
+      ## if <cond> <block> [elif <cond> <block>]* [else <block>]
+      ## if = token
+      condition*: Expression
+      ifBlock*: BlockStatement
+      elifBranches*: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
+      elseBlock*: BlockStatement

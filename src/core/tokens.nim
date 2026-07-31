@@ -13,6 +13,7 @@ type
 
     tkInt64, tkBool
     tkAnd, tkOr, tkTrue, tkFalse
+    tkIf, tkElif, tkElse, tkDo, tkEnd
 
     tkEOF
     tkInvalid
@@ -72,7 +73,13 @@ const keywordTable* = {
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
-  "or": tkOr
+  "or": tkOr,
+
+  "if": tkIf,
+  "elif": tkElif,
+  "else": tkElse,
+  "do": tkDo,
+  "end": tkEnd,
   
 }.toTable
 
@@ -111,6 +118,12 @@ proc mean*(kind: TokenKind): string =
   of tkOr:            return "keyword 'or'"
   of tkTrue:          return "keyword 'true'"
   of tkFalse:         return "keyword 'false'"
+
+  of tkIf:            return "keyword 'if'"
+  of tkElif:          return "keyword 'elif'"
+  of tkElse:          return "keyword 'else'"
+  of tkDo:            return "keyword 'do'"
+  of tkEnd:           return "keyword 'end'"
   
   of tkInvalid:       return "invalid token"
   of tkEOF:           return "end of file"

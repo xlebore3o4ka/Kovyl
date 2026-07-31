@@ -19,6 +19,7 @@ proc newError(self: var Parser,
 
 proc nextToken(self: var Parser): Token {.inline.} = self.lexer.nextToken()
 proc peekToken(self: var Parser): Token {.inline.} = self.lexer.peekToken()
+proc skipToken(self: var Parser) {.inline.} = discard self.lexer.nextToken()
 
 proc expectToken(self: var Parser, expected: TokenKind): Token =
   let token = self.nextToken()
@@ -110,6 +111,8 @@ proc parseOr(self: var Parser): Expression =
 proc parseExpression(self: var Parser): Expression =
   return self.parseOr()
 
+proc parseStatement(self: var Parser): Statement
+
 proc parseDeclaration(self: var Parser): Statement =
   let valueType = self.parseType(self.nextToken())
   let name = self.expectToken(tkIdent)
@@ -118,11 +121,53 @@ proc parseDeclaration(self: var Parser): Statement =
 
   return newDeclarationStatement(token, valueType, name, value)
 
+proc parseBlock(self: var Parser, endKinds: varargs[TokenKind], consume: bool = true): BlockStatement =
+  discard self.expectToken(tkDo)
+
+  var stmts: seq[Statement]
+  
+  while self.peekToken().kind notin endKinds and self.peekToken().kind != tkEOF:
+    stmts.add(self.parseStatement())
+  
+  let endToken = if consume:
+    self.nextToken()
+  else:
+    self.peekToken()
+  
+  result = newBlockStatement(endToken, stmts)
+
+proc parseBranching(self: var Parser): Statement =
+  let token = self.nextToken()
+
+  let cond = self.parseExpression()
+  let ifBlock = self.parseBlock(tkEnd, tkElif, tkElse, consume=false)
+
+  var elifBranches: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
+  while self.peekToken().kind == tkElif:
+    self.skipToken()
+
+    elifBranches.add((
+      cond: self.parseExpression(), 
+      elifBlock: self.parseBlock(tkEnd, tkElif, tkElse, consume=false)
+    ))
+
+  var elseBlock: BlockStatement = nil
+  if self.peekToken().kind == tkElse:
+    self.skipToken()
+    elseBlock = self.parseBlock(tkEnd, consume=false)
+
+  discard self.expectToken(tkEnd)
+
+  return newBranchingStatement(token, cond, ifBlock, elifBranches, elseBlock)
+
 proc parseStatement(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
   if self.isType(token):
     return self.parseDeclaration()
+
+  elif token.kind == tkIf:
+    return self.parseBranching()
 
   else:
     let expr = self.parseExpression()

@@ -2,15 +2,23 @@ import ../core/[ast, tokens, types]
 import std/[sets, strutils]
 import codegenSanitizers
 
+const TAB_WIDTH = 2
+
 type
   Context = ref object
     includes: HashSet[string]
     code: string
 
+    indent: Natural
     nameCounter: Natural
 
 proc emit(ctx: Context, code: varargs[string, `$`]) =
-  ctx.code &= code.join("") & "\n"
+  let joined = code.join("")
+  for line in joined.splitLines():
+    if line.len > 0:
+      ctx.code &= " ".repeat(ctx.indent) & line & "\n"
+    else:
+      ctx.code &= "\n"
 
 proc ctype(ctx: Context, typ: Type): string =
   case typ.kind:
@@ -57,14 +65,31 @@ proc visitIdentExpression(ctx: Context, node: IdentExpression): string =
 
 
 proc visitBlockStatement(ctx: Context, node: BlockStatement) =
+  ctx.indent += TAB_WIDTH
   for stmt in node.statements:
     ctx.visit(stmt)
+  ctx.indent -= TAB_WIDTH
 
 proc visitDeclarationStatement(ctx: Context, node: DeclarationStatement) =
   ctx.emit(ctx.ctype(node.valueType), " ", node.name.lexeme, " = ", ctx.visit(node.value), ";")
 
 proc visitAssignmentStatement(ctx: Context, node: AssignmentStatement) =
   ctx.emit(ctx.visit(node.left), " = ", ctx.visit(node.right), ";")
+
+proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
+  ctx.emit("if (", ctx.visit(node.condition), ") {")
+  ctx.visit(node.ifBlock)
+  ctx.emit("}")
+  
+  for elifBranch in node.elifBranches:
+    ctx.emit("else if (", ctx.visit(elifBranch.cond), ") {")
+    ctx.visit(elifBranch.elifBlock)
+    ctx.emit("}")
+  
+  if node.elseBlock != nil:
+    ctx.emit("else {")
+    ctx.visit(node.elseBlock)
+    ctx.emit("}")
 
 proc visit(ctx: Context, node: Expression): string =
   case node.kind:
@@ -80,6 +105,7 @@ proc visit(ctx: Context, node: Statement) =
   of stmtBlock: visitBlockStatement(ctx, BlockStatement(node))
   of stmtDeclaration: visitDeclarationStatement(ctx, DeclarationStatement(node))
   of stmtAssignment: visitAssignmentStatement(ctx, AssignmentStatement(node))
+  of stmtBranching: visitBranchingStatement(ctx, BranchingStatement(node))
   else: discard
 
 proc generate*(node: Statement, release: bool = false): string =

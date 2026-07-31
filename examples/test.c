@@ -28,5 +28,10 @@ void kovypanic(const char* kind, const char* message, int64_t line) {
 
   
 int main() {
-bool test_ = (((((10 + (2 * 3)) + 4) - -5) == ((10 * 4) % -4)) && (10 > 4));
+  int64_t x_ = 0;
+  int64_t _temp_0 = x_;
+  #if KOVYDEBUG
+  if (_temp_0 == 0) {kovypanic("ZeroDivision", "Zero division", 2);}
+  #endif
+  int64_t y_ = (10 / _temp_0);
 }
