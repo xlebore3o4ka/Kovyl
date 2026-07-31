@@ -1,13 +1,28 @@
-import std/[os, osproc]
+import std/[os, osproc, parseopt]
 import core/[errors, parser]
 import visitors/[semantics, codegen]
 
 proc main() =
-  if paramCount() < 1:
-    echo "Using: ", getAppFilename().extractFilename(), " <file>"
+  var
+    filename: string
+    release = false
+    savec = false
+
+  for kind, key, val in getopt():
+    case kind
+    of cmdLongOption, cmdShortOption:
+      case key
+      of "release", "r": release = true
+      of "savec", "s": savec = true
+      else: discard
+    of cmdArgument:
+      if filename == "": filename = key
+    of cmdEnd: discard
+
+  if filename == "":
+    echo "Using: ", getAppFilename().extractFilename(), " [--release|--savec] <file>"
     return
 
-  let filename = paramStr(1)
   if not fileExists(filename):
     echo "Error: file not found - ", filename
     return
@@ -22,7 +37,7 @@ proc main() =
     checkSemantics(expression)
 
     if errors.errors.len != 0: break errorProne
-    let code = generate(expression)
+    let code = generate(expression, release)
 
     if errors.errors.len != 0: break errorProne
     
@@ -32,12 +47,12 @@ proc main() =
     
     writeFile(cFile, code)
     
-    let gccCmd = "gcc -o " & exeFile & " " & cFile
+    let gccCmd = "gcc -O" & (if release: "2" else: "0") & " -o " & exeFile & " " & cFile
     if execCmd(gccCmd) != 0:
       echo "Compilation failed"
-      break errorProne
-    
-    removeFile(cFile)
+
+    if not savec:
+      removeFile(cFile)
 
   if errors.errors.len != 0:
     for e in errors.errors:

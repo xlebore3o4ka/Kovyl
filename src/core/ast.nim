@@ -160,9 +160,9 @@ macro constructors*(body: untyped): untyped =
 constructors: 
   type
     NodeKind* = enum
-      exprInvalid, exprNumber, exprUnary, exprBinary, exprBool
+      exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent
 
-      stmtInvalid, stmtBlock, stmtDeclaration
+      stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment
 
     Expression* = ref object of RootObj
       kind*: NodeKind
@@ -190,6 +190,10 @@ constructors:
       ## <bool>
       ## bool = token
 
+    IdentExpression* {.kovynode: exprIdent.} = ref object of Expression
+      ## <ident>
+      ## ident = token
+
     Statement* = ref object of RootObj
       kind*: NodeKind
       token*: Token
@@ -207,3 +211,9 @@ constructors:
       valueType*: Type
       name*: Token
       value*: Expression
+
+    AssignmentStatement* {.kovynode: stmtAssignment.} = ref object of Statement
+      ## <left> = <right>
+      ## "=" = token
+      left*: Expression
+      right*: Expression

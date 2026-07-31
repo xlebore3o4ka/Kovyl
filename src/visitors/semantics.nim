@@ -99,6 +99,15 @@ proc visitBinaryExpression(ctx: Context, node: BinaryExpression) =
     
     node.setType(ctx, typ)
 
+proc visitIdentExpression(ctx: Context, node: IdentExpression) =
+  let name = node.token.lexeme
+
+  if not ctx.symbolExists(name):
+    newError(errUndeclaredSymbol, node.token, name)
+
+  else:
+    node.setType(ctx, ctx.getSymbol(name).symbolType)
+    node.token.lexeme = node.token.lexeme & "_"
 
 # STATEMENTS
 
@@ -122,6 +131,14 @@ proc visitDeclarationStatement(ctx: Context, node: DeclarationStatement) =
       break semantics
 
     ctx.newSymbol(node.name, node.valueType)
+    node.name.lexeme = node.name.lexeme & "_"
+
+proc visitAssignmentStatement(ctx: Context, node: AssignmentStatement) =
+  ctx.visit(node.left)
+  ctx.visit(node.right)
+
+  if node.left.exprType.neq node.right.exprType:
+    newError(errTypeMismatch, node.token, node.left.exprType, node.right.exprType)
 
 proc visit(ctx: Context, node: Expression) =
   case node.kind:
@@ -129,12 +146,14 @@ proc visit(ctx: Context, node: Expression) =
   of exprBool: visitBoolExpression(ctx, BoolExpression(node))
   of exprUnary: visitUnaryExpression(ctx, UnaryExpression(node))
   of exprBinary: visitBinaryExpression(ctx, BinaryExpression(node))
+  of exprIdent: visitIdentExpression(ctx, IdentExpression(node))
   else: discard
 
 proc visit(ctx: Context, node: Statement) =
   case node.kind:
   of stmtBlock: visitBlockStatement(ctx, BlockStatement(node))
   of stmtDeclaration: visitDeclarationStatement(ctx, DeclarationStatement(node))
+  of stmtAssignment: visitAssignmentStatement(ctx, AssignmentStatement(node))
   else: discard
 
 proc checkSemantics*(node: Statement) =

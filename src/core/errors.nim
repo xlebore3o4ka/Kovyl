@@ -6,7 +6,8 @@ type
 
     errExpectedSyntax, errExpression, errStatement, errType
 
-    errUnaryTypeMismatch, errBinaryTypeMismatch, errDeclarationTypeMismatch, errRedeclaration
+    errUnaryTypeMismatch, errBinaryTypeMismatch, errDeclarationTypeMismatch, errTypeMismatch
+    errRedeclaration, errUndeclaredSymbol
 
   Error* = ref object
     kind*: ErrorKind
@@ -32,7 +33,9 @@ proc message(kind: ErrorKind): string =
   of errUnaryTypeMismatch:       "Type mismatch for the unary operator @0: @1"
   of errBinaryTypeMismatch:      "Type mismatch for the binary operator @0: @1 @0 @2"
   of errDeclarationTypeMismatch: "Expected @0 for @1, got @2"
+  of errTypeMismatch:            "Expected @0, got @1"
   of errRedeclaration:           "Redeclaration symbol '@0', originally declared in @1(@2:@3)"
+  of errUndeclaredSymbol:        "Undeclared symbol '@0'"
 
 proc newError*(kind: ErrorKind, file: string, line, col: Positive, len: Positive, args: varargs[string, `$`]) {.inline.} =
   errors.add(Error(

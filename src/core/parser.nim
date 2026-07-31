@@ -53,6 +53,9 @@ proc parsePrimary(self: var Parser): Expression =
   elif token.kind in {tkTrue, tkFalse}:
     return newBoolExpression(token)
 
+  elif token.kind == tkIdent:
+    return newIdentExpression(token)
+
   self.newError(errExpression, token, token.mean)
   return newInvalidExpression(token)
 
@@ -120,6 +123,12 @@ proc parseStatement(self: var Parser): Statement =
 
   if self.isType(token):
     return self.parseDeclaration()
+
+  else:
+    let expr = self.parseExpression()
+
+    if expr.kind in {exprIdent} and self.peekToken().kind == tkEquals:
+      return newAssignmentStatement(self.nextToken(), expr, self.parseExpression())
 
   self.newError(errStatement, token, token.mean())
   return newInvalidStatement(token)

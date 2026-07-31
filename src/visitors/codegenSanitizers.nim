@@ -23,8 +23,7 @@ void """ & funcname & """_setPanicHandler(""" & funcname & """_PanicHandler_t ha
 void """ & funcname & """(const char* kind, const char* message, int64_t line) {
   """ & funcname & """_Panic p = { kind, message };
   if (""" & funcname & """_PanicHandler != NULL) {if (""" & funcname & """_PanicHandler(&p)) return;}
-  /* default handler */
-  fprintf(stderr, "Panic(line %lld): %s [%s]\n", (long long)line, message, kind);
+  fprintf(stderr, "Panic at line %lld: %s [%s]\n", (long long)line, message, kind);
   exit(1);
 }
 
@@ -37,7 +36,7 @@ proc generatePanicCall(kind: string, message: string, line: Positive): string =
   panicFuncname & "(\"" & kind & "\", \"" & message & "\", " & $line & ");"
 
 proc generateZeroDivisionSanitizer*(temp: string, line: Positive): string =
-  result = "#ifdef " & debugFlag & "\n"
+  result = "#if " & debugFlag & "\n"
   result &= "if (" & temp & " == 0) {"
   result &= generatePanicCall(panicZeroDivision, "Zero division", line)
   result &= "}\n#endif"

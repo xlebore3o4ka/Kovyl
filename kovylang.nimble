@@ -7,7 +7,7 @@ license       = "LGPL-3.0"
 
 srcDir        = "src"
 binDir        = "build"
-bin           = @["kovylang"]
+bin           = @["kovylc"]
 
 # Dependencies
 requires "nim >= 2.0.0"
