@@ -17,6 +17,8 @@ type
     currentScope: Scope
     symbolScopeStack: Table[string, seq[Scope]]
 
+    loopDepth: Natural
+
 proc newSymbol(self: Context, name: Token, symbolType: Type) =
   self.currentScope.symbolTable[name.lexeme] = Symbol(definitionToken: name, symbolType: symbolType)
   self.symbolScopeStack.mgetOrPut(name.lexeme, @[]).add(self.currentScope)
@@ -162,6 +164,25 @@ proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
     ctx.visit(node.elseBlock)
     ctx.popScope()
 
+proc visitWhileStatement(ctx: Context, node: WhileStatement) =
+  ctx.visit(node.condition)
+  if not node.condition.exprType.eq(getBoolType()):
+    newError(errTypeMismatch, node.condition.token, node.condition.exprType, getBoolType())
+  
+  ctx.pushScope()
+  ctx.loopDepth.inc
+  ctx.visit(node.whileBlock)
+  ctx.loopDepth.dec
+  ctx.popScope()
+
+proc visitContinueStatement(ctx: Context, node: ContinueStatement) =
+  if ctx.loopDepth == 0:
+    newError(errControlFlowOutsideLoop, node.token, "continue")
+
+proc visitBreakStatement(ctx: Context, node: BreakStatement) =
+  if ctx.loopDepth == 0:
+    newError(errControlFlowOutsideLoop, node.token, "break")
+
 proc visit(ctx: Context, node: Expression) =
   case node.kind:
   of exprNumber: visitNumberExpression(ctx, NumberExpression(node))
@@ -177,6 +198,9 @@ proc visit(ctx: Context, node: Statement) =
   of stmtDeclaration: visitDeclarationStatement(ctx, DeclarationStatement(node))
   of stmtAssignment: visitAssignmentStatement(ctx, AssignmentStatement(node))
   of stmtBranching: visitBranchingStatement(ctx, BranchingStatement(node))
+  of stmtWhile: visitWhileStatement(ctx, WhileStatement(node))
+  of stmtContinue: visitContinueStatement(ctx, ContinueStatement(node))
+  of stmtBreak: visitBreakStatement(ctx, BreakStatement(node))
   else: discard
 
 proc checkSemantics*(node: Statement) =

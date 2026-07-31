@@ -28,10 +28,18 @@ void kovypanic(const char* kind, const char* message, int64_t line) {
 
   
 int main() {
-  int64_t x_ = 0;
-  int64_t _temp_0 = x_;
-  #if KOVYDEBUG
-  if (_temp_0 == 0) {kovypanic("ZeroDivision", "Zero division", 2);}
-  #endif
-  int64_t y_ = (10 / _temp_0);
+  int64_t c_ = 0;
+  int64_t result_ = 0;
+  while ((c_ < 15)) {
+    if ((c_ == 5)) {
+      c_ = 7;
+      continue;
+    }
+    else if ((c_ == 10)) {
+      break;
+    }
+    result_ = (result_ + c_);
+    c_ = (c_ + 1);
+  }
+fprintf(stdout, "%d", result_);
 }

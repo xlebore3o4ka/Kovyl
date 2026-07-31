@@ -14,6 +14,7 @@ type
     tkInt64, tkBool
     tkAnd, tkOr, tkTrue, tkFalse
     tkIf, tkElif, tkElse, tkDo, tkEnd
+    tkWhile, tkContinue, tkBreak
 
     tkEOF
     tkInvalid
@@ -80,6 +81,10 @@ const keywordTable* = {
   "else": tkElse,
   "do": tkDo,
   "end": tkEnd,
+
+  "while": tkWhile,
+  "continue": tkContinue,
+  "break": tkBreak,
   
 }.toTable
 
@@ -124,6 +129,10 @@ proc mean*(kind: TokenKind): string =
   of tkElse:          return "keyword 'else'"
   of tkDo:            return "keyword 'do'"
   of tkEnd:           return "keyword 'end'"
+
+  of tkWhile:         return "keyowrd 'while'"
+  of tkContinue:      return "keyowrd 'continue'"
+  of tkBreak:         return "keyowrd 'break'"
   
   of tkInvalid:       return "invalid token"
   of tkEOF:           return "end of file"

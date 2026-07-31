@@ -91,6 +91,17 @@ proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
     ctx.visit(node.elseBlock)
     ctx.emit("}")
 
+proc visitWhileStatement(ctx: Context, node: WhileStatement) =
+  ctx.emit("while (", ctx.visit(node.condition), ") {")
+  ctx.visit(node.whileBlock)
+  ctx.emit("}")
+
+proc visitContinueStatement(ctx: Context, node: ContinueStatement) =
+  ctx.emit("continue;")
+
+proc visitBreakStatement(ctx: Context, node: BreakStatement) =
+  ctx.emit("break;")
+
 proc visit(ctx: Context, node: Expression): string =
   case node.kind:
   of exprNumber: return visitNumberExpression(ctx, NumberExpression(node))
@@ -106,6 +117,9 @@ proc visit(ctx: Context, node: Statement) =
   of stmtDeclaration: visitDeclarationStatement(ctx, DeclarationStatement(node))
   of stmtAssignment: visitAssignmentStatement(ctx, AssignmentStatement(node))
   of stmtBranching: visitBranchingStatement(ctx, BranchingStatement(node))
+  of stmtWhile: visitWhileStatement(ctx, WhileStatement(node))
+  of stmtContinue: visitContinueStatement(ctx, ContinueStatement(node))
+  of stmtBreak: visitBreakStatement(ctx, BreakStatement(node))
   else: discard
 
 proc generate*(node: Statement, release: bool = false): string =
@@ -117,6 +131,7 @@ proc generate*(node: Statement, release: bool = false): string =
 
   ctx.emit("int main() {")
   ctx.visit(node)
+  ctx.emit("fprintf(stdout, \"%d\", result_);")
   ctx.emit("}")
   
   for name in ctx.includes:

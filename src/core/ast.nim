@@ -163,6 +163,7 @@ constructors:
       exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent
 
       stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment, stmtBranching
+      stmtWhile, stmtContinue, stmtBreak
 
     Expression* = ref object of RootObj
       kind*: NodeKind
@@ -225,3 +226,17 @@ constructors:
       ifBlock*: BlockStatement
       elifBranches*: seq[tuple[cond: Expression, elifBlock: BlockStatement]]
       elseBlock*: BlockStatement
+
+    WhileStatement* {.kovynode: stmtWhile.} = ref object of Statement
+      ## while <cond> <block>
+      ## while = token
+      condition*: Expression
+      whileBlock*: BlockStatement
+
+    ContinueStatement* {.kovynode: stmtContinue.} = ref object of Statement
+      ## continue
+      ## continue = token
+
+    BreakStatement* {.kovynode: stmtBreak.} = ref object of Statement
+      ## break
+      ## break = token

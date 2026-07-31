@@ -37,6 +37,6 @@ proc generatePanicCall(kind: string, message: string, line: Positive): string =
 
 proc generateZeroDivisionSanitizer*(temp: string, line: Positive): string =
   result = "#if " & debugFlag & "\n"
-  result &= "if (" & temp & " == 0) {"
+  result &= "  if (" & temp & " == 0) {"
   result &= generatePanicCall(panicZeroDivision, "Zero division", line)
   result &= "}\n#endif"

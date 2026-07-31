@@ -160,6 +160,14 @@ proc parseBranching(self: var Parser): Statement =
 
   return newBranchingStatement(token, cond, ifBlock, elifBranches, elseBlock)
 
+proc parseWhile(self: var Parser): Statement =
+  let token = self.nextToken()
+  
+  let cond = self.parseExpression()
+  let whileBlock = self.parseBlock(tkEnd)
+  
+  return newWhileStatement(token, cond, whileBlock)
+
 proc parseStatement(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -168,6 +176,15 @@ proc parseStatement(self: var Parser): Statement =
 
   elif token.kind == tkIf:
     return self.parseBranching()
+
+  elif token.kind == tkWhile:
+    return self.parseWhile()
+
+  elif token.kind == tkContinue:
+    return newContinueStatement(self.nextToken())
+
+  elif token.kind == tkBreak:
+    return newBreakStatement(self.nextToken())
 
   else:
     let expr = self.parseExpression()

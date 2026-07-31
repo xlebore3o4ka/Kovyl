@@ -34,7 +34,7 @@ proc isAlphaNumeric(c: char): bool =
   c.isAlpha() or c.isDigit()
 
 proc advance(self: var Lexer) =
-  if self.text[self.pos] == '\n':
+  if self.pos < self.len and self.text[self.pos] == '\n':
     self.line.inc()
     self.col = 1
   else:
@@ -48,6 +48,10 @@ proc nextToken*(self: var Lexer): Token =
 
   var c = self.peek()
 
+  while c in " \t\r\n":
+    self.advance()
+    c = self.peek()
+
   if c == '\0': 
     if self.parenthesisStack.len > 0:
       self.wasError = true
@@ -55,19 +59,15 @@ proc nextToken*(self: var Lexer): Token =
       newError(errSyntaxParenthesis, last.file, last.line, last.col, 1, "Unclosed")
     return newToken(tkEOF, "\0", self.file, self.line, self.col, 1)
 
-  while c in " \t\r\n":
-    self.advance()
-    c = self.peek()
-
   if c.isDigit():
-    var startPos = self.pos
     var startCol = self.col
     var startLine = self.line
+    var lexeme = ""
     
     while self.peek().isDigit():
+      lexeme &= $self.peek()
       self.advance()
     
-    let lexeme = self.text[startPos ..< self.pos]
     result = newToken(tkNumber, lexeme, self.file, startLine, startCol, lexeme.len)
 
   elif $c in operatorTable:
@@ -95,14 +95,14 @@ proc nextToken*(self: var Lexer): Token =
         discard self.parenthesisStack.pop()
 
   elif c.isAlpha() or c == '_':
-    var startPos = self.pos
     var startCol = self.col
     var startLine = self.line
+    var lexeme = ""
     
     while self.peek().isAlphaNumeric() or self.peek() == '_':
+      lexeme &= $self.peek()
       self.advance()
     
-    let lexeme = self.text[startPos ..< self.pos]
     if lexeme in keywordTable:
       result = newToken(keywordTable[lexeme], lexeme, self.file, startLine, startCol, lexeme.len)
     else:

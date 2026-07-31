@@ -1,2 +1,12 @@
-int x = 0
-int y = 10 / x
+int c = 0
+int result = 0
+while c < 15 do
+  if c == 5 do
+    c = 7
+    continue
+  elif c == 10 do
+    break
+  end
+  result = result + c
+  c = c + 1
+end
