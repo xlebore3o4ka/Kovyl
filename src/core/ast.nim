@@ -157,13 +157,21 @@ macro constructors*(body: untyped): untyped =
         objectTy
       )
 
+type
+  FuncArg* = ref object
+    argType*: Type
+    argToken*: Token
+
+proc add*(arguments: var seq[FuncArg], argType: Type, argToken: Token) =
+  arguments.add(FuncArg(argType: argType, argToken: argToken))
+
 constructors: 
   type
     NodeKind* = enum
       exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent
 
       stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment, stmtBranching
-      stmtWhile, stmtContinue, stmtBreak
+      stmtWhile, stmtContinue, stmtBreak, stmtFunc, stmtReturn
 
     Expression* = ref object of RootObj
       kind*: NodeKind
@@ -240,3 +248,16 @@ constructors:
     BreakStatement* {.kovynode: stmtBreak.} = ref object of Statement
       ## break
       ## break = token
+
+    FuncStatement* {.kovynode: stmtFunc.} = ref object of Statement
+      ## func [type] <name> ( [<args>]* ) <block>
+      ## func = token
+      returnType*: Type
+      name*: Token
+      args*: seq[FuncArg]
+      funcBlock*: BlockStatement
+
+    ReturnStatement* {.kovynode: stmtReturn.} = ref object of Statement
+      ## return [value]
+      ## return = token
+      value*: Expression

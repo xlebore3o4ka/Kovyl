@@ -31,6 +31,9 @@ proc expectToken(self: var Parser, expected: TokenKind): Token =
 proc isType(self: Parser, token: Token): bool =
   token.kind in {tkInt64, tkBool}
 
+proc isExpression(self: Parser, token: Token): bool =
+  token.kind in {tkLParen, tkNumber, tkTrue, tkFalse, tkIdent, tkBang, tkMinus, tkPlus}
+
 proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
   of tkInt64: return getInt64Type()
@@ -168,6 +171,41 @@ proc parseWhile(self: var Parser): Statement =
   
   return newWhileStatement(token, cond, whileBlock)
 
+proc parseFunc(self: var Parser): Statement =
+  let token = self.nextToken()
+
+  var funcType = getUndefinedType()
+
+  if self.isType(self.peekToken()):
+    funcType = self.parseType(self.nextToken())
+
+  let name = self.expectToken(tkIdent)
+
+  discard self.expectToken(tkLParen)
+
+  var args: seq[FuncArg]
+
+  while self.peekToken().kind != tkRParen:
+    args.add(self.parseType(self.nextToken()), self.expectToken(tkIdent))
+
+    if self.peekToken().kind == tkRParen: break
+    discard self.expectToken(tkComma)
+
+  discard self.expectToken(tkRParen)
+
+  let funcBlock = self.parseBlock(tkEnd)
+
+  return newFuncStatement(token, funcType, name, args, funcBlock)
+
+proc parseReturn(self: var Parser): Statement =
+  let token = self.nextToken()
+  var expression: Expression = nil
+
+  if self.isExpression(self.peekToken()):
+    expression = self.parseExpression()
+
+  return newReturnStatement(token, expression)
+
 proc parseStatement(self: var Parser): Statement =
   let token = self.lexer.peekToken()
 
@@ -186,7 +224,13 @@ proc parseStatement(self: var Parser): Statement =
   elif token.kind == tkBreak:
     return newBreakStatement(self.nextToken())
 
-  else:
+  elif token.kind == tkFunc:
+    return self.parseFunc()
+
+  elif token.kind == tkReturn:
+    return self.parseReturn()
+
+  elif self.isExpression(token):
     let expr = self.parseExpression()
 
     if expr.kind in {exprIdent} and self.peekToken().kind == tkEquals:

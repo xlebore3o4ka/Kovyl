@@ -26,20 +26,17 @@ void kovypanic(const char* kind, const char* message, int64_t line) {
   exit(1);
 }
 
-  
-int main() {
-  int64_t c_ = 0;
-  int64_t result_ = 0;
-  while ((c_ < 15)) {
-    if ((c_ == 5)) {
-      c_ = 7;
-      continue;
-    }
-    else if ((c_ == 10)) {
-      break;
-    }
-    result_ = (result_ + c_);
-    c_ = (c_ + 1);
+int64_t gcd_(int64_t a_, int64_t b_) {
+  while ((b_ != 0)) {
+    int64_t t_ = b_;
+    b_ = (a_ % b_);
+    a_ = t_;
   }
-fprintf(stdout, "%d", result_);
+  return a_;
+}
+void test_() {
+  return ;
+}
+
+int main() {
 }

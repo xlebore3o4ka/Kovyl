@@ -11,6 +11,8 @@ type
 
     errControlFlowOutsideLoop
 
+    errReturnOutsideFunc, errReturnValue, errReturnTypeMismatch
+
   Error* = ref object
     kind*: ErrorKind
     file*: string
@@ -40,6 +42,10 @@ proc message(kind: ErrorKind): string =
   of errUndeclaredSymbol:        "Undeclared symbol '@0'"
 
   of errControlFlowOutsideLoop:  "'@0' statement outside of loop"
+
+  of errReturnOutsideFunc:       "Return statement outside of function"
+  of errReturnValue:             "Function should not return anything"
+  of errReturnTypeMismatch:      "Function returns @0, got @1"
 
 proc newError*(kind: ErrorKind, file: string, line, col: Positive, len: Positive, args: varargs[string, `$`]) {.inline.} =
   errors.add(Error(

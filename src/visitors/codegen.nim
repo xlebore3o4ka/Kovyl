@@ -1,5 +1,5 @@
 import ../core/[ast, tokens, types]
-import std/[sets, strutils]
+import std/[sets, strutils, sequtils]
 import codegenSanitizers
 
 const TAB_WIDTH = 2
@@ -8,23 +8,31 @@ type
   Context = ref object
     includes: HashSet[string]
     code: string
+    globalCode: string
+    emitToGlobal: bool
 
     indent: Natural
     nameCounter: Natural
 
 proc emit(ctx: Context, code: varargs[string, `$`]) =
   let joined = code.join("")
+  var target = if ctx.emitToGlobal: ctx.globalCode else: ctx.code
+  
   for line in joined.splitLines():
     if line.len > 0:
-      ctx.code &= " ".repeat(ctx.indent) & line & "\n"
+      target &= " ".repeat(ctx.indent) & line & "\n"
     else:
-      ctx.code &= "\n"
+      target &= "\n"
+
+  if ctx.emitToGlobal: ctx.globalCode = target
+  else: ctx.code = target
 
 proc ctype(ctx: Context, typ: Type): string =
   case typ.kind:
   of typeUndefined: return "void"
   of typeInt64: return "int64_t"
   of typeBool: return "bool"
+  of typeFunc: echo "ctype unsupported type"; return "void /*func*/"
 
 proc generateUniqueName(ctx: Context, prefix: string): string =
   result = "_" & prefix & "_" & $ctx.nameCounter
@@ -102,6 +110,23 @@ proc visitContinueStatement(ctx: Context, node: ContinueStatement) =
 proc visitBreakStatement(ctx: Context, node: BreakStatement) =
   ctx.emit("break;")
 
+proc visitFuncStatement(ctx: Context, node: FuncStatement) =
+  ctx.indent -= TAB_WIDTH
+  ctx.emitToGlobal = true
+
+  ctx.emit(ctx.ctype(node.returnType), " ", node.name.lexeme, "(",
+    node.args.mapIt(ctx.ctype(it.argType) & " " & it.argToken.lexeme).join(", "),
+    ") {"
+  )
+  ctx.visit(node.funcBlock)
+  ctx.emit("}")
+
+  ctx.emitToGlobal = false
+  ctx.indent += TAB_WIDTH
+
+proc visitReturnStatement(ctx: Context, node: ReturnStatement) =
+  ctx.emit("return ", (if node.value != nil: ctx.visit(node.value) else: ""), ";")
+
 proc visit(ctx: Context, node: Expression): string =
   case node.kind:
   of exprNumber: return visitNumberExpression(ctx, NumberExpression(node))
@@ -120,19 +145,22 @@ proc visit(ctx: Context, node: Statement) =
   of stmtWhile: visitWhileStatement(ctx, WhileStatement(node))
   of stmtContinue: visitContinueStatement(ctx, ContinueStatement(node))
   of stmtBreak: visitBreakStatement(ctx, BreakStatement(node))
+  of stmtFunc: visitFuncStatement(ctx, FuncStatement(node))
+  of stmtReturn: visitReturnStatement(ctx, ReturnStatement(node))
   else: discard
 
 proc generate*(node: Statement, release: bool = false): string =
   let ctx = Context(includes: ["<stdbool.h>", "<stdint.h>", "<stdio.h>", "<stdlib.h>"].toHashSet)
 
-  ctx.emit(generateDebugDefine(release))
-
-  ctx.emit(generatePanicSystem("kovypanic"))
+  let panicSystem = generatePanicSystem("kovypanic")
 
   ctx.emit("int main() {")
   ctx.visit(node)
-  ctx.emit("fprintf(stdout, \"%d\", result_);")
   ctx.emit("}")
+
+  ctx.code = ctx.globalCode & "\n" & ctx.code
+  ctx.code = panicSystem & ctx.code
+  ctx.code = generateDebugDefine(release) & ctx.code
   
   for name in ctx.includes:
     ctx.code = "#include " & name & "\n" & ctx.code

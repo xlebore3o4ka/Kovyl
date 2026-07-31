@@ -9,6 +9,7 @@ proc generatePanicSystem*(funcname: string): string =
   panicFuncname = funcname
   """
 
+
 typedef struct {
   const char* kind;
   const char* message;
@@ -27,7 +28,7 @@ void """ & funcname & """(const char* kind, const char* message, int64_t line) {
   exit(1);
 }
 
-  """
+"""
 
 proc generateDebugDefine*(release: bool): string =
   "#define KOVYDEBUG " & (if release: "0" else: "1")

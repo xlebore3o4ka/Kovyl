@@ -1,5 +1,5 @@
 import ../core/[ast, types, tokens, errors]
-import std/[tables]
+import std/[tables, sequtils]
 
 type
   Symbol = object
@@ -18,6 +18,9 @@ type
     symbolScopeStack: Table[string, seq[Scope]]
 
     loopDepth: Natural
+    funcDepth: Natural
+
+    expectedReturnType: Type
 
 proc newSymbol(self: Context, name: Token, symbolType: Type) =
   self.currentScope.symbolTable[name.lexeme] = Symbol(definitionToken: name, symbolType: symbolType)
@@ -144,20 +147,23 @@ proc visitAssignmentStatement(ctx: Context, node: AssignmentStatement) =
 
 proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
   ctx.visit(node.condition)
-  if not node.condition.exprType.eq(getBoolType()):
+  if node.condition.exprType.neq(getBoolType()):
     newError(errTypeMismatch, node.condition.token, node.condition.exprType, getBoolType())
   
-  ctx.pushScope()
-  ctx.visit(node.ifBlock)
-  ctx.popScope()
+  else:
+    ctx.pushScope()
+    ctx.visit(node.ifBlock)
+    ctx.popScope()
   
   for elifBranch in node.elifBranches:
     ctx.visit(elifBranch.cond)
-    if not elifBranch.cond.exprType.eq(getBoolType()):
+    if elifBranch.cond.exprType.neq(getBoolType()):
       newError(errTypeMismatch, elifBranch.cond.token, elifBranch.cond.exprType, getBoolType())
-    ctx.pushScope()
-    ctx.visit(elifBranch.elifBlock)
-    ctx.popScope()
+
+    else:
+      ctx.pushScope()
+      ctx.visit(elifBranch.elifBlock)
+      ctx.popScope()
   
   if node.elseBlock != nil:
     ctx.pushScope()
@@ -166,14 +172,15 @@ proc visitBranchingStatement(ctx: Context, node: BranchingStatement) =
 
 proc visitWhileStatement(ctx: Context, node: WhileStatement) =
   ctx.visit(node.condition)
-  if not node.condition.exprType.eq(getBoolType()):
+  if node.condition.exprType.neq(getBoolType()):
     newError(errTypeMismatch, node.condition.token, node.condition.exprType, getBoolType())
-  
-  ctx.pushScope()
-  ctx.loopDepth.inc
-  ctx.visit(node.whileBlock)
-  ctx.loopDepth.dec
-  ctx.popScope()
+
+  else:
+    ctx.pushScope()
+    ctx.loopDepth.inc
+    ctx.visit(node.whileBlock)
+    ctx.loopDepth.dec
+    ctx.popScope()
 
 proc visitContinueStatement(ctx: Context, node: ContinueStatement) =
   if ctx.loopDepth == 0:
@@ -182,6 +189,50 @@ proc visitContinueStatement(ctx: Context, node: ContinueStatement) =
 proc visitBreakStatement(ctx: Context, node: BreakStatement) =
   if ctx.loopDepth == 0:
     newError(errControlFlowOutsideLoop, node.token, "break")
+
+proc visitFuncStatement(ctx: Context, node: FuncStatement) =
+  if ctx.symbolExistsInCurrentScope(node.name.lexeme):
+    let symbol = ctx.getSymbol(node.name.lexeme)
+    newError(errRedeclaration, node.name, symbol.definitionToken.lexeme, symbol.definitionToken.file, symbol.definitionToken.line, symbol.definitionToken.col)
+    return
+
+  let funcType = getFuncType(node.args.mapIt(it.argType), node.returnType)
+  ctx.newSymbol(node.name, funcType)
+  node.name.lexeme = node.name.lexeme & "_"
+
+  ctx.pushScope()
+  ctx.funcDepth.inc
+  
+  for arg in node.args:
+    ctx.newSymbol(arg.argToken, arg.argType)
+    arg.argToken.lexeme = arg.argToken.lexeme & "_"
+  
+  let expected = ctx.expectedReturnType
+  ctx.expectedReturnType = node.returnType
+
+  # TODO: check each return path
+  ctx.visit(node.funcBlock)
+
+  ctx.expectedReturnType = expected
+  
+  ctx.funcDepth.dec
+  ctx.popScope()
+
+proc visitReturnStatement(ctx: Context, node: ReturnStatement) =
+  if ctx.funcDepth == 0:
+    newError(errReturnOutsideFunc, node.token)
+    return
+
+  if ctx.expectedReturnType.eq(getUndefinedType()):
+    if node.value != nil:
+      newError(errReturnValue, node.token)
+  else:
+    if node.value == nil:
+      newError(errReturnTypeMismatch, node.token, ctx.expectedReturnType, getUndefinedType())
+    else:
+      ctx.visit(node.value)
+      if node.value.exprType.neq(ctx.expectedReturnType):
+        newError(errReturnTypeMismatch, node.token, ctx.expectedReturnType, node.value.exprType)
 
 proc visit(ctx: Context, node: Expression) =
   case node.kind:
@@ -201,6 +252,8 @@ proc visit(ctx: Context, node: Statement) =
   of stmtWhile: visitWhileStatement(ctx, WhileStatement(node))
   of stmtContinue: visitContinueStatement(ctx, ContinueStatement(node))
   of stmtBreak: visitBreakStatement(ctx, BreakStatement(node))
+  of stmtFunc: visitFuncStatement(ctx, FuncStatement(node))
+  of stmtReturn: visitReturnStatement(ctx, ReturnStatement(node))
   else: discard
 
 proc checkSemantics*(node: Statement) =

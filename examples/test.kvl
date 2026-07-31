@@ -1,12 +1,10 @@
-int c = 0
-int result = 0
-while c < 15 do
-  if c == 5 do
-    c = 7
-    continue
-  elif c == 10 do
-    break
+func int gcd(int a, int b) do
+  while b != 0 do
+    int t = b
+    b = a % b
+    a = t
   end
-  result = result + c
-  c = c + 1
+  return a
 end
+
+func test() do return end

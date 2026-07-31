@@ -7,7 +7,7 @@ type
 
     tkPlus, tkMinus, tkStar, tkSlash, tkPercent
     tkGT, tkLT, tkGTE, tkLTE, tkEqualsEquals, tkBangEquals
-    tkEquals, tkBang
+    tkEquals, tkBang, tkComma
 
     tkLParen, tkRParen
 
@@ -15,6 +15,7 @@ type
     tkAnd, tkOr, tkTrue, tkFalse
     tkIf, tkElif, tkElse, tkDo, tkEnd
     tkWhile, tkContinue, tkBreak
+    tkFunc, tkReturn
 
     tkEOF
     tkInvalid
@@ -49,6 +50,7 @@ const operatorTable* = {
 
   "!": tkBang,
   "=": tkEquals,
+  ",": tkComma,
 
   "(": tkLParen,
   ")": tkRParen
@@ -85,6 +87,9 @@ const keywordTable* = {
   "while": tkWhile,
   "continue": tkContinue,
   "break": tkBreak,
+
+  "func": tkFunc,
+  "return": tkReturn,
   
 }.toTable
 
@@ -112,6 +117,7 @@ proc mean*(kind: TokenKind): string =
   of tkBangEquals:    return "not equal operator '!='"
   of tkBang:          return "not operator '!'"
   of tkEquals:        return "assign operator '='"
+  of tkComma:         return "comma operator ','"
   
   of tkLParen:        return "left parenthesis '('"
   of tkRParen:        return "right parenthesis ')'"
@@ -133,6 +139,9 @@ proc mean*(kind: TokenKind): string =
   of tkWhile:         return "keyowrd 'while'"
   of tkContinue:      return "keyowrd 'continue'"
   of tkBreak:         return "keyowrd 'break'"
+
+  of tkFunc:          return "keyowrd 'func'"
+  of tkReturn:        return "keyowrd 'return'"
   
   of tkInvalid:       return "invalid token"
   of tkEOF:           return "end of file"

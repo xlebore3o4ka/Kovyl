@@ -47,7 +47,7 @@ proc main() =
     
     writeFile(cFile, code)
     
-    let gccCmd = "gcc -O" & (if release: "2" else: "0") & " -o " & exeFile & " " & cFile
+    let gccCmd = "gcc -O" & (if release: "2 -s" else: "0") & " -o " & exeFile & " " & cFile
     if execCmd(gccCmd) != 0:
       echo "Compilation failed"
 
