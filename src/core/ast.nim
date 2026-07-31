@@ -162,7 +162,7 @@ constructors:
     NodeKind* = enum
       exprInvalid, exprNumber, exprUnary, exprBinary, exprBool
 
-      stmtBlock, stmtDeclaration
+      stmtInvalid, stmtBlock, stmtDeclaration
 
     Expression* = ref object of RootObj
       kind*: NodeKind
@@ -193,6 +193,8 @@ constructors:
     Statement* = ref object of RootObj
       kind*: NodeKind
       token*: Token
+
+    InvalidStatement* {.kovynode: stmtInvalid.} = ref object of Statement
 
     BlockStatement* {.kovynode: stmtBlock.} = ref object of Statement
       ## do <stmt> <stmt> ... <endToken>

@@ -1,4 +1,4 @@
-import lexer, tokens, errors, ast
+import lexer, tokens, errors, ast, types
 
 type Parser* = object
   file: string
@@ -27,9 +27,19 @@ proc expectToken(self: var Parser, expected: TokenKind): Token =
     return token.copy(kind = tkInvalid)
   return token
 
-proc parseExpression*(self: var Parser): Expression
+proc isType(self: Parser, token: Token): bool =
+  token.kind in {tkInt64, tkBool}
 
-proc parsePrimary*(self: var Parser): Expression =
+proc parseType(self: var Parser, token: Token): Type =
+  case token.kind:
+  of tkInt64: return getInt64Type()
+  of tkBool: return getBoolType()
+  else:
+    newError(errType, token, token.mean)
+
+proc parseExpression(self: var Parser): Expression
+
+proc parsePrimary(self: var Parser): Expression =
   let token = self.nextToken()
 
   if token.kind == tkLParen:
@@ -94,8 +104,32 @@ proc parseOr(self: var Parser): Expression =
     let right = self.parseAnd()
     result = newBinaryExpression(op, result, right)
 
-proc parseExpression*(self: var Parser): Expression =
+proc parseExpression(self: var Parser): Expression =
   return self.parseOr()
 
-proc parse*(self: var Parser): Expression =
-  return self.parseExpression()
+proc parseDeclaration(self: var Parser): Statement =
+  let valueType = self.parseType(self.nextToken())
+  let name = self.expectToken(tkIdent)
+  let token = self.expectToken(tkEquals)
+  let value = self.parseExpression()
+
+  return newDeclarationStatement(token, valueType, name, value)
+
+proc parseStatement(self: var Parser): Statement =
+  let token = self.lexer.peekToken()
+
+  if self.isType(token):
+    return self.parseDeclaration()
+
+  self.newError(errStatement, token, token.mean())
+  return newInvalidStatement(token)
+
+proc parse*(self: var Parser): BlockStatement =
+  var statements: seq[Statement]
+
+  while true:
+    statements.add(self.parseStatement())
+    if self.lexer.peekToken().kind == tkEOF:
+      break
+
+  return newBlockStatement(self.peekToken(), statements)

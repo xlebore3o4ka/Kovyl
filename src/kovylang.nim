@@ -1,4 +1,4 @@
-import os
+import std/[os, osproc]
 import core/[errors, parser]
 import visitors/[semantics, codegen]
 
@@ -20,9 +20,24 @@ proc main() =
   block errorProne:
     if errors.errors.len != 0: break errorProne
     checkSemantics(expression)
-    
+
     if errors.errors.len != 0: break errorProne
-    echo generate(expression)
+    let code = generate(expression)
+
+    if errors.errors.len != 0: break errorProne
+    
+    let outputFile = filename.changeFileExt("")
+    let cFile = outputFile & ".c"
+    let exeFile = outputFile & (when defined(windows): ".exe" else: "")
+    
+    writeFile(cFile, code)
+    
+    let gccCmd = "gcc -o " & exeFile & " " & cFile
+    if execCmd(gccCmd) != 0:
+      echo "Compilation failed"
+      break errorProne
+    
+    removeFile(cFile)
 
   if errors.errors.len != 0:
     for e in errors.errors:
