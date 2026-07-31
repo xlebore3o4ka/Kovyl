@@ -1,0 +1,207 @@
+import tokens, types
+import std/macros
+
+template kovynode*(kind: untyped) {.pragma.}
+
+
+proc unstar(n: NimNode): NimNode =
+  if n.kind == nnkPostfix:
+    n[1]
+  else:
+    n
+
+proc getTypeName(n: NimNode): NimNode =
+  if n.kind == nnkPragmaExpr:
+    return unstar(n[0])
+
+  unstar(n)
+
+proc getPragmas(n: NimNode): NimNode =
+  if n.kind == nnkPragmaExpr:
+    return n[1]
+
+  newEmptyNode()
+
+proc makeConstructor(typeName, kindValue, objectTy: NimNode): NimNode =
+
+  let parentType = objectTy[1][0]
+
+  var params: seq[NimNode] = @[]
+
+  params.add typeName
+
+  params.add newIdentDefs(
+    ident("token"),
+    ident("Token")
+  )
+
+  var body = newStmtList()
+
+  body.add quote do:
+    new(result)
+
+  body.add quote do:
+    result.kind = `kindValue`
+
+  body.add quote do:
+    result.token = token
+
+  if objectTy[2].kind == nnkRecList:
+    for field in objectTy[2]:
+
+      if field.kind != nnkIdentDefs:
+        continue
+
+      let fieldType = field[1]
+      let fieldName = unstar(field[0])
+
+      params.add newIdentDefs(
+        fieldName,
+        fieldType
+      )
+
+      body.add quote do:
+        result.`fieldName` = `fieldName`
+
+  # Только Expression имеет exprType
+  if eqIdent(parentType, "Expression"):
+    params.add newIdentDefs(
+      ident("exprType"),
+      ident("Type"),
+      quote do:
+        types.getUndefinedType()
+    )
+
+    body.add quote do:
+      result.exprType = exprType
+
+  result = newProc(
+    name = postfix(ident("new" & $typeName), "*"),
+    params = params,
+    body = body
+  )
+
+proc isAstNode(objectTy: NimNode): bool =
+  if objectTy[1].kind != nnkOfInherit:
+    return false
+
+  let parent = objectTy[1][0]
+  eqIdent(parent, "Expression") or
+  eqIdent(parent, "Statement")
+
+macro constructors*(body: untyped): untyped =
+  result = newStmtList()
+
+  result.add body
+
+  for section in body:
+
+    if section.kind != nnkTypeSection:
+      continue
+
+
+    for typeDef in section:
+
+      if typeDef.kind != nnkTypeDef:
+        continue
+
+
+      let nameNode = typeDef[0]
+      let refNode = typeDef[2]
+
+
+      if refNode.kind != nnkRefTy:
+        continue
+
+
+      let objectTy = refNode[0]
+
+
+      if objectTy.kind != nnkObjectTy:
+        continue
+
+
+      if objectTy[1].kind != nnkOfInherit:
+        continue
+
+      if not isAstNode(objectTy):
+        continue
+
+
+      let pragmas = getPragmas(nameNode)
+
+      var kindValue: NimNode = nil
+
+
+      if pragmas.kind == nnkPragma:
+
+        for p in pragmas:
+
+          if p.kind == nnkExprColonExpr and
+             eqIdent(p[0], "kovynode"):
+
+            kindValue = p[1]
+            break
+
+
+      if kindValue.isNil:
+        error(
+          "Missing {.kovynode: ... .}",
+          typeDef
+        )
+
+
+      result.add makeConstructor(
+        getTypeName(nameNode),
+        kindValue,
+        objectTy
+      )
+
+constructors: 
+  type
+    NodeKind* = enum
+      exprInvalid, exprNumber, exprUnary, exprBinary, exprBool
+
+      stmtBlock, stmtDeclaration
+
+    Expression* = ref object of RootObj
+      kind*: NodeKind
+      token*: Token
+      exprType*: Type
+
+    InvalidExpression* {.kovynode: exprInvalid.} = ref object of Expression
+
+    NumberExpression* {.kovynode: exprNumber.} = ref object of Expression
+      ## <number>
+      ## number = token
+
+    UnaryExpression* {.kovynode: exprUnary.} = ref object of Expression
+      ## <op> <value>
+      ## op = token
+      value*: Expression
+
+    BinaryExpression* {.kovynode: exprBinary.} = ref object of Expression
+      ## <left> <op> <right>
+      ## op = token
+      left*: Expression
+      right*: Expression
+
+    BoolExpression* {.kovynode: exprBool.} = ref object of Expression
+      ## <bool>
+      ## bool = token
+
+    Statement* = ref object of RootObj
+      kind*: NodeKind
+      token*: Token
+
+    BlockStatement* {.kovynode: stmtBlock.} = ref object of Statement
+      ## do <stmt> <stmt> ... <endToken>
+      ## endToken = token
+      statements*: seq[Statement]
+
+    DeclarationStatement* {.kovynode: stmtDeclaration.} = ref object of Statement
+      ## <valueType> <name> "=" <value>
+      ## "=" = token
+      valueType*: Type
+      name*: Token
+      value*: Expression
