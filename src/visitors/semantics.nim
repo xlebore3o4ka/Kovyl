@@ -114,6 +114,33 @@ proc visitIdentExpression(ctx: Context, node: IdentExpression) =
     node.setType(ctx, ctx.getSymbol(name).symbolType)
     node.token.lexeme = node.token.lexeme & "_"
 
+proc visitCallExpression(ctx: Context, node: CallExpression) =
+  ctx.visit(node.value)
+
+  let valueType = node.value.exprType
+
+  block semantics:
+    if valueType.neq typeFunc:
+      newError(errCallNonFunc, node.value.token, valueType)
+      break semantics
+
+    if valueType.argTypes.len != node.args.len:
+      newError(errCallArgCount, node.value.token, valueType.argTypes.len, node.args.len)
+      break semantics
+
+    for idx in 0..<node.args.len:
+      let expected = valueType.argTypes[idx]
+      let arg = node.args[idx]
+
+      ctx.visit(arg)
+
+      if expected.neq arg.exprType:
+        newError(errCallArgType, arg.token, expected, arg.exprType)
+        break semantics
+
+    node.setType(ctx, valueType.returnType)
+
+
 # STATEMENTS
 
 
@@ -241,6 +268,7 @@ proc visit(ctx: Context, node: Expression) =
   of exprUnary: visitUnaryExpression(ctx, UnaryExpression(node))
   of exprBinary: visitBinaryExpression(ctx, BinaryExpression(node))
   of exprIdent: visitIdentExpression(ctx, IdentExpression(node))
+  of exprCall: visitCallExpression(ctx, CallExpression(node))
   else: discard
 
 proc visit(ctx: Context, node: Statement) =

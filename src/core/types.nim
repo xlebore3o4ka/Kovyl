@@ -13,8 +13,8 @@ type
   Type* = ref object
     case kind*: TypeKind
     of typeFunc:
-      argTypes: seq[Type]
-      returnType: Type
+      argTypes*: seq[Type]
+      returnType*: Type
     else: discard
 
 let

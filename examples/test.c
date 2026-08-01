@@ -34,9 +34,8 @@ int64_t gcd_(int64_t a_, int64_t b_) {
   }
   return a_;
 }
-void test_() {
-  return ;
-}
 
 int main() {
+  int64_t result_ = gcd_(15, 12);
+fprintf(stdout, "%lld", result_);
 }

@@ -66,17 +66,35 @@ proc parsePrimary(self: var Parser): Expression =
 proc parsePrefix(self: var Parser): Expression =
   let token = self.peekToken()
   if token.kind in {tkPlus, tkMinus, tkBang}:
-    let token = self.nextToken()
+    self.skipToken()
     return newUnaryExpression(token, self.parsePrefix())
 
   return self.parsePrimary()
 
-proc parseMulDiv(self: var Parser): Expression =
+proc parsePostfix(self: var Parser): Expression =
   result = self.parsePrefix()
+
+  while (let token = self.peekToken(); token.kind in {tkLParen}):
+    if token.kind == tkLParen:
+      self.skipToken()
+
+      var args: seq[Expression]
+
+      while self.peekToken().kind != tkRParen:
+        args.add(self.parseExpression())
+
+        if self.peekToken().kind == tkRParen: break
+        discard self.expectToken(tkComma)
+
+      discard self.expectToken(tkRParen)
+      result = newCallExpression(token, result, args)
+
+proc parseMulDiv(self: var Parser): Expression =
+  result = self.parsePostfix()
 
   while self.peekToken().kind in {tkStar, tkSlash, tkPercent}:
     let op = self.nextToken()
-    let right = self.parsePrefix()
+    let right = self.parsePostfix()
     result = newBinaryExpression(op, result, right)
 
 proc parseAddSub(self: var Parser): Expression =

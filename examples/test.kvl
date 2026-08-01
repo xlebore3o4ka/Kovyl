@@ -7,4 +7,4 @@ func int gcd(int a, int b) do
   return a
 end
 
-func test() do return end
+int result = gcd(15, 12)

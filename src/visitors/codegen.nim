@@ -69,6 +69,11 @@ proc visitBinaryExpression(ctx: Context, node: BinaryExpression): string =
 proc visitIdentExpression(ctx: Context, node: IdentExpression): string =
   node.token.lexeme
 
+proc visitCallExpression(ctx: Context, node: CallExpression): string =
+  result = ctx.visit(node.value) & "(" & 
+    node.args.mapIt(ctx.visit(it)).join(", ") & ")"
+
+
 # STATEMENTS
 
 
@@ -134,6 +139,7 @@ proc visit(ctx: Context, node: Expression): string =
   of exprUnary: return visitUnaryExpression(ctx, UnaryExpression(node))
   of exprBinary: return visitBinaryExpression(ctx, BinaryExpression(node))
   of exprIdent: return visitIdentExpression(ctx, IdentExpression(node))
+  of exprCall: return visitCallExpression(ctx, CallExpression(node))
   else: discard
 
 proc visit(ctx: Context, node: Statement) =
@@ -156,6 +162,7 @@ proc generate*(node: Statement, release: bool = false): string =
 
   ctx.emit("int main() {")
   ctx.visit(node)
+  ctx.emit("fprintf(stdout, \"%lld\", result_);")
   ctx.emit("}")
 
   ctx.code = ctx.globalCode & "\n" & ctx.code

@@ -168,7 +168,8 @@ proc add*(arguments: var seq[FuncArg], argType: Type, argToken: Token) =
 constructors: 
   type
     NodeKind* = enum
-      exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent
+      exprInvalid, exprNumber, exprUnary, exprBinary, exprBool, exprIdent,
+      exprCall
 
       stmtInvalid, stmtBlock, stmtDeclaration, stmtAssignment, stmtBranching
       stmtWhile, stmtContinue, stmtBreak, stmtFunc, stmtReturn
@@ -202,6 +203,12 @@ constructors:
     IdentExpression* {.kovynode: exprIdent.} = ref object of Expression
       ## <ident>
       ## ident = token
+    
+    CallExpression* {.kovynode: exprCall.} = ref object of Expression
+      ## <value> ( [<args>]* )
+      ## "(" = token
+      value*: Expression
+      args*: seq[Expression]
 
     Statement* = ref object of RootObj
       kind*: NodeKind
