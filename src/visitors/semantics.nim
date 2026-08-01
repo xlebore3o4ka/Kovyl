@@ -217,6 +217,32 @@ proc visitBreakStatement(ctx: Context, node: BreakStatement) =
   if ctx.loopDepth == 0:
     newError(errControlFlowOutsideLoop, node.token, "break")
 
+proc checkReturnPaths(stmt: Statement): bool =
+  case stmt.kind:
+  of stmtReturn:
+    return true
+  of stmtBlock:
+    let blockStmt = BlockStatement(stmt)
+    for s in blockStmt.statements:
+      if checkReturnPaths(s):
+        return true
+    return false
+  of stmtBranching:
+    let branchStmt = BranchingStatement(stmt)
+    var hasElse = branchStmt.elseBlock != nil
+    for elifBranch in branchStmt.elifBranches:
+      if checkReturnPaths(elifBranch.elifBlock):
+        return true
+    if branchStmt.ifBlock != nil and checkReturnPaths(branchStmt.ifBlock):
+      return true
+    if hasElse and checkReturnPaths(branchStmt.elseBlock):
+      return true
+    return false
+  of stmtWhile:
+    return false
+  else:
+    return false
+
 proc visitFuncStatement(ctx: Context, node: FuncStatement) =
   if ctx.symbolExistsInCurrentScope(node.name.lexeme):
     let symbol = ctx.getSymbol(node.name.lexeme)
@@ -225,6 +251,7 @@ proc visitFuncStatement(ctx: Context, node: FuncStatement) =
 
   let funcType = getFuncType(node.args.mapIt(it.argType), node.returnType)
   ctx.newSymbol(node.name, funcType)
+  let name = node.name.lexeme
   node.name.lexeme = node.name.lexeme & "_"
 
   ctx.pushScope()
@@ -237,7 +264,10 @@ proc visitFuncStatement(ctx: Context, node: FuncStatement) =
   let expected = ctx.expectedReturnType
   ctx.expectedReturnType = node.returnType
 
-  # TODO: check each return path
+  if not ctx.expectedReturnType.eq(getUndefinedType()):
+    if not checkReturnPaths(node.funcBlock):
+      newError(errMissingReturn, node.name, name)
+
   ctx.visit(node.funcBlock)
 
   ctx.expectedReturnType = expected

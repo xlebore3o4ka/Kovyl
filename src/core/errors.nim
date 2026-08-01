@@ -12,7 +12,7 @@ type
     errControlFlowOutsideLoop
 
     errReturnOutsideFunc, errReturnValue, errReturnTypeMismatch
-    errCallNonFunc, errCallArgCount, errCallArgType
+    errCallNonFunc, errCallArgCount, errCallArgType, errMissingReturn
 
   Error* = ref object
     kind*: ErrorKind
@@ -50,6 +50,7 @@ proc message(kind: ErrorKind): string =
   of errCallNonFunc:             "Cannot call non-function value of type '@0'"
   of errCallArgCount:            "Expected @0 arguments, got @1"
   of errCallArgType:             "Expected argument of type @0, got @1"
+  of errMissingReturn:           "Function '@0' does not return a value on all paths"
 
 proc newError*(kind: ErrorKind, file: string, line, col: Positive, len: Positive, args: varargs[string, `$`]) {.inline.} =
   errors.add(Error(
