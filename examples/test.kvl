@@ -1,1 +1,9 @@
-if true do end
+func int apply(int(int,int) f, int a, int b) do
+  return f(a, b)
+end
+
+func int add(int a, int b) do
+  return a + b
+end
+
+int result = apply(add, 10, 20)

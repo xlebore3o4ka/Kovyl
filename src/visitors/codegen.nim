@@ -30,12 +30,15 @@ proc emit(ctx: Context, code: varargs[string, `$`]) =
   if ctx.emitToGlobal: ctx.globalCode = target
   else: ctx.code = target
 
-proc ctype(ctx: Context, typ: Type): string =
-  case typ.kind:
-  of typeUndefined: return "void"
-  of typeInt64: return "int64_t"
-  of typeBool: return "bool"
-  of typeFunc: echo "ctype unsupported type"; return "void /*func*/"
+proc formatType(baseType: string, name: string): string =
+  if name == "": baseType else: baseType & " " & name
+
+proc ctype(ctx: Context, t: Type, name: string = ""): string =
+  case t.kind:
+  of typeUndefined: formatType("void", name)
+  of typeInt64: formatType("int64_t", name)
+  of typeBool: formatType("bool", name)
+  of typeFunc: return $ctx.ctype(t.returnType) & " (*" & name & ")(" & t.argTypes.mapIt(ctx.ctype(it)).join(", ") & ")"
 
 proc generateUniqueName(ctx: Context, prefix: string): string =
   result = "_" & prefix & "_" & $ctx.nameCounter
@@ -63,7 +66,7 @@ proc visitBinaryExpression(ctx: Context, node: BinaryExpression): string =
   elif node.token.kind == tkOr:  op = "||"
   elif node.token.kind in {tkSlash, tkPercent}:
     let name = ctx.generateUniqueName("temp")
-    ctx.emit(ctx.ctype(node.right.exprType), " ", name, " = ", right, ";")
+    ctx.emit(ctx.ctype(node.right.exprType, name), " = ", right, ";")
     right = name
     ctx.emit(generateZeroDivisionSanitizer(right, node.right.token.line))
 
@@ -87,7 +90,7 @@ proc visitBlockStatement(ctx: Context, node: BlockStatement) =
   ctx.indent -= TAB_WIDTH
 
 proc visitDeclarationStatement(ctx: Context, node: DeclarationStatement) =
-  ctx.emit(ctx.ctype(node.valueType), " ", node.name.lexeme, " = ", ctx.visit(node.value), ";")
+  ctx.emit(ctx.ctype(node.valueType, node.name.lexeme), " = ", ctx.visit(node.value), ";")
 
 proc visitAssignmentStatement(ctx: Context, node: AssignmentStatement) =
   ctx.emit(ctx.visit(node.left), " = ", ctx.visit(node.right), ";")
@@ -122,8 +125,8 @@ proc visitFuncStatement(ctx: Context, node: FuncStatement) =
   ctx.indent -= TAB_WIDTH
   ctx.emitToGlobal = true
 
-  ctx.emit(ctx.ctype(node.returnType), " ", node.name.lexeme, "(",
-    node.args.mapIt(ctx.ctype(it.argType) & " " & it.argToken.lexeme).join(", "),
+  ctx.emit(ctx.ctype(node.returnType, node.name.lexeme), "(",
+    node.args.mapIt(ctx.ctype(it.argType, it.argToken.lexeme)).join(", "),
     ") {"
   )
   ctx.visit(node.funcBlock)

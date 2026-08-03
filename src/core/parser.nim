@@ -28,18 +28,35 @@ proc expectToken(self: var Parser, expected: TokenKind): Token =
     return token.copy(kind = tkInvalid)
   return token
 
-proc isType(self: Parser, token: Token): bool =
-  token.kind in {tkInt64, tkBool}
-
 proc isExpression(self: Parser, token: Token): bool =
   token.kind in {tkLParen, tkNumber, tkTrue, tkFalse, tkIdent, tkBang, tkMinus, tkPlus}
 
+proc isType(self: Parser, token: Token): bool =
+  token.kind in {tkInt64, tkBool, tkUnder}
+
 proc parseType(self: var Parser, token: Token): Type =
   case token.kind:
-  of tkInt64: return getInt64Type()
-  of tkBool: return getBoolType()
+  of tkInt64: result = getInt64Type()
+  of tkBool: result = getBoolType()
+  of tkUnder: result = getUndefinedType()
   else:
     newError(errType, token, token.mean)
+    result = getUndefinedType()
+
+  while self.peekToken().kind in {tkLParen}:
+    let tok = self.nextToken()
+
+    if tok.kind == tkLParen:
+      var argTypes: seq[Type]
+
+      while self.peekToken().kind != tkRParen:
+        argTypes.add(self.parseType(self.nextToken()))
+
+        if self.peekToken().kind == tkRParen: break
+        discard self.expectToken(tkComma)
+
+      discard self.expectToken(tkRParen)
+      result = getFuncType(argTypes, result)
 
 proc parseExpression(self: var Parser): Expression
 

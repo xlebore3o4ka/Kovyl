@@ -11,7 +11,8 @@ type
 
     tkLParen, tkRParen
 
-    tkInt64, tkBool
+    tkInt64, tkBool, tkUnder
+
     tkAnd, tkOr, tkTrue, tkFalse
     tkIf, tkElif, tkElse, tkDo, tkEnd
     tkWhile, tkContinue, tkBreak
@@ -73,6 +74,8 @@ const keywordTable* = {
   "int": tkInt64,
   "int64": tkInt64,
   "bool": tkBool,
+  "_": tkUnder,
+
   "true": tkTrue,
   "false": tkFalse,
   "and": tkAnd,
@@ -124,6 +127,8 @@ proc mean*(kind: TokenKind): string =
 
   of tkInt64:         return "type 'int64'"
   of tkBool:          return "type 'bool'"
+
+  of tkUnder:         return "under operator '_'"
   
   of tkAnd:           return "keyword 'and'"
   of tkOr:            return "keyword 'or'"

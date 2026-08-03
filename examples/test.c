@@ -27,8 +27,13 @@ void kovypanic(const char* kind, const char* message, int64_t line) {
   exit(1);
 }
 
+int64_t apply_(int64_t (*f_)(int64_t, int64_t), int64_t a_, int64_t b_) {
+  return f_(a_, b_);
+}
+int64_t add_(int64_t a_, int64_t b_) {
+  return (a_ + b_);
+}
 
 int main() {
-  if (true) {
-  }
+  int64_t result_ = apply_(add_, 10, 20);
 }
